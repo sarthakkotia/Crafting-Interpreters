@@ -7,7 +7,8 @@ This is an repo for all the code and learnings during my reading of crafting int
     2. And [This video](https://www.youtube.com/watch?v=TAtrPoaJ7gc&list=PL9gnSGHSqcnr_DxHsP7AW9ftq0AtAyYqJ&index=8) to set up a basic java program
 
 # DEVLOG
-15/11/24 -> started the journey \
+15/11/24 -> started the journey 
+16/11/24 -> watched first video created notebook notes, online pending 
 
 ![Challenge #1](Challenge-1.png)
 
