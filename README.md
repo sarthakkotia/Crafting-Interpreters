@@ -2,18 +2,22 @@
 This is an repo for all the code and learnings during my reading of crafting interpreters book 
 
 # TODO
-1. Set up Java environment using IntelliJ [see notes](#notes)
+1. ~~Set up Java environment using IntelliJ [see notes](#notes)~~
     1. ~~Watch [Kunal Kushwaha this video on java](https://www.youtube.com/watch?v=4EP8YzcN0hQ&list=PL9gnSGHSqcnr_DxHsP7AW9ftq0AtAyYqJ&index=7) to learn how java works.~~ [Notes - Pending](#how-java-works)
     2. ~~And [This video](https://www.youtube.com/watch?v=TAtrPoaJ7gc&list=PL9gnSGHSqcnr_DxHsP7AW9ftq0AtAyYqJ&index=8) to set up a basic java program~~[Notes - Pending](#how-java-works)
-2. Start Chapter 2 of the book
+2. ~~Start Chapter 2 of the book~~
+3. Start Chapter 3 
+
 
 # DEVLOG
 15/11/24 -> started the journey \
 16/11/24 -> watched first video created notebook notes, online pending \
-25/11/24 -> completed kunal video in notebook, online pending
-
+25/11/24 -> completed kunal video in notebook, online pending \
+18/12/24 -> started chapter 2 ie part of programming language \
+19/12/24 -> completed chapter 2 the repo jlox works in codespaces
 
 ![Challenge #1](Challenge-1.png)
+![Challenge #2](Challenge-2.png)
 
 
 # NOTES
