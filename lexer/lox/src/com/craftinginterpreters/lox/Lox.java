@@ -33,9 +33,10 @@ public class Lox {
     private static void runFile(String path) throws IOException{
             byte[] bytes = Files.readAllBytes(Paths.get(path));
             // read all the data in the file in the path defined as byte format so that theres no loss of data
-            // all of the source code is stores in the bytes array
+            // all the source code is stores in the bytes array
             run(new String(bytes, Charset.defaultCharset()));
             // from the bytes array convert it back to source code as a String data type and then run that code
+
             if(hadError) System.exit(65);
             // The input data was incorrect in some way.  This
             // should only be used for user's data and not system
@@ -56,6 +57,7 @@ public class Lox {
             hadError = false;
         }
     }
+    // both run prompt and run file internally calls this function and this does the actual lexing
     private static void run(String source){
         Scanner scanner = new Scanner(source);
 
