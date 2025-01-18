@@ -1,7 +1,9 @@
 package com.craftinginterpreters.lox;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Scanner {
     private final String source;
@@ -11,6 +13,26 @@ public class Scanner {
     private int line = 1;
     public Scanner(String source) {
         this.source = source;
+    }
+    // we have created a static keywordshashmap to recognize if the identifier is a keyword
+    private static final Map<String, TokenType>keywords;
+    static{
+        keywords = new HashMap<String, TokenType>();
+        keywords.put("and", TokenType.AND);
+        keywords.put("class", TokenType.CLASS);
+        keywords.put("if", TokenType.IF);
+        keywords.put("else", TokenType.ELSE);
+        keywords.put("true", TokenType.TRUE);
+        keywords.put("false", TokenType.FALSE);
+        keywords.put("fun", TokenType.FUN);
+        keywords.put("nil", TokenType.NIL);
+        keywords.put("or", TokenType.OR);
+        keywords.put("print", TokenType.PRINT);
+        keywords.put("return", TokenType.RETURN);
+        keywords.put("super", TokenType.SUPER);
+        keywords.put("this", TokenType.THIS);
+        keywords.put("var", TokenType.VAR);
+        keywords.put("while", TokenType.WHILE);
     }
 
     List<Token> scanTokens(){
@@ -69,12 +91,25 @@ public class Scanner {
             case ' ':
             // \r represents carraige return
             case '\r':
-            case '\t': break;
+            case '\t':  break;
             case '\n':
                         line++;
                         break;
-            default: Lox.error(line, String.format("Unexpected character %c", ch));
-                     break;
+            case '"':
+                        handleString();
+                        break;
+            default:
+                    if(isDigit(ch)){
+                        handleNumber();
+                    }
+                    // assuming that our identifier is starting with underscore or any alphabet
+                    else if(isAlphaUnderscore(ch)){
+                        handleIdentifier();
+                    }
+                    else{
+                        Lox.error(line, String.format("Unexpected character %c", ch));
+                        break;
+                    }
         }
     }
 
@@ -89,7 +124,7 @@ public class Scanner {
     }
     private void addToken(TokenType tokenType, Object literal){
         String lexeme = source.substring(start, current);
-        tokens.add(new Token(tokenType, lexeme,literal, line));
+        tokens.add(new Token(tokenType, lexeme, literal, line));
     }
     private boolean match(char expected){
         if(isAtEnd()) return false;
@@ -100,5 +135,53 @@ public class Scanner {
     private char peek(){
         if(isAtEnd()) return '\0';
         return source.charAt(current);
+    }
+    private void handleString(){
+        while(peek()!='"' && !isAtEnd()){
+            if(peek()=='\n') line++;
+            getChar();
+        }
+        if(isAtEnd()){
+            Lox.error(line, "Unterminated String");
+            return;
+        }
+        // the closing "
+        getChar();
+        // we could also have used the substring inside the helper function but with this we are essentially removing the quotes
+        String lexeme = source.substring(start+1, current-1);
+        addToken(TokenType.STRING, lexeme);
+    }
+    private boolean isDigit(char ch){
+        return ch >= '0' && ch <= '9';
+    }
+    private void handleNumber(){
+        while(isDigit(peek())) getChar();
+        // if we foung the decimal point, then before consuming the point we need to make sure that the next character should be a digit
+        if(peek() == '.' && isDigit(peekNext())){
+            getChar();
+
+            while (isDigit(peek())) getChar();
+        }
+        addToken(TokenType.NUMBER, Double.parseDouble(source.substring(start, current)));
+    }
+    private char peekNext(){
+        if(current+1 >= source.length()) return '\0';
+        return source.charAt(current+1);
+    }
+    private boolean isAlphaUnderscore(char ch){
+        return (ch == '_') || (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z');
+    }
+    private void handleIdentifier(){
+        while (isAlphaNumeric(peek())) getChar();
+
+        // handling keywords
+        String text = source.substring(start, current);
+        TokenType tokenType = keywords.get(text);
+        if(tokenType == null) tokenType = TokenType.IDENTIFIER;
+        addToken(tokenType);
+
+    }
+    private boolean isAlphaNumeric(char ch){
+        return isDigit(ch) || isAlphaNumeric(ch);
     }
 }
