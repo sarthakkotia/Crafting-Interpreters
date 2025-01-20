@@ -110,6 +110,7 @@ public class Scanner {
                         Lox.error(line, String.format("Unexpected character %c", ch));
                         break;
                     }
+            //TODO: Add support to Lox’s scanner for C-style /* ... */ block comments. Make sure to handle newlines in them. Consider allowing them to nest. Is adding support for nesting more work than you expected? Why?
         }
     }
 
@@ -182,6 +183,6 @@ public class Scanner {
 
     }
     private boolean isAlphaNumeric(char ch){
-        return isDigit(ch) || isAlphaNumeric(ch);
+        return isDigit(ch) || isAlphaUnderscore(ch);
     }
 }
