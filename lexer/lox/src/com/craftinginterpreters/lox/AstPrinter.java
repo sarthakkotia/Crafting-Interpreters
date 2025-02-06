@@ -31,7 +31,7 @@ public class AstPrinter implements Expression.Visitor<String>{
 
     String parenthesize(String name, Expression[] expressions){
         StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append(" ( ").append(name)    ;
+        stringBuilder.append(" ( ").append(name);
         for(Expression expression: expressions){
             stringBuilder.append(" ");
             stringBuilder.append(print(expression));

@@ -33,6 +33,7 @@ public class Scanner {
         keywords.put("this", TokenType.THIS);
         keywords.put("var", TokenType.VAR);
         keywords.put("while", TokenType.WHILE);
+        keywords.put("for", TokenType.FOR);
     }
 
     List<Token> scanTokens(){
@@ -156,6 +157,7 @@ public class Scanner {
         return ch >= '0' && ch <= '9';
     }
     private void handleNumber(){
+        //TODO: I believe this may have errors check it again
         while(isDigit(peek())) getChar();
         // if we foung the decimal point, then before consuming the point we need to make sure that the next character should be a digit
         if(peek() == '.' && isDigit(peekNext())){
