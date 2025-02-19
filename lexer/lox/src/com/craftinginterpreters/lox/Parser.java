@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Parser {
+    private static class ParseError extends RuntimeException{}
     private final List<Token> tokens;
     private int current = 0;
     Parser(List<Token> tokens){
@@ -17,19 +18,39 @@ public class Parser {
         return equality();
     }
     private Expression equality(){
-        Expression comparison = comparison();
-        return comparison;
+        Expression expression = comparison();
+        while (match(TokenType.BANG_EQUAL, TokenType.EQUAL_EQUAL)){
+            Token operator = previous();
+            Expression right = comparison();
+            expression = new Expression.Binary(expression, right, operator);
+        }
+        return expression;
     }
     private Expression comparison(){
-        Expression term = term();
-        return term;
+        Expression expression = term();
+        while (match(TokenType.GREATER, TokenType.GREATER_EQUAL, TokenType.LESS, TokenType.LESS_EQUAL)){
+            Token operator = previous();
+            Expression right = term();
+            expression = new Expression.Binary(expression, right, operator);
+        }
+        return expression;
     }
     private Expression term(){
         Expression factor = factor();
+        while (match(TokenType.MINUS, TokenType.PLUS)){
+            Token operator = previous();
+            Expression right = factor();
+            factor = new Expression.Binary(factor, right, operator);
+        }
         return factor;
     }
     private Expression factor(){
         Expression unary = unary();
+        while (match(TokenType.SLASH, TokenType.STAR)){
+            Token operator = previous();
+            Expression right = unary();
+            unary = new Expression.Binary(unary, right, operator);
+        }
         return unary;
     }
     private Expression unary(){
@@ -47,14 +68,22 @@ public class Parser {
         if (match(TokenType.NUMBER, TokenType.STRING)){
             return new Expression.Literal(previous().literal);
         }
+        Expression expression = null;
         if(match(TokenType.LEFT_PAREN)){
-            Expression expression = expression();
-//            consume(TokenType.RIGHT_PAREN)
-            while(peek().type != TokenType.RIGHT_PAREN){
-                expression = expression();
-            }
+            expression = expression();
+            consume(TokenType.RIGHT_PAREN, "Expect ')' after expression");
+            return new Expression.Grouping(expression);
         }
+
         return (expression == null) ? new Expression.Literal("") : expression;
+    }
+    private Token consume(TokenType type, String message){
+        if(check(type)) return advance();
+        throw error(peek(), message);
+    }
+    private ParseError error(Token token, String message){
+        Lox.error(token, message);
+        return new ParseError();
     }
     private Token previous(){
         if(current == 0) Lox.error(-1, "previous character not available");
@@ -74,7 +103,7 @@ public class Parser {
         return peek().type == type;
     }
     private boolean isAtEnd(){
-        return peek().type == TokenType.EOF;
+        return current == tokens.size() || peek().type == TokenType.EOF;
     }
     private Token peek(){
         return tokens.get(current);
@@ -86,9 +115,11 @@ public class Parser {
 
     public static void main(String[] args) {
         ArrayList<Token> tokens = new ArrayList<>();
-        tokens.add(new Token(TokenType.BANG, "!", null, 1));
-        tokens.add(new Token(TokenType.BANG, "!", null, 1));
-        tokens.add(new Token(TokenType.NUMBER, "5", null, 1));
+        tokens.add(new Token(TokenType.NUMBER, "2", 2, 1));
+        tokens.add(new Token(TokenType.SLASH, "/", '/', 1));
+        tokens.add(new Token(TokenType.NUMBER, "2", 2, 1));;
+        tokens.add(new Token(TokenType.SLASH, "/", '/', 1));
+        tokens.add(new Token(TokenType.NUMBER, "2", 2, 1));
         Parser parser = new Parser(tokens);
         Expression expression = parser.solve();
         AstPrinter astPrinter = new AstPrinter();
