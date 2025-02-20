@@ -10,6 +10,13 @@ public class Parser {
     Parser(List<Token> tokens){
         this.tokens = tokens;
     }
+    Expression parse(){
+        try {
+            return expression();
+        }catch (ParseError err){
+            return null;
+        }
+    }
     public Expression solve(){
         return expression();
     }
@@ -68,14 +75,13 @@ public class Parser {
         if (match(TokenType.NUMBER, TokenType.STRING)){
             return new Expression.Literal(previous().literal);
         }
-        Expression expression = null;
         if(match(TokenType.LEFT_PAREN)){
-            expression = expression();
+            Expression expression = expression();
             consume(TokenType.RIGHT_PAREN, "Expect ')' after expression");
             return new Expression.Grouping(expression);
         }
 
-        return (expression == null) ? new Expression.Literal("") : expression;
+        throw error(peek(), "Expect expression");
     }
     private Token consume(TokenType type, String message){
         if(check(type)) return advance();
