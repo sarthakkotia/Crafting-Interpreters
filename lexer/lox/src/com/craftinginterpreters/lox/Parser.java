@@ -85,6 +85,25 @@ public class Parser {
         Lox.error(token, message);
         return new ParseError();
     }
+    private void synchronize(){
+        advance();
+        while(!isAtEnd()){
+            if(previous().type == TokenType.SEMICOLON) return;
+
+            switch (peek().type){
+                case TokenType.CLASS:
+                case TokenType.FOR:
+                case TokenType.FUN:
+                case TokenType.IF:
+                case TokenType.PRINT:
+                case TokenType.RETURN:
+                case TokenType.VAR:
+                case TokenType.WHILE:
+                    return;
+            }
+            advance();
+        }
+    }
     private Token previous(){
         if(current == 0) Lox.error(-1, "previous character not available");
         return tokens.get(current-1);
