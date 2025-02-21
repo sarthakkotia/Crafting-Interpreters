@@ -22,7 +22,16 @@ public class Parser {
     }
     // defining the grammer
     private Expression expression(){
-        return equality();
+        return comma();
+    }
+    private Expression comma(){
+        Expression expression = equality();
+        while(match(TokenType.COMMA)){
+            Token operator = previous();
+            Expression right = equality();
+            expression = new Expression.Binary(expression, right, operator);
+        }
+        return expression;
     }
     private Expression equality(){
         Expression expression = comparison();
