@@ -32,7 +32,9 @@ public class Parser {
             expression = new Expression.Binary(expression, right, operator);
         }
         return expression;
+        //TODO: this could cause problems for functions solve that
     }
+    //TODO: Add support for ternary expressions
     private Expression equality(){
         Expression expression = comparison();
         while (match(TokenType.BANG_EQUAL, TokenType.EQUAL_EQUAL)){
