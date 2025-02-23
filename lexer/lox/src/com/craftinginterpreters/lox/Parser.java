@@ -91,7 +91,26 @@ public class Parser {
             consume(TokenType.RIGHT_PAREN, "Expect ')' after expression");
             return new Expression.Grouping(expression);
         }
-
+        if(match(TokenType.EQUAL_EQUAL, TokenType.BANG_EQUAL)){
+            error(previous(), "The operator does not have a left operand");
+            equality();
+            return null;
+        }
+        if(match(TokenType.GREATER, TokenType.GREATER_EQUAL, TokenType.LESS, TokenType.LESS_EQUAL)) {
+            error(previous(), "The operator does not have a left operand");
+            comparison();
+            return null;
+        }
+        if(match(TokenType.PLUS)){
+            error(previous(), "The operator does not have a left operand");
+            term();
+            return null;
+        }
+        if(match(TokenType.SLASH, TokenType.STAR)){
+            error(previous(), "The operator does not have a left operand");
+            factor();
+            return null;
+        }
         throw error(peek(), "Expect expression");
     }
     private Token consume(TokenType type, String message){
