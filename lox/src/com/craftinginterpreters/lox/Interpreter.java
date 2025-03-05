@@ -7,22 +7,32 @@ public class Interpreter implements Expression.Visitor<Object> {
         Object right = evaluate(expression.right);
         switch (expression.operator.type){
             case TokenType.MINUS:
+                checkNumberOperand(expression.operator, left, right);
                 return (double) left - (double) right;
             case TokenType.STAR:
+                checkNumberOperand(expression.operator, left, right);
                 return (double) left * (double) right;
             case TokenType.SLASH:
+                checkNumberOperand(expression.operator, left, right);
                 return (double) left / (double) right;
             case TokenType.PLUS:
-                if(left instanceof Double && right instanceof Double) return (double) left + (double) right;
+                if(left instanceof Double && right instanceof Double){
+                    checkNumberOperand(expression.operator, left, right);
+                    return (double) left + (double) right;
+                }
                 if(left instanceof String && right instanceof String) return (String) left + (String) right;
-                break;
+                throw new RuntimeError(expression.operator, "Operands must be two numbers or two strings");`
             case TokenType.GREATER:
+                checkNumberOperand(expression.operator, left, right);
                 return (double) left > (double) right;
             case TokenType.GREATER_EQUAL:
+                checkNumberOperand(expression.operator, left, right);
                 return (double) left >= (double) right;
             case TokenType.LESS:
+                checkNumberOperand(expression.operator, left, right);
                 return (double) left < (double) right;
             case TokenType.LESS_EQUAL:
+                checkNumberOperand(expression.operator, left, right);
                 return (double) left <= (double) right;
             case TokenType.BANG_EQUAL: return !isEqual(left, right);
             case TokenType.EQUAL_EQUAL: return isEqual(left, right);
@@ -46,11 +56,20 @@ public class Interpreter implements Expression.Visitor<Object> {
         Object rightAnswer = evaluate(right);
         switch (expression.operator.type){
             case TokenType.MINUS:
+                checkNumberOperand(expression.operator, rightAnswer);
                 return -(double)rightAnswer;
             case TokenType.BANG:
                 return !isTruthy(rightAnswer);
         }
         return null;
+    }
+    void checkNumberOperand(Token operator, Object expression){
+        if(expression instanceof Double) return;
+        throw new RuntimeError(operator, "Operand must be a number");
+    }
+    void checkNumberOperand(Token operator, Object expression1, Object expression2){
+        if(expression1 instanceof Double && expression2 instanceof Double) return;
+        throw new RuntimeError(operator, "Operand(s) must be a number");
     }
     private boolean isTruthy(Object object){
         if(object == null) return false;
@@ -63,7 +82,7 @@ public class Interpreter implements Expression.Visitor<Object> {
         return expression.value;
     }
 
-    private Object evaluate(Expression expression){
+    public Object evaluate(Expression expression){
         return expression.accept(this);
     }
 }
