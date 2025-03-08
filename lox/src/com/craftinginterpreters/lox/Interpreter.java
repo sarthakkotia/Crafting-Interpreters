@@ -21,7 +21,7 @@ public class Interpreter implements Expression.Visitor<Object> {
                     return (double) left + (double) right;
                 }
                 if(left instanceof String && right instanceof String) return (String) left + (String) right;
-                throw new RuntimeError(expression.operator, "Operands must be two numbers or two strings");`
+                throw new RuntimeError(expression.operator, "Operands must be two numbers or two strings");
             case TokenType.GREATER:
                 checkNumberOperand(expression.operator, left, right);
                 return (double) left > (double) right;
