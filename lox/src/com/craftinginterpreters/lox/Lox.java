@@ -9,7 +9,9 @@ import java.util.List;
 
 
 public class Lox {
+    private static Interpreter interpreter = new Interpreter();
     static boolean hadError = false;
+    static boolean hadRuntimeError = false;
     public static void main(String[] args) throws IOException {
         // args here refers to the additional arguments given upon running the main function
         if(args.length > 1){
@@ -37,6 +39,7 @@ public class Lox {
             // from the bytes array convert it back to source code as a String data type and then run that code
 
             if(hadError) System.exit(65);
+            if(hadRuntimeError) System.exit(70);
             // The input data was incorrect in some way.  This
             // should only be used for user's data and not system
             // files.
@@ -69,8 +72,7 @@ public class Lox {
         Expression expression = parser.parse();
         if(hadError) return;
         System.out.println(new AstPrinter().print(expression));
-        Interpreter interpreter = new Interpreter();
-        System.out.println(interpreter.evaluate(expression));
+        interpreter.interpret(expression);
     }
     static void error(int line, String message){
         report(line, "", message);
@@ -90,5 +92,9 @@ public class Lox {
         //     15 | function(first, second,);
         //                               ^-- Here.
         hadError = true;
+    }
+    static void runtimeError(RuntimeError error){
+        System.err.println(error.getMessage() + "\n[line "+ error.token.line + "]");
+        hadRuntimeError = true;
     }
 }
