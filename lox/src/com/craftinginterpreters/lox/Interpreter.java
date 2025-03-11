@@ -1,5 +1,7 @@
 package com.craftinginterpreters.lox;
 
+import java.util.Objects;
+
 public class Interpreter implements Expression.Visitor<Object> {
     @Override
     public Object visitBinaryExpression(Expression.Binary expression) {
@@ -21,19 +23,55 @@ public class Interpreter implements Expression.Visitor<Object> {
                     return (double) left + (double) right;
                 }
                 if(left instanceof String && right instanceof String) return (String) left + (String) right;
+                if(left instanceof String || right instanceof String){
+                    String leftText = left.toString();
+                    if(left instanceof Double){
+                        if(leftText.endsWith(".0")){
+                            leftText = leftText.substring(0, leftText.length()-2);
+                        }
+                    }
+                    String rightText = right.toString();
+                    if(right instanceof Double){
+                        if(rightText.endsWith(".0")){
+                            rightText = rightText.substring(0, rightText.length()-2);
+                        }
+                    }
+                    return leftText + rightText;
+
+                }
                 throw new RuntimeError(expression.operator, "Operands must be two numbers or two strings");
             case TokenType.GREATER:
-                checkNumberOperand(expression.operator, left, right);
-                return (double) left > (double) right;
+                if(checkNumberSingleCharOperand(expression.operator, left, right) == 0){
+                    return (double) left > (double) right;
+                }else{
+                    String leftStr = (String) left;
+                    String rightStr = (String) left;
+                    return leftStr.charAt(0) > rightStr.charAt(0);
+                }
             case TokenType.GREATER_EQUAL:
-                checkNumberOperand(expression.operator, left, right);
-                return (double) left >= (double) right;
+                if(checkNumberSingleCharOperand(expression.operator, left, right) == 0){
+                    return (double) left >= (double) right;
+                }else{
+                    String leftStr = (String) left;
+                    String rightStr = (String) left;
+                    return leftStr.charAt(0) >= rightStr.charAt(0);
+                }
             case TokenType.LESS:
-                checkNumberOperand(expression.operator, left, right);
-                return (double) left < (double) right;
+                if(checkNumberSingleCharOperand(expression.operator, left, right) == 0){
+                    return (double) left < (double) right;
+                }else{
+                    String leftStr = (String) left;
+                    String rightStr = (String) left;
+                    return leftStr.charAt(0) < rightStr.charAt(0);
+                }
             case TokenType.LESS_EQUAL:
-                checkNumberOperand(expression.operator, left, right);
-                return (double) left <= (double) right;
+                if(checkNumberSingleCharOperand(expression.operator, left, right) == 0){
+                    return (double) left <= (double) right;
+                }else{
+                    String leftStr = (String) left;
+                    String rightStr = (String) left;
+                    return leftStr.charAt(0) <= rightStr.charAt(0);
+                }
             case TokenType.BANG_EQUAL: return !isEqual(left, right);
             case TokenType.EQUAL_EQUAL: return isEqual(left, right);
         }
@@ -70,6 +108,11 @@ public class Interpreter implements Expression.Visitor<Object> {
     void checkNumberOperand(Token operator, Object expression1, Object expression2){
         if(expression1 instanceof Double && expression2 instanceof Double) return;
         throw new RuntimeError(operator, "Operand(s) must be a number");
+    }
+    int checkNumberSingleCharOperand(Token operator, Object expression1, Object expression2){
+        if(expression1 instanceof Double && expression2 instanceof Double) return 0 ;
+        if((expression1 instanceof String && ((String) expression1).length() == 1) && (expression2 instanceof String && ((String) expression2).length() == 1)) return 1;
+        throw new RuntimeError(operator, "Operand(s) must be a number or a single character string");
     }
     private boolean isTruthy(Object object){
         if(object == null) return false;
