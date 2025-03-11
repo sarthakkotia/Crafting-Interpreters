@@ -22,21 +22,8 @@ public class Interpreter implements Expression.Visitor<Object> {
                     checkNumberOperand(expression.operator, left, right);
                     return (double) left + (double) right;
                 }
-                if(left instanceof String && right instanceof String) return (String) left + (String) right;
                 if(left instanceof String || right instanceof String){
-                    String leftText = left.toString();
-                    if(left instanceof Double){
-                        if(leftText.endsWith(".0")){
-                            leftText = leftText.substring(0, leftText.length()-2);
-                        }
-                    }
-                    String rightText = right.toString();
-                    if(right instanceof Double){
-                        if(rightText.endsWith(".0")){
-                            rightText = rightText.substring(0, rightText.length()-2);
-                        }
-                    }
-                    return leftText + rightText;
+                    return stringify(left) + stringify(right);
 
                 }
                 throw new RuntimeError(expression.operator, "Operands must be two numbers or two strings");
