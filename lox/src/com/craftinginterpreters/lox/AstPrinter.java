@@ -1,6 +1,6 @@
 package com.craftinginterpreters.lox;
 
-public class AstPrinter implements Expression.Visitor<String>{
+public class AstPrinter implements Expression.Visitor<String>, Statement.Visitor<String>{
     String print(Expression expression){
         return expression.accept(this);
     }
@@ -53,5 +53,17 @@ public class AstPrinter implements Expression.Visitor<String>{
         );
         AstPrinter astPrinter = new AstPrinter();
         System.out.println(astPrinter.print(expression));
+    }
+
+    @Override
+    public String visitExpressionStatement(Statement.ExpressionStatement expressionStatement) {
+        Expression[] expressions = {expressionStatement.expression};
+        return parenthesize("Expression", expressions);
+    }
+
+    @Override
+    public String visitPrintStatement(Statement.PrintStatement printStatement) {
+        Expression[] expressions = {printStatement.expression};
+        return parenthesize("Print", expressions);
     }
 }
