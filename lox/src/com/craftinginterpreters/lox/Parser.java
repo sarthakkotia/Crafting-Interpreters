@@ -10,13 +10,34 @@ public class Parser {
     Parser(List<Token> tokens){
         this.tokens = tokens;
     }
-    Expression parse(){
-        try {
-            return expression();
-        }catch (ParseError err){
-            return null;
+    List<Statement> parse(){
+        List<Statement> statements = new ArrayList<Statement>();
+        while(!isAtEnd()){
+            statements.add(statement());
         }
+        return statements;
     }
+    Statement statement(){
+        if(match(TokenType.PRINT)) return printStatement();
+        return expressionStatement();
+    }
+    Statement printStatement(){
+        Expression expression = expression();
+        consume(TokenType.SEMICOLON, "Expected ';' after expression");
+        return new Statement.PrintStatement(expression);
+    }
+    Statement expressionStatement(){
+        Expression expression = expression();
+        consume(TokenType.SEMICOLON, "Expected ';' after expression");
+        return new Statement.ExpressionStatement(expression);
+    }
+//    Expression parse(){
+//        try {
+//            return expression();
+//        }catch (ParseError err){
+//            return null;
+//        }
+//    }
     public Expression solve(){
         return expression();
     }

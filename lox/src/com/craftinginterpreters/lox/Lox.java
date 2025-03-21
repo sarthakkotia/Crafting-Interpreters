@@ -69,9 +69,14 @@ public class Lox {
 //            System.out.println(token);
 //        }
         Parser parser = new Parser(tokens);
-        Expression expression = parser.parse();
+//        Expression expression = parser.parse();
+        List<Statement> statements = parser.parse();
+        AstPrinter astPrinter = new AstPrinter();
         if(hadError) return;
-        System.out.println(new AstPrinter().print(expression));
+        for(Statement statement: statements){
+            System.out.println(astPrinter.print(statement));
+        }
+//        System.out.println(new AstPrinter().print(expression));
         interpreter.interpret(expression);
     }
     static void error(int line, String message){

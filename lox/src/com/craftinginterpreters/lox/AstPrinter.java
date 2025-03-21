@@ -4,6 +4,9 @@ public class AstPrinter implements Expression.Visitor<String>, Statement.Visitor
     String print(Expression expression){
         return expression.accept(this);
     }
+    String print(Statement statement){
+        return statement.accept(this);
+    }
 
     @Override
     public String visitBinaryExpression(Expression.Binary expression) {
