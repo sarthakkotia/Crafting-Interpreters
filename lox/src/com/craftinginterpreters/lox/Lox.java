@@ -77,7 +77,7 @@ public class Lox {
             System.out.println(astPrinter.print(statement));
         }
 //        System.out.println(new AstPrinter().print(expression));
-        interpreter.interpret(expression);
+        interpreter.interpret(statements);
     }
     static void error(int line, String message){
         report(line, "", message);

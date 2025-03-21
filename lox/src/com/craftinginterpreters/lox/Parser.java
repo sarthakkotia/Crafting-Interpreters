@@ -17,16 +17,16 @@ public class Parser {
         }
         return statements;
     }
-    Statement statement(){
+    private Statement statement(){
         if(match(TokenType.PRINT)) return printStatement();
         return expressionStatement();
     }
-    Statement printStatement(){
+    private Statement printStatement(){
         Expression expression = expression();
         consume(TokenType.SEMICOLON, "Expected ';' after expression");
         return new Statement.PrintStatement(expression);
     }
-    Statement expressionStatement(){
+    private Statement expressionStatement(){
         Expression expression = expression();
         consume(TokenType.SEMICOLON, "Expected ';' after expression");
         return new Statement.ExpressionStatement(expression);

@@ -1,8 +1,9 @@
 package com.craftinginterpreters.lox;
 
+import java.util.List;
 import java.util.Objects;
 
-public class Interpreter implements Expression.Visitor<Object> {
+public class Interpreter implements Expression.Visitor<Object>, Statement.Visitor<Object> {
     @Override
     public Object visitBinaryExpression(Expression.Binary expression) {
         Object left = evaluate(expression.left);
@@ -115,7 +116,18 @@ public class Interpreter implements Expression.Visitor<Object> {
     public Object evaluate(Expression expression){
         return expression.accept(this);
     }
-
+    void interpret(List<Statement> statements){
+        try {
+            for (Statement statement: statements){
+                execute(statement);
+            }
+        } catch (RuntimeError e){
+            Lox.runtimeError(e);
+        }
+    }
+    void execute(Statement statement){
+        statement.accept(this);
+    }
     void interpret(Expression expression){
         try {
             Object value = evaluate(expression);
@@ -135,5 +147,18 @@ public class Interpreter implements Expression.Visitor<Object> {
             return text;
         }
         return object.toString();
+    }
+
+    @Override
+    public Object visitExpressionStatement(Statement.ExpressionStatement expressionStatement) {
+        evaluate(expressionStatement.expression);
+        return null;
+    }
+
+    @Override
+    public Object visitPrintStatement(Statement.PrintStatement printStatement) {
+        Object value = evaluate(printStatement.expression);
+        System.out.println(stringify(value));
+        return null;
     }
 }
