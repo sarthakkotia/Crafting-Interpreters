@@ -32,6 +32,11 @@ public class AstPrinter implements Expression.Visitor<String>, Statement.Visitor
         return expression.value.toString();
     }
 
+    @Override
+    public String visitVariable(Expression.Variable variable) {
+        return variable.name.toString();
+    }
+
     String parenthesize(String name, Expression[] expressions){
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("(").append(name);
@@ -68,5 +73,11 @@ public class AstPrinter implements Expression.Visitor<String>, Statement.Visitor
     public String visitPrintStatement(Statement.PrintStatement printStatement) {
         Expression[] expressions = {printStatement.expression};
         return parenthesize("Print", expressions);
+    }
+
+    @Override
+    public String visitVariableDeclaration(Statement.VariableDeclaration variableDeclaration) {
+        Expression[] expressions = {variableDeclaration.initializer};
+        return parenthesize("VariableDeclaration", expressions);
     }
 }

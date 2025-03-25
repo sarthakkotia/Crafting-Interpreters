@@ -7,6 +7,7 @@ abstract class Expression {
         R visitGroupingExpression(Grouping expression);
         R visitUnaryExpression(Unary expression);
         R visitLiteralExpression(Literal expression);
+        R visitVariable(Variable variable);
     }
     // this abstract method will be implemented by each child class to call the
     abstract <R> R accept(Visitor<R> visitor);
@@ -58,6 +59,14 @@ abstract class Expression {
         @Override
         <R> R accept(Visitor<R> visitor){
             return visitor.visitLiteralExpression(this);
+        }
+    }
+    static class Variable extends Expression{
+        final Token name;
+        Variable(Token name){this.name = name;}
+        @Override
+        <R> R accept(Visitor<R> visitor) {
+            return visitor.visitVariable(this);
         }
     }
 }
