@@ -13,9 +13,25 @@ public class Parser {
     List<Statement> parse(){
         List<Statement> statements = new ArrayList<Statement>();
         while(!isAtEnd()){
-            statements.add(statement());
+            statements.add(declaration());
         }
         return statements;
+    }
+    private Statement declaration(){
+        try{
+            if(match(TokenType.VAR)) return variableDeclaration();
+            return statement();
+        } catch (ParseError e){
+            synchronize();
+            return null;
+        }
+    }
+    private Statement variableDeclaration(){
+        Token name = consume(TokenType.IDENTIFIER, "Expect variable name");
+        Expression expression = null;
+        if(match(TokenType.EQUAL)) expression = expression();
+        consume(TokenType.SEMICOLON, "Expeected ';' after variable Declaration");
+        return new Statement.VariableDeclaration(name, expression);
     }
     private Statement statement(){
         if(match(TokenType.PRINT)) return printStatement();
@@ -131,6 +147,9 @@ public class Parser {
             error(previous(), "The operator does not have a left operand");
             factor();
             return null;
+        }
+        if(match(TokenType.IDENTIFIER)){
+            return new Expression.Variable(previous());
         }
         throw error(peek(), "Expect expression");
     }
