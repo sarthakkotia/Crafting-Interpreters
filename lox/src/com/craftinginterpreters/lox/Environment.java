@@ -6,6 +6,7 @@ public class Environment {
     final HashMap<String, Object>values = new HashMap<String, Object>();
 
     void define(String name, Object value){
+        if(values.containsKey(name)) throw new RuntimeError(name, "Variable redefinition is not allowed");
         values.put(name, value);
     }
 
