@@ -59,8 +59,31 @@ public class Parser {
     }
     // defining the grammer
     private Expression expression(){
-        return comma();
+        return assign();
     }
+    private Expression assign(){
+        Expression expression = comma();
+        if(match(TokenType.EQUAL)){
+            Token equals = previous();
+            Expression value = assign();
+            if(expression instanceof Expression.Variable){
+                Token identifier = ((Expression.Variable)expression).name;
+                return new Expression.Assignment(identifier, value);
+            }
+            error(equals, "Invalid assignment target");
+        }
+        return expression;
+    }
+//    private Expression assign(){
+//        Expression expression = comma();
+//        if(match(TokenType.EQUAL)){
+//            Token identifier = previous();
+//            consume(TokenType.EQUAL, "identifier is needed to be assigned");
+////            Expression expression = comma();
+////            consume(TokenType.SEMICOLON, "Expeected ';' after variable Declaration");
+//            return new Expression.Assignment(identifier, expression);
+//        }
+//    }
     private Expression comma(){
         Expression expression = equality();
         while(match(TokenType.COMMA)){

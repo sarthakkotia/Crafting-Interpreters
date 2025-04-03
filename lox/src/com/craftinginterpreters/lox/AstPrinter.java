@@ -33,6 +33,12 @@ public class AstPrinter implements Expression.Visitor<String>, Statement.Visitor
     }
 
     @Override
+    public String visitAssignmentExpression(Expression.Assignment assignment) {
+        Expression[] expressionsArr = {assignment.expression};
+        return parenthesize("Assignment", expressionsArr);
+    }
+
+    @Override
     public String visitVariable(Expression.Variable variable) {
         return variable.name.toString();
     }

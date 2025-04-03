@@ -176,4 +176,11 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
         environment.define(variableDeclaration.name.lexeme, value);
         return null;
     }
+
+    @Override
+    public Object visitAssignmentExpression(Expression.Assignment assignment) {
+        Object answer = evaluate(assignment.expression);
+        environment.assign(assignment.identifier,answer);
+        return answer;
+    }
 }

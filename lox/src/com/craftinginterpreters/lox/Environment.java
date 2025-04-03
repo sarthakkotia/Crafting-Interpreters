@@ -10,10 +10,15 @@ public class Environment {
         values.put(name, value);
     }
 
+    void assign(Token name, Object value){
+        if(!values.containsKey(name.lexeme)) throw new RuntimeError(name, "Underfined variable " + name);
+        values.put(name.lexeme, value);
+    }
     Object get(Token name){
         if(values.containsKey(name.lexeme)){
             return values.get(name.lexeme);
         }
         throw new RuntimeError(name, "Undefined Variable " + name.lexeme + ".");
     }
+
 }
