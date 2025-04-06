@@ -121,6 +121,7 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
     public Object evaluate(Expression expression){
         return expression.accept(this);
     }
+
     void interpret(List<Statement> statements){
         try {
             for (Statement statement: statements){
