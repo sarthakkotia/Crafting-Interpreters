@@ -35,7 +35,16 @@ public class Parser {
     }
     private Statement statement(){
         if(match(TokenType.PRINT)) return printStatement();
+        if(match(TokenType.LEFT_BRACE)) return block();
         return expressionStatement();
+    }
+    private Statement block(){
+        List<Statement>statements = new ArrayList<>();
+        while(!check(TokenType.RIGHT_BRACE) && !isAtEnd()){
+            statements.add(declaration());
+        }
+        consume(TokenType.RIGHT_BRACE, "Expect '}' after block.");
+        return new Statement.Block(statements);
     }
     private Statement printStatement(){
         Expression expression = expression();

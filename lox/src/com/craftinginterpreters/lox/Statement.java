@@ -1,10 +1,13 @@
 package com.craftinginterpreters.lox;
 
+import java.util.List;
+
 abstract class Statement {
     interface Visitor<R>{
         R visitExpressionStatement(ExpressionStatement expressionStatement);
         R visitPrintStatement(PrintStatement printStatement);
         R visitVariableDeclaration(VariableDeclaration variableDeclaration);
+        R visitBlock(Block block);
     }
     abstract <R> R accept(Visitor<R> visitor);
     static class ExpressionStatement extends Statement{
@@ -40,6 +43,17 @@ abstract class Statement {
         @Override
         <R> R accept(Visitor<R> visitor) {
             return visitor.visitVariableDeclaration(this);
+        }
+    }
+    static class Block extends Statement{
+        List<Statement> statements;
+        Block(List<Statement> statements){
+            this.statements = statements;
+        }
+
+        @Override
+        <R> R accept(Visitor<R> visitor) {
+            return visitor.visitBlock(this);
         }
     }
 }

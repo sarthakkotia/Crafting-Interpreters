@@ -179,6 +179,25 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
     }
 
     @Override
+    public Void visitBlock(Statement.Block block) {
+        Environment env = new Environment(environment);
+        executeBlock(block, env);
+        return null;
+    }
+
+    private void executeBlock(Statement.Block block, Environment environment){
+        Environment previous = this.environment;
+        try{
+            this.environment = environment;
+            for(Statement statement: block.statements){
+                execute(statement);
+            }
+        }finally {
+            this.environment = previous;
+        }
+    }
+
+    @Override
     public Object visitAssignmentExpression(Expression.Assignment assignment) {
         Object answer = evaluate(assignment.expression);
         environment.assign(assignment.identifier,answer);

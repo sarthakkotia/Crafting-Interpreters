@@ -86,4 +86,17 @@ public class AstPrinter implements Expression.Visitor<String>, Statement.Visitor
         Expression[] expressions = {variableDeclaration.initializer};
         return parenthesize("VariableDeclaration", expressions);
     }
+
+    @Override
+    public String visitBlock(Statement.Block block) {
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("Block starts {\n");
+        for(Statement statement: block.statements){
+            stringBuilder.append("\t");
+            stringBuilder.append(statement.accept(this));
+            stringBuilder.append("\n");
+        }
+        stringBuilder.append("Block ends }\n");
+        return stringBuilder.toString();
+    }
 }
