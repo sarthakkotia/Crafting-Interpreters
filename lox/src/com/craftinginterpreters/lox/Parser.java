@@ -30,7 +30,8 @@ public class Parser {
         Token name = consume(TokenType.IDENTIFIER, "Expect variable name");
         Expression expression = null;
         if(match(TokenType.EQUAL)) expression = expression();
-        consume(TokenType.SEMICOLON, "Expeected ';' after variable Declaration");
+        else error(previous(),  previous().lexeme + " not initialized");
+        consume(TokenType.SEMICOLON, "Expected ';' after variable Declaration");
         return new Statement.VariableDeclaration(name, expression);
     }
     private Statement statement(){
