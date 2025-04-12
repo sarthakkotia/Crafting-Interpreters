@@ -128,12 +128,7 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
             if (!leftAns) return false;
         }
         Object rightValue = evaluate(logical.right);
-        boolean rightAns = isTruthy(rightValue);
-        if(logical.operator.type == TokenType.OR){
-            return  leftAns || rightAns;
-        }else{
-            return leftAns && rightAns;
-        }
+        return isTruthy(rightValue);
 
     }
 
