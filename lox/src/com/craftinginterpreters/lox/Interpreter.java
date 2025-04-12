@@ -185,6 +185,15 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
         return null;
     }
 
+    @Override
+    public Void visitIf(Statement.If ifStatement) {
+        Object conditionValue = evaluate(ifStatement.condition);
+        if(isTruthy(conditionValue)){
+            execute(ifStatement.thenBranch);
+        }else if(ifStatement.elseBranch != null) execute(ifStatement.elseBranch);
+        return null;
+    }
+
     private void executeBlock(Statement.Block block, Environment environment){
         Environment previous = this.environment;
         try{

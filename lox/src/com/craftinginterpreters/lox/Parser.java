@@ -37,7 +37,20 @@ public class Parser {
     private Statement statement(){
         if(match(TokenType.PRINT)) return printStatement();
         if(match(TokenType.LEFT_BRACE)) return block();
+        if(match(TokenType.IF)) return ifStatement();
         return expressionStatement();
+    }
+    private Statement ifStatement(){
+        consume(TokenType.LEFT_PAREN, "Expected '(' after if    ");
+        Expression condition = expression();
+        consume(TokenType.RIGHT_PAREN, "Expected ')' after condition");
+        Statement thenBranch = statement();
+        Statement elseBranch = null;
+        if(match(TokenType.ELSE)){
+            elseBranch = statement();
+        }
+        return new Statement.If(condition, thenBranch, elseBranch);
+
     }
     private Statement block(){
         List<Statement>statements = new ArrayList<>();

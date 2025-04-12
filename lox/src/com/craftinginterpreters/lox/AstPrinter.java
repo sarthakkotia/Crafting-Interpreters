@@ -99,4 +99,14 @@ public class AstPrinter implements Expression.Visitor<String>, Statement.Visitor
         stringBuilder.append("Block ends }\n");
         return stringBuilder.toString();
     }
+
+    @Override
+    public String visitIf(Statement.If ifStatement) {
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("if ");
+        stringBuilder.append("<condition>: "+ ifStatement.condition.accept(this));
+        stringBuilder.append("then: "+ ifStatement.thenBranch.accept(this));
+        if(ifStatement.elseBranch != null) stringBuilder.append("else: " + ifStatement.elseBranch.accept(this));
+        return stringBuilder.toString();
+    }
 }
