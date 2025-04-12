@@ -85,7 +85,7 @@ public class Parser {
         return assign();
     }
     private Expression assign(){
-        Expression expression = comma();
+        Expression expression = or();
         if(match(TokenType.EQUAL)){
             Token equals = previous();
             Expression value = assign();
@@ -94,6 +94,24 @@ public class Parser {
                 return new Expression.Assignment(identifier, value);
             }
             error(equals, "Invalid assignment target");
+        }
+        return expression;
+    }
+    private Expression or(){
+        Expression expression = and();
+        while(match(TokenType.OR)){
+            Token operator = previous();
+            Expression right = and();
+            expression = new Expression.Logical(expression, right, operator);
+        }
+        return expression;
+    }
+    private Expression and(){
+        Expression expression = comma();
+        while (match(TokenType.AND)){
+            Token operator = previous();
+            Expression right = comma();
+            expression = new Expression.Logical(expression, right, operator);
         }
         return expression;
     }

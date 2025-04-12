@@ -118,6 +118,25 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
         return environment.get(expression.name);
     }
 
+    @Override
+    public Object visitLogical(Expression.Logical logical) {
+        Object leftValue = evaluate(logical.left);
+        boolean leftAns = isTruthy(leftValue);
+        if(logical.operator.type == TokenType.OR){
+            if(leftAns) return true;
+        }else {
+            if (!leftAns) return false;
+        }
+        Object rightValue = evaluate(logical.right);
+        boolean rightAns = isTruthy(rightValue);
+        if(logical.operator.type == TokenType.OR){
+            return  leftAns || rightAns;
+        }else{
+            return leftAns && rightAns;
+        }
+
+    }
+
     public Object evaluate(Expression expression){
         return expression.accept(this);
     }

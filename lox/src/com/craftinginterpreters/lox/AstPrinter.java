@@ -43,6 +43,12 @@ public class AstPrinter implements Expression.Visitor<String>, Statement.Visitor
         return variable.name.toString();
     }
 
+    @Override
+    public String visitLogical(Expression.Logical logical) {
+        Expression[] expressionsArr = {logical.left, logical.right};
+        return parenthesize(logical.operator.lexeme, expressionsArr);
+    }
+
     String parenthesize(String name, Expression[] expressions){
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("(").append(name);

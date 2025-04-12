@@ -9,6 +9,7 @@ abstract class Expression {
         R visitLiteralExpression(Literal expression);
         R visitAssignmentExpression(Assignment assignment);
         R visitVariable(Variable variable);
+        R visitLogical(Logical logical);
     }
     // this abstract method will be implemented by each child class to call the
     abstract <R> R accept(Visitor<R> visitor);
@@ -81,6 +82,21 @@ abstract class Expression {
         @Override
         <R> R accept(Visitor<R> visitor) {
             return visitor.visitAssignmentExpression(this);
+        }
+    }
+    static class Logical extends Expression{
+        final Expression left;
+        final Expression right;
+        final Token operator;
+        Logical(Expression left, Expression right, Token operator){
+            this.left = left;
+            this.right = right;
+            this.operator = operator;
+        }
+
+        @Override
+        <R> R accept(Visitor<R> visitor) {
+            return visitor.visitLogical(this);
         }
     }
 }
