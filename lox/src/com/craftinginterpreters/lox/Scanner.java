@@ -81,7 +81,7 @@ public class Scanner {
             case '/':
                         if(match('/')){
                             // keep consuming until end of line or end of file
-                            while(peek() != '\n' && isAtEnd()){
+                            while(peek() != '\n' && !isAtEnd()){
                                 getChar();
                             }
                         }else{
