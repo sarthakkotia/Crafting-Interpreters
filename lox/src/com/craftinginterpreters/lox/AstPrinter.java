@@ -115,4 +115,14 @@ public class AstPrinter implements Expression.Visitor<String>, Statement.Visitor
         if(ifStatement.elseBranch != null) stringBuilder.append("else: " + ifStatement.elseBranch.accept(this));
         return stringBuilder.toString();
     }
+
+    @Override
+    public String visitWhile(Statement.While whileStatement) {
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("while, <condition>->");
+        stringBuilder.append(whileStatement.condition.accept(this));
+        stringBuilder.append("<statement>->");
+        stringBuilder.append(whileStatement.body.accept(this));
+        return stringBuilder.toString();
+    }
 }

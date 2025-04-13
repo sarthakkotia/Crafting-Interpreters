@@ -38,10 +38,18 @@ public class Parser {
         if(match(TokenType.PRINT)) return printStatement();
         if(match(TokenType.LEFT_BRACE)) return block();
         if(match(TokenType.IF)) return ifStatement();
+        if(match(TokenType.WHILE)) return whileStatement();
         return expressionStatement();
     }
+    private Statement whileStatement(){
+        consume(TokenType.LEFT_PAREN, "Expected '(' after while");
+        Expression condititon = expression();
+        consume(TokenType.RIGHT_PAREN, "Expected ')' after condition");
+        Statement body = statement();
+        return new Statement.While(condititon, body);
+    }
     private Statement ifStatement(){
-        consume(TokenType.LEFT_PAREN, "Expected '(' after if    ");
+        consume(TokenType.LEFT_PAREN, "Expected '(' after if");
         Expression condition = expression();
         consume(TokenType.RIGHT_PAREN, "Expected ')' after condition");
         Statement thenBranch = statement();
