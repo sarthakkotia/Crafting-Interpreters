@@ -125,18 +125,4 @@ public class AstPrinter implements Expression.Visitor<String>, Statement.Visitor
         stringBuilder.append(whileStatement.body.accept(this));
         return stringBuilder.toString();
     }
-
-    @Override
-    public String visitFor(Statement.For forStatement) {
-        StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append("for ");
-        if(forStatement.initializer != null)
-            stringBuilder.append("<initializer> ").append(forStatement.initializer.accept(this));
-        if(forStatement.condition != null)
-            stringBuilder.append("<condition> ").append(forStatement.condition.accept(this));
-        if(forStatement.action != null)
-            stringBuilder.append("<action> ").append(forStatement.action.accept(this));
-        stringBuilder.append(forStatement.body.accept(this));
-        return stringBuilder.toString();
-    }
 }

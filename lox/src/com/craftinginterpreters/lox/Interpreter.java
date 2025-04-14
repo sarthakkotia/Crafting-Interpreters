@@ -216,25 +216,6 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
         return null;
     }
 
-    @Override
-    public Void visitFor(Statement.For forStatement) {
-        if(forStatement.initializer != null){
-            execute(forStatement.initializer);
-        }
-        boolean conditionValue = true;
-        if(forStatement.condition != null){
-            conditionValue = isTruthy(evaluate(forStatement.condition));
-        }
-        while (conditionValue){
-            execute(forStatement.body);
-            if(forStatement.action != null){
-                evaluate(forStatement.action);
-            }
-            if(forStatement.condition != null) conditionValue = isTruthy(evaluate(forStatement.condition));
-        }
-        return null;
-    }
-
     private void executeBlock(Statement.Block block, Environment environment){
         Environment previous = this.environment;
         try{

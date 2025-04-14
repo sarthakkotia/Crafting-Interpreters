@@ -1,6 +1,7 @@
 package com.craftinginterpreters.lox;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class Parser {
@@ -51,20 +52,38 @@ public class Parser {
                 throw error(previous(), "Expected a variable declartion or a expression");
             }
         }else{
-            consume(TokenType.SEMICOLON, "Expected ';' after for");
+            consume(TokenType.SEMICOLON, "Expected ';' after loop initializer");
         }
         Expression condition = null;
         if(peek().type != TokenType.SEMICOLON){
             condition = expression();
         }
-        consume(TokenType.SEMICOLON, "Expected ';' after for");
+        consume(TokenType.SEMICOLON, "Expected ';' after loop condition");
         Expression action = null;
         if(peek().type != TokenType.RIGHT_PAREN){
             action = expression();
         }
         consume(TokenType.RIGHT_PAREN, "Expeced ')' after for");
         Statement body = statement();
-        return new Statement.For(initializer, condition, action, body);
+        if(action != null){
+            body = new Statement.Block(
+                    Arrays.asList(
+                            body,
+                            new Statement.ExpressionStatement(action)
+                    )
+            );
+        }
+        if(condition == null) condition = new Expression.Literal(true);
+        body = new Statement.While(condition, body);
+        if(initializer != null){
+            body = new Statement.Block(
+                    Arrays.asList(
+                            initializer,
+                            body
+                    )
+            );
+        }
+        return body;
 
     }
     private Statement whileStatement(){
