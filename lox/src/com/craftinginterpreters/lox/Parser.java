@@ -39,7 +39,33 @@ public class Parser {
         if(match(TokenType.LEFT_BRACE)) return block();
         if(match(TokenType.IF)) return ifStatement();
         if(match(TokenType.WHILE)) return whileStatement();
+        if (match(TokenType.FOR)) return forStatement();
         return expressionStatement();
+    }
+    private Statement forStatement(){
+        consume(TokenType.LEFT_PAREN, "Expected '(' after for");
+        Statement initializer = null;
+        if(peek().type != TokenType.SEMICOLON){
+            initializer = declaration();
+            if(!(initializer instanceof Statement.VariableDeclaration) && !(initializer instanceof Statement.ExpressionStatement)){
+                throw error(previous(), "Expected a variable declartion or a expression");
+            }
+        }else{
+            consume(TokenType.SEMICOLON, "Expected ';' after for");
+        }
+        Expression condition = null;
+        if(peek().type != TokenType.SEMICOLON){
+            condition = expression();
+        }
+        consume(TokenType.SEMICOLON, "Expected ';' after for");
+        Expression action = null;
+        if(peek().type != TokenType.RIGHT_PAREN){
+            action = expression();
+        }
+        consume(TokenType.RIGHT_PAREN, "Expeced ')' after for");
+        Statement body = statement();
+        return new Statement.For(initializer, condition, action, body);
+
     }
     private Statement whileStatement(){
         consume(TokenType.LEFT_PAREN, "Expected '(' after while");

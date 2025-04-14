@@ -10,6 +10,7 @@ abstract class Statement {
         R visitBlock(Block block);
         R visitIf(If ifStatement);
         R visitWhile(While whileStatement);
+        R visitFor(For forStatement);
     }
     abstract <R> R accept(Visitor<R> visitor);
     static class ExpressionStatement extends Statement{
@@ -85,6 +86,23 @@ abstract class Statement {
         @Override
         <R> R accept(Visitor<R> visitor) {
             return visitor.visitWhile(this);
+        }
+    }
+    static class For extends Statement{
+        Statement initializer;
+        Expression condition;
+        Expression action;
+        Statement body;
+        For(Statement initializer, Expression condition, Expression action, Statement body){
+            this.initializer = initializer;
+            this.condition = condition;
+            this.action = action;
+            this.body = body;
+        }
+
+        @Override
+        <R> R accept(Visitor<R> visitor) {
+            return visitor.visitFor(this);
         }
     }
 }
