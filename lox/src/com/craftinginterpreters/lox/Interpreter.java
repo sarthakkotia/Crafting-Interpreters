@@ -3,6 +3,7 @@ package com.craftinginterpreters.lox;
 import java.util.List;
 
 public class Interpreter implements Expression.Visitor<Object>, Statement.Visitor<Void> {
+    private static class BreakException extends RuntimeException{}
     private Environment environment = new Environment();
     @Override
     public Object visitBinaryExpression(Expression.Binary expression) {
@@ -210,20 +211,18 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
 
     @Override
     public Void visitWhile(Statement.While whileStatement) {
-        while(isTruthy(evaluate(whileStatement.condition))){
-            try{
+        try{
+            while(isTruthy(evaluate(whileStatement.condition))){
                 execute(whileStatement.body);
-            } catch (RuntimeError e){
-                if(e.token.type == TokenType.BREAK) return null;
-                throw e;
             }
-        }
+        } catch (BreakException e){}
+
         return null;
     }
 
     @Override
     public Void visitBreak(Statement.Break breakStatement) {
-        return null;
+        throw new BreakException();
     }
 
     private void executeBlock(Statement.Block block, Environment environment){
