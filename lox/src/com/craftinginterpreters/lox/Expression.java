@@ -10,6 +10,7 @@ abstract class Expression {
         R visitAssignmentExpression(Assignment assignment);
         R visitVariable(Variable variable);
         R visitLogical(Logical logical);
+        R visitBreak(Break breakExpression);
     }
     // this abstract method will be implemented by each child class to call the
     abstract <R> R accept(Visitor<R> visitor);
@@ -97,6 +98,18 @@ abstract class Expression {
         @Override
         <R> R accept(Visitor<R> visitor) {
             return visitor.visitLogical(this);
+        }
+    }
+    static class Break extends Expression{
+        final Token breakToken;
+
+        Break(Token breakToken) {
+            this.breakToken = breakToken;
+        }
+
+        @Override
+        <R> R accept(Visitor<R> visitor) {
+            return visitor.visitBreak(this);
         }
     }
 }

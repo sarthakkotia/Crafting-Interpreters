@@ -135,7 +135,22 @@ public class Parser {
     }
     // defining the grammer
     private Expression expression(){
+        if(match(TokenType.BREAK)) return breakExpression();
         return assign();
+    }
+    private Expression breakExpression(){
+        StackTraceElement[] elements = Thread.currentThread().getStackTrace();
+        boolean loopExistBefore = false;
+        for (int i = 1; i < elements.length; i++) {
+            StackTraceElement s = elements[i];
+            if(s.getMethodName().equals("whileStatement") || s.getMethodName().equals("forStatement")){
+                loopExistBefore = true;
+                break;
+            }
+        }
+        if(!loopExistBefore) error(previous(), "break shouldn't exist outside a loop");
+        Expression expression = new Expression.Break(previous());
+        return expression;
     }
     private Expression assign(){
         Expression expression = or();
@@ -275,7 +290,7 @@ public class Parser {
         throw error(peek(), message);
     }
     private ParseError error(Token token, String message){
-        Lox.error(token, message);
+        Lox.error(token, "Parse Error: "+message);
         return new ParseError();
     }
     private void synchronize(){

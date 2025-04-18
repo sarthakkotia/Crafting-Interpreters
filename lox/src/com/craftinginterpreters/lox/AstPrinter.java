@@ -49,6 +49,11 @@ public class AstPrinter implements Expression.Visitor<String>, Statement.Visitor
         return parenthesize(logical.operator.lexeme, expressionsArr);
     }
 
+    @Override
+    public String visitBreak(Expression.Break breakExpression) {
+        return "";
+    }
+
     String parenthesize(String name, Expression[] expressions){
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("(").append(name);

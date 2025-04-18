@@ -73,8 +73,8 @@ public class Lox {
         List<Statement> statements = parser.parse();
         AstPrinter astPrinter = new AstPrinter();
         if(hadError) return;
-        for(Statement statement: statements){
-            System.out.println(astPrinter.print(statement));
+        for(int i=0; i< statements.size(); i++){
+            System.out.println("statement"+"["+i+"]: "+astPrinter.print(statements.get(i)));
         }
 //        System.out.println(new AstPrinter().print(expression));
         interpreter.interpret(statements);

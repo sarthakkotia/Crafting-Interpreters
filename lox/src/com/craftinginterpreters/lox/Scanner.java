@@ -34,6 +34,7 @@ public class Scanner {
         keywords.put("var", TokenType.VAR);
         keywords.put("while", TokenType.WHILE);
         keywords.put("for", TokenType.FOR);
+        keywords.put("break", TokenType.BREAK);
     }
 
     List<Token> scanTokens(){

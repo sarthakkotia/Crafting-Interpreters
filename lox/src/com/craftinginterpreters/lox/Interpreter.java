@@ -132,6 +132,12 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
 
     }
 
+    @Override
+    public Object visitBreak(Expression.Break breakExpression) {
+        throw new RuntimeError(breakExpression.breakToken, "break operation");
+//        return null;
+    }
+
     public Object evaluate(Expression expression){
         return expression.accept(this);
     }
@@ -211,7 +217,12 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
     @Override
     public Void visitWhile(Statement.While whileStatement) {
         while(isTruthy(evaluate(whileStatement.condition))){
-            execute(whileStatement.body);
+            try{
+                execute(whileStatement.body);
+            } catch (RuntimeError e){
+                if(e.token.type == TokenType.BREAK) return null;
+                throw e;
+            }
         }
         return null;
     }
@@ -223,7 +234,8 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
             for(Statement statement: block.statements){
                 execute(statement);
             }
-        }finally {
+        }
+        finally {
             this.environment = previous;
         }
     }
