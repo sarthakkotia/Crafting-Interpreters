@@ -8,6 +8,7 @@ public class Parser {
     private static class ParseError extends RuntimeException{}
     private final List<Token> tokens;
     private int current = 0;
+    private int loopDepth = 0;
     Parser(List<Token> tokens){
         this.tokens = tokens;
     }
@@ -41,7 +42,15 @@ public class Parser {
         if(match(TokenType.IF)) return ifStatement();
         if(match(TokenType.WHILE)) return whileStatement();
         if (match(TokenType.FOR)) return forStatement();
+        if(match(TokenType.BREAK)) return breakStatement();
         return expressionStatement();
+    }
+    private Statement breakStatement(){
+        if(loopDepth == 0){
+            error(previous(), "break must be used inside a loop");
+        }
+        consume(TokenType.SEMICOLON, "Expect ';' after break");
+        return new Statement.Break();
     }
     private Statement forStatement(){
         consume(TokenType.LEFT_PAREN, "Expected '(' after for");
@@ -64,34 +73,46 @@ public class Parser {
             action = expression();
         }
         consume(TokenType.RIGHT_PAREN, "Expeced ')' after for");
-        Statement body = statement();
-        if(action != null){
-            body = new Statement.Block(
-                    Arrays.asList(
-                            body,
-                            new Statement.ExpressionStatement(action)
-                    )
-            );
+        try{
+            loopDepth++;
+            Statement body = statement();
+            if(action != null){
+                body = new Statement.Block(
+                        Arrays.asList(
+                                body,
+                                new Statement.ExpressionStatement(action)
+                        )
+                );
+            }
+            if(condition == null) condition = new Expression.Literal(true);
+            body = new Statement.While(condition, body);
+            if(initializer != null){
+                body = new Statement.Block(
+                        Arrays.asList(
+                                initializer,
+                                body
+                        )
+                );
+            }
+            return body;
+        }finally {
+            loopDepth--;
         }
-        if(condition == null) condition = new Expression.Literal(true);
-        body = new Statement.While(condition, body);
-        if(initializer != null){
-            body = new Statement.Block(
-                    Arrays.asList(
-                            initializer,
-                            body
-                    )
-            );
-        }
-        return body;
+
 
     }
     private Statement whileStatement(){
         consume(TokenType.LEFT_PAREN, "Expected '(' after while");
         Expression condititon = expression();
         consume(TokenType.RIGHT_PAREN, "Expected ')' after condition");
-        Statement body = statement();
-        return new Statement.While(condititon, body);
+        try{
+            loopDepth++;
+            Statement body = statement();
+            return new Statement.While(condititon, body);
+        }finally {
+            loopDepth--;
+        }
+
     }
     private Statement ifStatement(){
         consume(TokenType.LEFT_PAREN, "Expected '(' after if");
@@ -135,22 +156,7 @@ public class Parser {
     }
     // defining the grammer
     private Expression expression(){
-        if(match(TokenType.BREAK)) return breakExpression();
         return assign();
-    }
-    private Expression breakExpression(){
-        StackTraceElement[] elements = Thread.currentThread().getStackTrace();
-        boolean loopExistBefore = false;
-        for (int i = 1; i < elements.length; i++) {
-            StackTraceElement s = elements[i];
-            if(s.getMethodName().equals("whileStatement") || s.getMethodName().equals("forStatement")){
-                loopExistBefore = true;
-                break;
-            }
-        }
-        if(!loopExistBefore) error(previous(), "break shouldn't exist outside a loop");
-        Expression expression = new Expression.Break(previous());
-        return expression;
     }
     private Expression assign(){
         Expression expression = or();

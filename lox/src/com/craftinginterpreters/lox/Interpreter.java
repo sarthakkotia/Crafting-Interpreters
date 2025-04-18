@@ -132,12 +132,6 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
 
     }
 
-    @Override
-    public Object visitBreak(Expression.Break breakExpression) {
-        throw new RuntimeError(breakExpression.breakToken, "break operation");
-//        return null;
-    }
-
     public Object evaluate(Expression expression){
         return expression.accept(this);
     }
@@ -224,6 +218,11 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
                 throw e;
             }
         }
+        return null;
+    }
+
+    @Override
+    public Void visitBreak(Statement.Break breakStatement) {
         return null;
     }
 

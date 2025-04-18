@@ -1,8 +1,4 @@
 var a = 1;
 var b = 2;
-while(true){
-    if(false){
-        break;
-    }
-}
+break;
 print a;
