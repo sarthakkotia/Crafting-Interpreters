@@ -1,5 +1,8 @@
 package com.craftinginterpreters.lox;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class AstPrinter implements Expression.Visitor<String>, Statement.Visitor<String>{
     String print(Expression expression){
         return expression.accept(this);
@@ -10,19 +13,23 @@ public class AstPrinter implements Expression.Visitor<String>, Statement.Visitor
 
     @Override
     public String visitBinaryExpression(Expression.Binary expression) {
-        Expression[] expressionsArr = {expression.left, expression.right};
+        List<Expression>expressionsArr = new ArrayList<>();
+        expressionsArr.add(expression.left);
+        expressionsArr.add(expression.right);
         return parenthesize(expression.operator.lexeme, expressionsArr);
     }
 
     @Override
     public String visitGroupingExpression(Expression.Grouping expression) {
-        Expression[] expressionsArr = {expression.expression};
+        List<Expression>expressionsArr = new ArrayList<>();
+        expressionsArr.add(expression.expression);
         return parenthesize("Grouping", expressionsArr);
     }
 
     @Override
     public String visitUnaryExpression(Expression.Unary expression) {
-        Expression[] expressionsArr = {expression.expression};
+        List<Expression>expressionsArr = new ArrayList<>();
+        expressionsArr.add(expression.expression);
         return parenthesize(expression.operator.lexeme, expressionsArr);
     }
 
@@ -34,7 +41,8 @@ public class AstPrinter implements Expression.Visitor<String>, Statement.Visitor
 
     @Override
     public String visitAssignmentExpression(Expression.Assignment assignment) {
-        Expression[] expressionsArr = {assignment.expression};
+        List<Expression>expressionsArr = new ArrayList<>();
+        expressionsArr.add(assignment.expression);
         return parenthesize("Assignment", expressionsArr);
     }
 
@@ -45,11 +53,26 @@ public class AstPrinter implements Expression.Visitor<String>, Statement.Visitor
 
     @Override
     public String visitLogical(Expression.Logical logical) {
-        Expression[] expressionsArr = {logical.left, logical.right};
+        List<Expression>expressionsArr = new ArrayList<>();
+        expressionsArr.add(logical.left);
+        expressionsArr.add(logical.right);
         return parenthesize(logical.operator.lexeme, expressionsArr);
     }
 
-    String parenthesize(String name, Expression[] expressions){
+    @Override
+    public String visitCall(Expression.Call call) {
+        List<Expression>expressionsArr = new ArrayList<>();
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("function call\n");
+        expressionsArr.add(call.callee);
+        stringBuilder.append(parenthesize("callee", expressionsArr));
+        stringBuilder.append("\n");
+        expressionsArr.clear();
+        stringBuilder.append(parenthesize("Arguments", call.arguments));
+        return stringBuilder.toString();
+    }
+
+    String parenthesize(String name, List<Expression> expressions){
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("(").append(name);
         for(Expression expression: expressions){
@@ -77,20 +100,23 @@ public class AstPrinter implements Expression.Visitor<String>, Statement.Visitor
 
     @Override
     public String visitExpressionStatement(Statement.ExpressionStatement expressionStatement) {
-        Expression[] expressions = {expressionStatement.expression};
-        return parenthesize("Expression", expressions);
+        List<Expression>expressionsArr = new ArrayList<>();
+        expressionsArr.add(expressionStatement.expression);
+        return parenthesize("Expression", expressionsArr);
     }
 
     @Override
     public String visitPrintStatement(Statement.PrintStatement printStatement) {
-        Expression[] expressions = {printStatement.expression};
-        return parenthesize("Print", expressions);
+        List<Expression>expressionsArr = new ArrayList<>();
+        expressionsArr.add(printStatement.expression);
+        return parenthesize("Print", expressionsArr);
     }
 
     @Override
     public String visitVariableDeclaration(Statement.VariableDeclaration variableDeclaration) {
-        Expression[] expressions = {variableDeclaration.initializer};
-        return parenthesize("VariableDeclaration", expressions);
+        List<Expression>expressionsArr = new ArrayList<>();
+        expressionsArr.add(variableDeclaration.initializer);
+        return parenthesize("VariableDeclaration", expressionsArr);
     }
 
     @Override
