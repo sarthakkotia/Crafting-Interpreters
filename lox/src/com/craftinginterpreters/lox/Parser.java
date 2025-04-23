@@ -252,7 +252,28 @@ public class Parser {
             Expression right = unary();
             return new Expression.Unary(operator, right);
         }
-        return primary();
+        return call();
+    }
+    private Expression call(){
+        Expression primary = primary();
+        while(true){
+            if(match(TokenType.LEFT_PAREN)){
+                primary = finishCall(primary);
+            }else{
+                break;
+            }
+        }
+        return primary;
+    }
+    private Expression finishCall(Expression callee){
+        List<Expression> arguments = new ArrayList<>();
+        if(!check(TokenType.RIGHT_PAREN)){
+            do{
+                arguments.add(expression());
+            } while (match(TokenType.COMMA));
+        }
+        Token paren = consume(TokenType.RIGHT_PAREN, "Expect ')' after function call arguments");
+        return new Expression.Call(callee, paren, arguments);
     }
     private Expression primary(){
         if (match(TokenType.FALSE)) return new Expression.Literal(false);
