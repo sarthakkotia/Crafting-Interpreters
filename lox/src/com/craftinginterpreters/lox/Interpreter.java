@@ -142,7 +142,7 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
             arguments.add(evaluate(argument));
         }
         LoxCallable function = (LoxCallable) callee;
-        return function.call(callee, arguments);
+        return function.call(this, arguments);
     }
 
     public Object evaluate(Expression expression){
