@@ -1,5 +1,6 @@
 package com.craftinginterpreters.lox;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Interpreter implements Expression.Visitor<Object>, Statement.Visitor<Void> {
@@ -131,6 +132,17 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
         Object rightValue = evaluate(logical.right);
         return isTruthy(rightValue);
 
+    }
+
+    @Override
+    public Object visitCall(Expression.Call call) {
+        Object callee = evaluate(call.callee);
+        List<Object> arguments = new ArrayList<>();
+        for(Expression argument: call.arguments){
+            arguments.add(evaluate(argument));
+        }
+        LoxCallable function = (LoxCallable) callee;
+        return function.call(callee, arguments);
     }
 
     public Object evaluate(Expression expression){
