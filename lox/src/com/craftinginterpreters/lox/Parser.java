@@ -269,6 +269,9 @@ public class Parser {
         List<Expression> arguments = new ArrayList<>();
         if(!check(TokenType.RIGHT_PAREN)){
             do{
+                if(arguments.size() >= 255){
+                    error(peek(), "function can't have more than 255 arguments");
+                }
                 arguments.add(expression());
             } while (match(TokenType.COMMA));
         }
