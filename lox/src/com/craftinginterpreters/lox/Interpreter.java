@@ -141,6 +141,9 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
         for(Expression argument: call.arguments){
             arguments.add(evaluate(argument));
         }
+        if(!(callee instanceof LoxCallable)) {
+            throw new RuntimeError(call.paren, "Could only call functions and classes");
+        }
         LoxCallable function = (LoxCallable) callee;
         return function.call(this, arguments);
     }
