@@ -145,6 +145,9 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
             throw new RuntimeError(call.paren, "Could only call functions and classes");
         }
         LoxCallable function = (LoxCallable) callee;
+        if(arguments.size() != function.airity()){
+            throw new RuntimeError(call.paren, "Expected " + function.airity() + " arguments, but got " + arguments.size() + "." );
+        }
         return function.call(this, arguments);
     }
 
