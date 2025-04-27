@@ -5,7 +5,27 @@ import java.util.List;
 
 public class Interpreter implements Expression.Visitor<Object>, Statement.Visitor<Void> {
     private static class BreakException extends RuntimeException{}
-    private Environment environment = new Environment();
+//    private Environment environment = new Environment();
+    final Environment globals = new Environment();
+    private Environment environment = globals;
+
+    Interpreter(){
+        globals.define("clock", new LoxCallable() {
+            @Override
+            public int airity() {
+                return 0;
+            }
+
+            @Override
+            public Object call(Interpreter interpreter, List<Object> arguments) {
+                return (double) System.currentTimeMillis() / 1000.0;
+            }
+
+            public String toString(){
+                return "<native fn>";
+            }
+        });
+    }
     @Override
     public Object visitBinaryExpression(Expression.Binary expression) {
         Object left = evaluate(expression.left);
