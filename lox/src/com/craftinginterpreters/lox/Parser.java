@@ -21,12 +21,31 @@ public class Parser {
     }
     private Statement declaration(){
         try{
+            if(match(TokenType.FUN)) return function("function");
             if(match(TokenType.VAR)) return variableDeclaration();
             return statement();
         } catch (ParseError e){
             synchronize();
             return null;
         }
+    }
+    private Statement function(String kind){
+        Token name = consume(TokenType.IDENTIFIER, "Expected " + kind + "name. ");
+        consume(TokenType.LEFT_PAREN, "Expected '(' after function name");
+        List<Token> parameters = new ArrayList<>();
+        if(!check(TokenType.LEFT_PAREN)){
+            do{
+                if(parameters.size() >= 255){
+                    error(peek(), "Can't have more than 255 arguments");
+                }
+                parameters.add(consume(TokenType.IDENTIFIER, "Expected a parameter name"));
+            } while (match(TokenType.COMMA));
+        }
+        consume(TokenType.RIGHT_PAREN, "Expected ')' after parameters");
+        consume(TokenType.LEFT_BRACE, "Expected '{' before" + kind + "body. ");
+        List<Statement> body = ((Statement.Block)block()).statements;
+        return new Statement.Function(name, parameters, body);
+
     }
     private Statement variableDeclaration(){
         Token name = consume(TokenType.IDENTIFIER, "Expect variable name");
