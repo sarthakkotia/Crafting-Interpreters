@@ -263,6 +263,13 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
         throw new BreakException();
     }
 
+    @Override
+    public Void visitFunction(Statement.Function function) {
+        LoxFunction fun = new LoxFunction(function);
+        environment.define(function.name.lexeme, fun);
+        return null;
+    }
+
     public void executeBlock(Statement.Block block, Environment environment){
         Environment previous = this.environment;
         try{
