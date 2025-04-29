@@ -99,8 +99,8 @@ abstract class Statement {
     static class Function extends Statement{
         final Token name;
         final List<Token> parameters;
-        final List<Statement> body;
-        Function(Token name, List<Token> parameters, List<Statement> body){
+        final Statement.Block body;
+        Function(Token name, List<Token> parameters, Statement.Block body){
             this.name = name;
             this.parameters = parameters;
             this.body = body;

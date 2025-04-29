@@ -43,7 +43,7 @@ public class Parser {
         }
         consume(TokenType.RIGHT_PAREN, "Expected ')' after parameters");
         consume(TokenType.LEFT_BRACE, "Expected '{' before" + kind + "body. ");
-        List<Statement> body = ((Statement.Block)block()).statements;
+        Statement.Block body = ((Statement.Block)block());
         return new Statement.Function(name, parameters, body);
 
     }

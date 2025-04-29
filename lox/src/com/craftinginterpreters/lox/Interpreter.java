@@ -263,7 +263,7 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
         throw new BreakException();
     }
 
-    private void executeBlock(Statement.Block block, Environment environment){
+    public void executeBlock(Statement.Block block, Environment environment){
         Environment previous = this.environment;
         try{
             this.environment = environment;
