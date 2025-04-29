@@ -22,4 +22,9 @@ public class LoxFunction implements LoxCallable{
         interpreter.executeBlock(function.body, environment);
         return null;
     }
+
+    @Override
+    public String toString(){
+        return "<fn "+function.name.lexeme+" >";
+    }
 }
