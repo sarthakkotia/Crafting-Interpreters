@@ -62,7 +62,18 @@ public class Parser {
         if(match(TokenType.WHILE)) return whileStatement();
         if (match(TokenType.FOR)) return forStatement();
         if(match(TokenType.BREAK)) return breakStatement();
+        if(match(TokenType.RETURN)) return returnStatement();
         return expressionStatement();
+    }
+    //TODO: this seems a bit odd, we aren't really checking if return is actually within a function or not if it's not that than we will do it ourself
+    private Statement returnStatement(){
+        Token keyword = previous();
+        Expression value = null;
+        if(!check(TokenType.SEMICOLON)){
+            value = expression();
+        }
+        consume(TokenType.SEMICOLON, "Expected ';' after return statement");
+        return new Statement.Return(keyword, value);
     }
     private Statement breakStatement(){
         if(loopDepth == 0){
