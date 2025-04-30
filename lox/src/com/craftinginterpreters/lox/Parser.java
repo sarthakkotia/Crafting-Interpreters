@@ -175,7 +175,17 @@ public class Parser {
     }
     // defining the grammer
     private Expression expression(){
-        return assign();
+        return comma();
+    }
+    private Expression comma(){
+        Expression expression = assign();
+        while(match(TokenType.COMMA)){
+            Token operator = previous();
+            Expression right = assign();
+            expression = new Expression.Binary(expression, right, operator);
+        }
+        return expression;
+        //TODO: We have solved the problem it was causing while parsing a function call, don't know how much it would help
     }
     private Expression assign(){
         Expression expression = or();
@@ -200,10 +210,10 @@ public class Parser {
         return expression;
     }
     private Expression and(){
-        Expression expression = comma();
+        Expression expression = equality();
         while (match(TokenType.AND)){
             Token operator = previous();
-            Expression right = comma();
+            Expression right = equality();
             expression = new Expression.Logical(expression, right, operator);
         }
         return expression;
@@ -218,16 +228,6 @@ public class Parser {
 //            return new Expression.Assignment(identifier, expression);
 //        }
 //    }
-    private Expression comma(){
-        Expression expression = equality();
-        while(match(TokenType.COMMA)){
-            Token operator = previous();
-            Expression right = equality();
-            expression = new Expression.Binary(expression, right, operator);
-        }
-        return expression;
-        //TODO: this could cause problems for functions solve that
-    }
     //TODO: Add support for ternary expressions
     private Expression equality(){
         Expression expression = comparison();
@@ -291,7 +291,7 @@ public class Parser {
                 if(arguments.size() >= 255){
                     error(peek(), "function can't have more than 255 arguments");
                 }
-                arguments.add(expression());
+                arguments.add(assign());
             } while (match(TokenType.COMMA));
         }
         Token paren = consume(TokenType.RIGHT_PAREN, "Expect ')' after function call arguments");

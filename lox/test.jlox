@@ -1,8 +1,4 @@
-var a = 1;
-var b = 2;
-while(true){
-    if(true){
-        break;
-    }
+fun sayHi(first, last) {
+  print "Hi, " + first + " " + last + "!";
 }
-print b;
+sayHi("Dear", "Reader");
