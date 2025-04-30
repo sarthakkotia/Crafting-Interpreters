@@ -12,6 +12,7 @@ abstract class Statement {
         R visitWhile(While whileStatement);
         R visitBreak(Break breakStatement);
         R visitFunction(Function function);
+        R visitReturn(Return returnStatement);
     }
     abstract <R> R accept(Visitor<R> visitor);
     static class ExpressionStatement extends Statement{
@@ -108,5 +109,16 @@ abstract class Statement {
 
         @Override
         <R> R accept(Visitor<R> visitor){ return visitor.visitFunction(this); }
+    }
+    static class Return extends Statement{
+        final Token keyword;
+        final Expression value;
+        Return(Token keyword, Expression value){
+            this.keyword = keyword;
+            this.value = value;
+        }
+
+        @Override
+        <R> R accept(Visitor<R> visitor){ return visitor.visitReturn(this); }
     }
 }

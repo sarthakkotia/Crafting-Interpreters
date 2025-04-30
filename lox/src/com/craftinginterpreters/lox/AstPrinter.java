@@ -167,4 +167,11 @@ public class AstPrinter implements Expression.Visitor<String>, Statement.Visitor
         sb.append(function.body.accept(this));
         return sb.toString();
     }
+
+    @Override
+    public String visitReturn(Statement.Return returnStatement) {
+        List<Expression>expressions = new ArrayList<>();
+        expressions.add(returnStatement.value);
+        return parenthesize("return", expressions);
+    }
 }
