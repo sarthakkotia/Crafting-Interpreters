@@ -70,7 +70,7 @@ public class Parser {
         Token keyword = previous();
         Expression value = null;
         if(!check(TokenType.SEMICOLON)){
-            value = expression();
+            value = assign();
         }
         consume(TokenType.SEMICOLON, "Expected ';' after return statement");
         return new Statement.Return(keyword, value);
