@@ -270,6 +270,13 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
         return null;
     }
 
+    @Override
+    public Void visitReturn(Statement.Return returnStatement) {
+        Object value = null;
+        if(returnStatement.value != null) value = evaluate(returnStatement.value);
+        throw new ReturnException(value);
+    }
+
     public void executeBlock(Statement.Block block, Environment environment){
         Environment previous = this.environment;
         try{
