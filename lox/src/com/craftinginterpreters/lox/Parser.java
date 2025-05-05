@@ -33,7 +33,7 @@ public class Parser {
         Token name = consume(TokenType.IDENTIFIER, "Expected " + kind + "name. ");
         consume(TokenType.LEFT_PAREN, "Expected '(' after function name");
         List<Token> parameters = new ArrayList<>();
-        if(!check(TokenType.LEFT_PAREN)){
+        if(!check(TokenType.RIGHT_PAREN)){
             do{
                 if(parameters.size() >= 255){
                     error(peek(), "Can't have more than 255 arguments");
