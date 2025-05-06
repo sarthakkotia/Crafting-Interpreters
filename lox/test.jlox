@@ -1,8 +1,3 @@
-var a = 1;
-var b = 2;
-while(true){
-    if(false){
-        break;
-    }
+fun scope(a){
+    var a = 2;
 }
-print a;

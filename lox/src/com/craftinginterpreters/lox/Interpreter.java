@@ -1,9 +1,31 @@
 package com.craftinginterpreters.lox;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Interpreter implements Expression.Visitor<Object>, Statement.Visitor<Void> {
-    private Environment environment = new Environment();
+    private static class BreakException extends RuntimeException{}
+//    private Environment environment = new Environment();
+    final Environment globals = new Environment();
+    private Environment environment = globals;
+
+    Interpreter(){
+        globals.define("clock", new LoxCallable() {
+            @Override
+            public int airity() {
+                return 0;
+            }
+
+            @Override
+            public Object call(Interpreter interpreter, List<Object> arguments) {
+                return (double) System.currentTimeMillis() / 1000.0;
+            }
+
+            public String toString(){
+                return "<native fn>";
+            }
+        });
+    }
     @Override
     public Object visitBinaryExpression(Expression.Binary expression) {
         Object left = evaluate(expression.left);
@@ -133,9 +155,20 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
     }
 
     @Override
-    public Object visitBreak(Expression.Break breakExpression) {
-        throw new RuntimeError(breakExpression.breakToken, "break operation");
-//        return null;
+    public Object visitCall(Expression.Call call) {
+        Object callee = evaluate(call.callee);
+        List<Object> arguments = new ArrayList<>();
+        for(Expression argument: call.arguments){
+            arguments.add(evaluate(argument));
+        }
+        if(!(callee instanceof LoxCallable)) {
+            throw new RuntimeError(call.paren, "Could only call functions and classes");
+        }
+        LoxCallable function = (LoxCallable) callee;
+        if(arguments.size() != function.airity()){
+            throw new RuntimeError(call.paren, "Expected " + function.airity() + " arguments, but got " + arguments.size() + "." );
+        }
+        return function.call(this, arguments);
     }
 
     public Object evaluate(Expression expression){
@@ -216,18 +249,35 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
 
     @Override
     public Void visitWhile(Statement.While whileStatement) {
-        while(isTruthy(evaluate(whileStatement.condition))){
-            try{
+        try{
+            while(isTruthy(evaluate(whileStatement.condition))){
                 execute(whileStatement.body);
-            } catch (RuntimeError e){
-                if(e.token.type == TokenType.BREAK) return null;
-                throw e;
             }
-        }
+        } catch (BreakException e){}
+
         return null;
     }
 
-    private void executeBlock(Statement.Block block, Environment environment){
+    @Override
+    public Void visitBreak(Statement.Break breakStatement) {
+        throw new BreakException();
+    }
+
+    @Override
+    public Void visitFunction(Statement.Function function) {
+        LoxFunction fun = new LoxFunction(function, environment);
+        environment.define(function.name.lexeme, fun);
+        return null;
+    }
+
+    @Override
+    public Void visitReturn(Statement.Return returnStatement) {
+        Object value = null;
+        if(returnStatement.value != null) value = evaluate(returnStatement.value);
+        throw new ReturnException(value);
+    }
+
+    public void executeBlock(Statement.Block block, Environment environment){
         Environment previous = this.environment;
         try{
             this.environment = environment;

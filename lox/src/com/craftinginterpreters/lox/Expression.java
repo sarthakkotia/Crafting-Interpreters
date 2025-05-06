@@ -1,5 +1,7 @@
 package com.craftinginterpreters.lox;
 
+import java.util.List;
+
 abstract class Expression {
     //defining the visitor interface
     interface Visitor<R>{
@@ -10,7 +12,7 @@ abstract class Expression {
         R visitAssignmentExpression(Assignment assignment);
         R visitVariable(Variable variable);
         R visitLogical(Logical logical);
-        R visitBreak(Break breakExpression);
+        R visitCall(Call call);
     }
     // this abstract method will be implemented by each child class to call the
     abstract <R> R accept(Visitor<R> visitor);
@@ -100,16 +102,18 @@ abstract class Expression {
             return visitor.visitLogical(this);
         }
     }
-    static class Break extends Expression{
-        final Token breakToken;
+    static class Call extends Expression{
+        final Expression callee;
+        final Token paren;
+        final List<Expression> arguments;
 
-        Break(Token breakToken) {
-            this.breakToken = breakToken;
+        Call(Expression callee, Token paren, List<Expression> arguments) {
+            this.callee = callee;
+            this.paren = paren;
+            this.arguments = arguments;
         }
 
         @Override
-        <R> R accept(Visitor<R> visitor) {
-            return visitor.visitBreak(this);
-        }
+        <R> R accept(Visitor<R> visitor){ return visitor.visitCall(this); }
     }
 }

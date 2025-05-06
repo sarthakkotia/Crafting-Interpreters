@@ -10,6 +10,9 @@ abstract class Statement {
         R visitBlock(Block block);
         R visitIf(If ifStatement);
         R visitWhile(While whileStatement);
+        R visitBreak(Break breakStatement);
+        R visitFunction(Function function);
+        R visitReturn(Return returnStatement);
     }
     abstract <R> R accept(Visitor<R> visitor);
     static class ExpressionStatement extends Statement{
@@ -86,5 +89,36 @@ abstract class Statement {
         <R> R accept(Visitor<R> visitor) {
             return visitor.visitWhile(this);
         }
+    }
+    static class Break extends Statement{
+
+        @Override
+        <R> R accept(Visitor<R> visitor) {
+            return visitor.visitBreak(this);
+        }
+    }
+    static class Function extends Statement{
+        final Token name;
+        final List<Token> parameters;
+        final Statement.Block body;
+        Function(Token name, List<Token> parameters, Statement.Block body){
+            this.name = name;
+            this.parameters = parameters;
+            this.body = body;
+        }
+
+        @Override
+        <R> R accept(Visitor<R> visitor){ return visitor.visitFunction(this); }
+    }
+    static class Return extends Statement{
+        final Token keyword;
+        final Expression value;
+        Return(Token keyword, Expression value){
+            this.keyword = keyword;
+            this.value = value;
+        }
+
+        @Override
+        <R> R accept(Visitor<R> visitor){ return visitor.visitReturn(this); }
     }
 }

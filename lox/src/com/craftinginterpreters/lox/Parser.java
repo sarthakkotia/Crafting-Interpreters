@@ -8,6 +8,7 @@ public class Parser {
     private static class ParseError extends RuntimeException{}
     private final List<Token> tokens;
     private int current = 0;
+    private int loopDepth = 0;
     Parser(List<Token> tokens){
         this.tokens = tokens;
     }
@@ -20,12 +21,31 @@ public class Parser {
     }
     private Statement declaration(){
         try{
+            if(match(TokenType.FUN)) return function("function");
             if(match(TokenType.VAR)) return variableDeclaration();
             return statement();
         } catch (ParseError e){
             synchronize();
             return null;
         }
+    }
+    private Statement function(String kind){
+        Token name = consume(TokenType.IDENTIFIER, "Expected " + kind + "name. ");
+        consume(TokenType.LEFT_PAREN, "Expected '(' after function name");
+        List<Token> parameters = new ArrayList<>();
+        if(!check(TokenType.RIGHT_PAREN)){
+            do{
+                if(parameters.size() >= 255){
+                    error(peek(), "Can't have more than 255 arguments");
+                }
+                parameters.add(consume(TokenType.IDENTIFIER, "Expected a parameter name"));
+            } while (match(TokenType.COMMA));
+        }
+        consume(TokenType.RIGHT_PAREN, "Expected ')' after parameters");
+        consume(TokenType.LEFT_BRACE, "Expected '{' before" + kind + "body. ");
+        Statement.Block body = ((Statement.Block)block());
+        return new Statement.Function(name, parameters, body);
+
     }
     private Statement variableDeclaration(){
         Token name = consume(TokenType.IDENTIFIER, "Expect variable name");
@@ -41,7 +61,26 @@ public class Parser {
         if(match(TokenType.IF)) return ifStatement();
         if(match(TokenType.WHILE)) return whileStatement();
         if (match(TokenType.FOR)) return forStatement();
+        if(match(TokenType.BREAK)) return breakStatement();
+        if(match(TokenType.RETURN)) return returnStatement();
         return expressionStatement();
+    }
+    //TODO: this seems a bit odd, we aren't really checking if return is actually within a function or not if it's not that than we will do it ourself
+    private Statement returnStatement(){
+        Token keyword = previous();
+        Expression value = null;
+        if(!check(TokenType.SEMICOLON)){
+            value = assign();
+        }
+        consume(TokenType.SEMICOLON, "Expected ';' after return statement");
+        return new Statement.Return(keyword, value);
+    }
+    private Statement breakStatement(){
+        if(loopDepth == 0){
+            error(previous(), "break must be used inside a loop");
+        }
+        consume(TokenType.SEMICOLON, "Expect ';' after break");
+        return new Statement.Break();
     }
     private Statement forStatement(){
         consume(TokenType.LEFT_PAREN, "Expected '(' after for");
@@ -64,34 +103,46 @@ public class Parser {
             action = expression();
         }
         consume(TokenType.RIGHT_PAREN, "Expeced ')' after for");
-        Statement body = statement();
-        if(action != null){
-            body = new Statement.Block(
-                    Arrays.asList(
-                            body,
-                            new Statement.ExpressionStatement(action)
-                    )
-            );
+        try{
+            loopDepth++;
+            Statement body = statement();
+            if(action != null){
+                body = new Statement.Block(
+                        Arrays.asList(
+                                body,
+                                new Statement.ExpressionStatement(action)
+                        )
+                );
+            }
+            if(condition == null) condition = new Expression.Literal(true);
+            body = new Statement.While(condition, body);
+            if(initializer != null){
+                body = new Statement.Block(
+                        Arrays.asList(
+                                initializer,
+                                body
+                        )
+                );
+            }
+            return body;
+        }finally {
+            loopDepth--;
         }
-        if(condition == null) condition = new Expression.Literal(true);
-        body = new Statement.While(condition, body);
-        if(initializer != null){
-            body = new Statement.Block(
-                    Arrays.asList(
-                            initializer,
-                            body
-                    )
-            );
-        }
-        return body;
+
 
     }
     private Statement whileStatement(){
         consume(TokenType.LEFT_PAREN, "Expected '(' after while");
         Expression condititon = expression();
         consume(TokenType.RIGHT_PAREN, "Expected ')' after condition");
-        Statement body = statement();
-        return new Statement.While(condititon, body);
+        try{
+            loopDepth++;
+            Statement body = statement();
+            return new Statement.While(condititon, body);
+        }finally {
+            loopDepth--;
+        }
+
     }
     private Statement ifStatement(){
         consume(TokenType.LEFT_PAREN, "Expected '(' after if");
@@ -135,22 +186,17 @@ public class Parser {
     }
     // defining the grammer
     private Expression expression(){
-        if(match(TokenType.BREAK)) return breakExpression();
-        return assign();
+        return comma();
     }
-    private Expression breakExpression(){
-        StackTraceElement[] elements = Thread.currentThread().getStackTrace();
-        boolean loopExistBefore = false;
-        for (int i = 1; i < elements.length; i++) {
-            StackTraceElement s = elements[i];
-            if(s.getMethodName().equals("whileStatement") || s.getMethodName().equals("forStatement")){
-                loopExistBefore = true;
-                break;
-            }
+    private Expression comma(){
+        Expression expression = assign();
+        while(match(TokenType.COMMA)){
+            Token operator = previous();
+            Expression right = assign();
+            expression = new Expression.Binary(expression, right, operator);
         }
-        if(!loopExistBefore) error(previous(), "break shouldn't exist outside a loop");
-        Expression expression = new Expression.Break(previous());
         return expression;
+        //TODO: We have solved the problem it was causing while parsing a function call, don't know how much it would help
     }
     private Expression assign(){
         Expression expression = or();
@@ -175,10 +221,10 @@ public class Parser {
         return expression;
     }
     private Expression and(){
-        Expression expression = comma();
+        Expression expression = equality();
         while (match(TokenType.AND)){
             Token operator = previous();
-            Expression right = comma();
+            Expression right = equality();
             expression = new Expression.Logical(expression, right, operator);
         }
         return expression;
@@ -193,16 +239,6 @@ public class Parser {
 //            return new Expression.Assignment(identifier, expression);
 //        }
 //    }
-    private Expression comma(){
-        Expression expression = equality();
-        while(match(TokenType.COMMA)){
-            Token operator = previous();
-            Expression right = equality();
-            expression = new Expression.Binary(expression, right, operator);
-        }
-        return expression;
-        //TODO: this could cause problems for functions solve that
-    }
     //TODO: Add support for ternary expressions
     private Expression equality(){
         Expression expression = comparison();
@@ -246,7 +282,31 @@ public class Parser {
             Expression right = unary();
             return new Expression.Unary(operator, right);
         }
-        return primary();
+        return call();
+    }
+    private Expression call(){
+        Expression primary = primary();
+        while(true){
+            if(match(TokenType.LEFT_PAREN)){
+                primary = finishCall(primary);
+            }else{
+                break;
+            }
+        }
+        return primary;
+    }
+    private Expression finishCall(Expression callee){
+        List<Expression> arguments = new ArrayList<>();
+        if(!check(TokenType.RIGHT_PAREN)){
+            do{
+                if(arguments.size() >= 255){
+                    error(peek(), "function can't have more than 255 arguments");
+                }
+                arguments.add(assign());
+            } while (match(TokenType.COMMA));
+        }
+        Token paren = consume(TokenType.RIGHT_PAREN, "Expect ')' after function call arguments");
+        return new Expression.Call(callee, paren, arguments);
     }
     private Expression primary(){
         if (match(TokenType.FALSE)) return new Expression.Literal(false);
