@@ -13,6 +13,7 @@ abstract class Expression {
         R visitVariable(Variable variable);
         R visitLogical(Logical logical);
         R visitCall(Call call);
+        R visitFunctionExpr(Function function);
     }
     // this abstract method will be implemented by each child class to call the
     abstract <R> R accept(Visitor<R> visitor);
@@ -115,5 +116,17 @@ abstract class Expression {
 
         @Override
         <R> R accept(Visitor<R> visitor){ return visitor.visitCall(this); }
+    }
+    static class Function extends Expression{
+        final List<Token> parameters;
+        final Statement.Block block;
+
+        public Function(List<Token> parameters, Statement.Block block) {
+            this.parameters = parameters;
+            this.block = block;
+        }
+
+        @Override
+        <R> R accept(Visitor<R> visitor) { return visitor.visitFunctionExpr(this); }
     }
 }

@@ -21,7 +21,10 @@ public class Parser {
     }
     private Statement declaration(){
         try{
-            if(match(TokenType.FUN)) return function("function");
+            if (check(TokenType.FUN) && checkNext(TokenType.IDENTIFIER)) {
+                consume(TokenType.FUN, null);
+                return function("function");
+            }
             if(match(TokenType.VAR)) return variableDeclaration();
             return statement();
         } catch (ParseError e){
@@ -31,6 +34,9 @@ public class Parser {
     }
     private Statement function(String kind){
         Token name = consume(TokenType.IDENTIFIER, "Expected " + kind + "name. ");
+        return new Statement.Function(name, functionBody(kind));
+    }
+    private Expression.Function functionBody(String kind){
         consume(TokenType.LEFT_PAREN, "Expected '(' after function name");
         List<Token> parameters = new ArrayList<>();
         if(!check(TokenType.RIGHT_PAREN)){
@@ -44,8 +50,7 @@ public class Parser {
         consume(TokenType.RIGHT_PAREN, "Expected ')' after parameters");
         consume(TokenType.LEFT_BRACE, "Expected '{' before" + kind + "body. ");
         Statement.Block body = ((Statement.Block)block());
-        return new Statement.Function(name, parameters, body);
-
+        return new Expression.Function(parameters, body);
     }
     private Statement variableDeclaration(){
         Token name = consume(TokenType.IDENTIFIER, "Expect variable name");
@@ -343,7 +348,13 @@ public class Parser {
         if(match(TokenType.IDENTIFIER)){
             return new Expression.Variable(previous());
         }
+        if (match(TokenType.FUN)) return functionBody("function");
         throw error(peek(), "Expect expression");
+    }
+    private boolean checkNext(TokenType tokenType) {
+        if (isAtEnd()) return false;
+        if (tokens.get(current + 1).type == TokenType.EOF) return false;
+        return tokens.get(current + 1).type == tokenType;
     }
     private Token consume(TokenType type, String message){
         if(check(type)) return advance();

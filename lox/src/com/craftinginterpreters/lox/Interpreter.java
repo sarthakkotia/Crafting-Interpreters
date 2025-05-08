@@ -171,6 +171,11 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
         return function.call(this, arguments);
     }
 
+    @Override
+    public Object visitFunctionExpr(Expression.Function function) {
+        return new LoxFunction(null, function, environment);
+    }
+
     public Object evaluate(Expression expression){
         return expression.accept(this);
     }
@@ -265,8 +270,8 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
 
     @Override
     public Void visitFunction(Statement.Function function) {
-        LoxFunction fun = new LoxFunction(function, environment);
-        environment.define(function.name.lexeme, fun);
+        String fnName = function.name.lexeme;
+        environment.define(fnName, new LoxFunction(fnName, function.function, environment));
         return null;
     }
 

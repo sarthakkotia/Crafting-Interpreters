@@ -3,9 +3,11 @@ package com.craftinginterpreters.lox;
 import java.util.List;
 
 public class LoxFunction implements LoxCallable{
-    private final Statement.Function function;
+    private final String name;
+    private final Expression.Function function;
     private final Environment closure;
-    LoxFunction(Statement.Function function, Environment closure){
+    LoxFunction(String name, Expression.Function function, Environment closure){
+        this.name = name;
         this.function = function;
         this.closure = closure;
     }
@@ -22,7 +24,7 @@ public class LoxFunction implements LoxCallable{
             environment.define(function.parameters.get(i).lexeme,arguments.get(i));
         }
         try{
-            interpreter.executeBlock(function.body, environment);
+            interpreter.executeBlock(function.block, environment);
         } catch (ReturnException returnException){
             return returnException.value;
         }
@@ -31,6 +33,7 @@ public class LoxFunction implements LoxCallable{
 
     @Override
     public String toString(){
-        return "<fn "+function.name.lexeme+" >";
+        if(name == null) return "<fn>";
+        return "<fn "+name+" >";
     }
 }

@@ -72,6 +72,17 @@ public class AstPrinter implements Expression.Visitor<String>, Statement.Visitor
         return stringBuilder.toString();
     }
 
+    @Override
+    public String visitFunctionExpr(Expression.Function function) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("<function expression>: "+ ", parameters: ");
+        for (int i=0; i<function.parameters.size(); i++){
+            sb.append(" " + function.parameters.get(i).lexeme + " ");
+        }
+        sb.append(function.block.accept(this));
+        return sb.toString();
+    }
+
     String parenthesize(String name, List<Expression> expressions){
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("(").append(name);
@@ -161,10 +172,7 @@ public class AstPrinter implements Expression.Visitor<String>, Statement.Visitor
     public String visitFunction(Statement.Function function) {
         StringBuilder sb = new StringBuilder();
         sb.append("<function declaration>: " + function.name.lexeme + ", parameters: ");
-        for (int i=0; i<function.parameters.size(); i++){
-            sb.append(" " + function.parameters.get(i).lexeme + " ");
-        }
-        sb.append(function.body.accept(this));
+        sb.append(function.function.accept(this));
         return sb.toString();
     }
 

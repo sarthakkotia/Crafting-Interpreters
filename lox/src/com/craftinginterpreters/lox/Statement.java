@@ -99,12 +99,11 @@ abstract class Statement {
     }
     static class Function extends Statement{
         final Token name;
-        final List<Token> parameters;
-        final Statement.Block body;
-        Function(Token name, List<Token> parameters, Statement.Block body){
+        final Expression.Function function;
+
+        public Function(Token name, Expression.Function function) {
             this.name = name;
-            this.parameters = parameters;
-            this.body = body;
+            this.function = function;
         }
 
         @Override
