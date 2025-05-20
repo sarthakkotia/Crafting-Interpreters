@@ -58,11 +58,8 @@ public class Resolver implements Statement.Visitor<Void>, Expression.Visitor<Voi
     }
     @Override
     public Void visitAssignmentExpression(Expression.Assignment assignment) {
-
-
-
-        scopes.peek().put(assignment.identifier.lexeme, true);
         resolve(assignment.expression);
+        resolveLocal(assignment, assignment.identifier);
         return null;
     }
 
