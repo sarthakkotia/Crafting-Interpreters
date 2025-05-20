@@ -5,12 +5,15 @@ import java.util.Map;
 import java.util.Stack;
 
 public class Resolver implements Statement.Visitor<Void>, Expression.Visitor<Void>{
+    final Interpreter interpreter;
     private Stack<Map<String, Boolean>> scopes = new Stack<>();
 
-    Resolver(){
+    public Resolver(Interpreter interpreter) {
+        this.interpreter = interpreter;
         Map<String, Boolean>map = new HashMap<>();
         scopes.push(map);
     }
+
 
     void beginSope(){
         scopes.push(new HashMap<String, Boolean>());
@@ -27,6 +30,14 @@ public class Resolver implements Statement.Visitor<Void>, Expression.Visitor<Voi
         if(scopes.isEmpty()) return;
         scopes.peek().put(name.lexeme, true);
     }
+    void resolveLocal(Expression expression, Token name){
+        for(int i=scopes.size()-1; i>=0; i--){
+            if(scopes.get(i).containsKey(name.lexeme)){
+                interpreter.resolve(expression, scopes.size()-i-1);
+                return;
+            }
+        }
+    }
     @Override
     public Void visitVariableDeclaration(Statement.VariableDeclaration variableDeclaration) {
         declare(variableDeclaration.name);
@@ -34,8 +45,17 @@ public class Resolver implements Statement.Visitor<Void>, Expression.Visitor<Voi
             resolve(variableDeclaration.initializer);
         }
         define(variableDeclaration.name);
+        return null;
     }
 
+    @Override
+    public Void visitVariable(Expression.Variable variable) {
+        if(!scopes.empty() && scopes.peek().get(variable.name.lexeme) == Boolean.FALSE){
+            Lox.error(variable.name, "Can't read local variable in its own initializer");
+        }
+        resolveLocal(variable, variable.name);
+        return null;
+    }
     @Override
     public Void visitAssignmentExpression(Expression.Assignment assignment) {
 
@@ -46,24 +66,6 @@ public class Resolver implements Statement.Visitor<Void>, Expression.Visitor<Voi
         return null;
     }
 
-    @Override
-    public Void visitVariable(Expression.Variable variable) {
-        Stack<Map<String, Boolean>>prev = (Stack<Map<String, Boolean>>) scopes.clone();
-        boolean found = false;
-        while(!scopes.empty()){
-            Map<String, Boolean>map = scopes.pop();
-            if(map.containsKey(variable.name.lexeme)){
-                found = true;
-                break;
-            }
-        }
-        if(found){
-            scopes = prev;
-        }else{
-            Lox.error(variable.name.line, "[Resolver Error]: not able to resolve:" + variable.name.lexeme);
-        }
-        return null;
-    }
 
     @Override
     public Void visitBlock(Statement.Block block) {
