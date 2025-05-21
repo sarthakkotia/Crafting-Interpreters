@@ -76,13 +76,26 @@ public class Resolver implements Statement.Visitor<Void>, Expression.Visitor<Voi
         return null;
     }
 
+    private void resolveFunction(Expression.Function function){
+        beginSope();
+        for(Token param: function.parameters){
+            declare(param);
+            define(param);
+        }
+        resolve(function.block);
+        endScope();
+    }
+    @Override
+    public Void visitFunction(Statement.Function function) {
+        declare(function.name);
+        define(function.name);
+        resolveFunction(function.function);
+        return null;
+    }
+
     @Override
     public Void visitFunctionExpr(Expression.Function function) {
-        scopes.push(new HashMap<>());
-        for(Token parameter: function.parameters){
-            scopes.peek().put(parameter.lexeme, true);
-        }
-        scopes.pop();
+        resolveFunction(function);
         return null;
     }
 
@@ -165,11 +178,7 @@ public class Resolver implements Statement.Visitor<Void>, Expression.Visitor<Voi
         return null;
     }
 
-    @Override
-    public Void visitFunction(Statement.Function function) {
-        resolve(function.function);
-        return null;
-    }
+
 
     @Override
     public Void visitReturn(Statement.Return returnStatement) {
