@@ -108,6 +108,51 @@ public class Resolver implements Statement.Visitor<Void>, Expression.Visitor<Voi
         return null;
     }
 
+    @Override
+    public Void visitExpressionStatement(Statement.ExpressionStatement expressionStatement) {
+        resolve(expressionStatement.expression);
+        return null;
+    }
+    @Override
+    public Void visitIf(Statement.If ifStatement) {
+        resolve(ifStatement.condition);
+        resolve(ifStatement.thenBranch);
+        if(ifStatement.elseBranch != null) resolve(ifStatement.elseBranch);
+        return null;
+    }
+
+    @Override
+    public Void visitPrintStatement(Statement.PrintStatement printStatement) {
+        resolve(printStatement.expression);
+        return null;
+    }
+
+    @Override
+    public Void visitReturn(Statement.Return returnStatement) {
+        if(returnStatement.value != null) resolve(returnStatement.value);
+        return null;
+    }
+    @Override
+    public Void visitWhile(Statement.While whileStatement) {
+        resolve(whileStatement.condition);
+        resolve(whileStatement.body);
+        return null;
+    }
+
+    @Override
+    public Void visitBinaryExpression(Expression.Binary expression) {
+        resolve(expression.left);
+        resolve(expression.right);
+        return null;
+    }
+    @Override
+    public Void visitCall(Expression.Call call) {
+        resolve(call.callee);
+        for(Expression arg: call.arguments){
+            resolve(arg);
+        }
+        return null;
+    }
 
     @Override
     public Void visitGroupingExpression(Expression.Grouping expression) {
@@ -133,56 +178,14 @@ public class Resolver implements Statement.Visitor<Void>, Expression.Visitor<Voi
         return null;
     }
 
-    @Override
-    public Void visitCall(Expression.Call call) {
-        resolve(call.callee);
-        return null;
-    }
 
-    @Override
-    public Void visitExpressionStatement(Statement.ExpressionStatement expressionStatement) {
-        resolve(expressionStatement.expression);
-        return null;
-    }
 
-    @Override
-    public Void visitPrintStatement(Statement.PrintStatement printStatement) {
-        resolve(printStatement.expression);
-        return null;
-    }
 
-    @Override
-    public Void visitBinaryExpression(Expression.Binary expression) {
-        resolve(expression.left);
-        resolve(expression.right);
-        return null;
-    }
 
-    @Override
-    public Void visitIf(Statement.If ifStatement) {
-        resolve(ifStatement.condition);
-        resolve(ifStatement.thenBranch);
-        if(ifStatement.elseBranch != null) resolve(ifStatement.elseBranch);
-        return null;
-    }
-
-    @Override
-    public Void visitWhile(Statement.While whileStatement) {
-        resolve(whileStatement.condition);
-        resolve(whileStatement.body);
-        return null;
-    }
 
     @Override
     public Void visitBreak(Statement.Break breakStatement) {
         return null;
     }
 
-
-
-    @Override
-    public Void visitReturn(Statement.Return returnStatement) {
-        resolve(returnStatement.value);
-        return null;
-    }
 }
