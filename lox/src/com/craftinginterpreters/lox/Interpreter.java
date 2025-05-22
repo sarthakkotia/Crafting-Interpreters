@@ -1,14 +1,16 @@
 package com.craftinginterpreters.lox;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Interpreter implements Expression.Visitor<Object>, Statement.Visitor<Void> {
     private static class BreakException extends RuntimeException{}
 //    private Environment environment = new Environment();
     final Environment globals = new Environment();
     private Environment environment = globals;
-
+    private Map<Expression, Integer> locals = new HashMap<>();
     Interpreter(){
         globals.define("clock", new LoxCallable() {
             @Override
@@ -300,5 +302,9 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
         Object answer = evaluate(assignment.expression);
         environment.assign(assignment.identifier,answer);
         return answer;
+    }
+
+    public void resolve(Expression expression, int depth){
+        locals.put(expression, depth);
     }
 }
