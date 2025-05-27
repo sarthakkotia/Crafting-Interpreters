@@ -132,6 +132,15 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
         return true;
     }
 
+    private Object lookUp(Token name, Expression expression){
+        Integer distance = locals.get(expression);
+        if(distance != null){
+            return environment.getAt(name, distance);
+        }else{
+            return globals.get(name);
+        }
+
+    }
     @Override
     public Object visitLiteralExpression(Expression.Literal expression) {
         return expression.value;
@@ -139,7 +148,8 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
 
     @Override
     public Object visitVariable(Expression.Variable expression) {
-        return environment.get(expression.name);
+//        return environment.get(expression.name);
+        return lookUp(expression.name, expression);
     }
 
     @Override
@@ -299,9 +309,13 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
 
     @Override
     public Object visitAssignmentExpression(Expression.Assignment assignment) {
-        Object answer = evaluate(assignment.expression);
-        environment.assign(assignment.identifier,answer);
-        return answer;
+        Object value = evaluate(assignment.expression);
+        Integer distance = locals.get(assignment);
+        if(distance != null){
+            environment.assignAt(distance, assignment.identifier, value);
+        }else{
+            globals.assign(assignment.identifier, value);
+        }
     }
 
     public void resolve(Expression expression, int depth){

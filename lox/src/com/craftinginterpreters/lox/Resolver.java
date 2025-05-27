@@ -99,11 +99,11 @@ public class Resolver implements Statement.Visitor<Void>, Expression.Visitor<Voi
         return null;
     }
 
-    private Void resolve(Expression expression){
+    Void resolve(Expression expression){
         expression.accept(this);
         return null;
     }
-    private Void resolve(Statement statement){
+    Void resolve(Statement statement){
         statement.accept(this);
         return null;
     }

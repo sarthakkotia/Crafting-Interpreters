@@ -77,6 +77,10 @@ public class Lox {
 //            System.out.println("statement"+"["+i+"]: "+astPrinter.print(statements.get(i)));
 //        }
 //        System.out.println(new AstPrinter().print(expression));
+        Resolver resolver = new Resolver(interpreter);
+        for(Statement statement: statements){
+            resolver.resolve(statement);
+        }
         interpreter.interpret(statements);
     }
     static void error(int line, String message){
