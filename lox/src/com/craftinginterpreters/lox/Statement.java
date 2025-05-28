@@ -91,7 +91,10 @@ abstract class Statement {
         }
     }
     static class Break extends Statement{
-
+        Token name;
+        public Break(Token name){
+            this.name = name;
+        }
         @Override
         <R> R accept(Visitor<R> visitor) {
             return visitor.visitBreak(this);

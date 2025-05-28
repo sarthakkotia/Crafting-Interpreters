@@ -66,7 +66,7 @@ public class Parser {
         if(match(TokenType.IF)) return ifStatement();
         if(match(TokenType.WHILE)) return whileStatement();
         if (match(TokenType.FOR)) return forStatement();
-        if(match(TokenType.BREAK)) return breakStatement();
+        if(match(TokenType.BREAK)) return breakStatement(previous());
         if(match(TokenType.RETURN)) return returnStatement();
         return expressionStatement();
     }
@@ -80,12 +80,12 @@ public class Parser {
         consume(TokenType.SEMICOLON, "Expected ';' after return statement");
         return new Statement.Return(keyword, value);
     }
-    private Statement breakStatement(){
+    private Statement breakStatement(Token name){
         if(loopDepth == 0){
             error(previous(), "break must be used inside a loop");
         }
         consume(TokenType.SEMICOLON, "Expect ';' after break");
-        return new Statement.Break();
+        return new Statement.Break(name);
     }
     private Statement forStatement(){
         consume(TokenType.LEFT_PAREN, "Expected '(' after for");

@@ -81,6 +81,7 @@ public class Lox {
         for(Statement statement: statements){
             resolver.resolve(statement);
         }
+        if(hadError) return;
         interpreter.interpret(statements);
     }
     static void error(int line, String message){

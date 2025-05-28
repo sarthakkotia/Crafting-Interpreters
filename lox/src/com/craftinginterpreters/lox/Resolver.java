@@ -5,8 +5,14 @@ import java.util.Map;
 import java.util.Stack;
 
 public class Resolver implements Statement.Visitor<Void>, Expression.Visitor<Void>{
+    enum FunctionType{
+        NONE,
+        FUNCTION
+    }
     final Interpreter interpreter;
     private Stack<Map<String, Boolean>> scopes = new Stack<>();
+    private FunctionType currentFunctionType = FunctionType.NONE;
+    private Boolean isInLoop = false;
 
     public Resolver(Interpreter interpreter) {
         this.interpreter = interpreter;
@@ -15,7 +21,7 @@ public class Resolver implements Statement.Visitor<Void>, Expression.Visitor<Voi
     }
 
 
-    void beginSope(){
+    void beginScope(){
         scopes.push(new HashMap<String, Boolean>());
     }
     void endScope(){
@@ -24,6 +30,9 @@ public class Resolver implements Statement.Visitor<Void>, Expression.Visitor<Voi
     void declare(Token name){
         if(scopes.isEmpty()) return;
         Map<String, Boolean>scope = scopes.peek();
+        if(scope.containsKey(name.lexeme)){
+            Lox.error(name, "A variable is already declared with the same name in the local scope");
+        }
         scope.put(name.lexeme, false);
     }
     void define(Token name){
@@ -66,7 +75,7 @@ public class Resolver implements Statement.Visitor<Void>, Expression.Visitor<Voi
 
     @Override
     public Void visitBlock(Statement.Block block) {
-        beginSope();
+        beginScope();
 //        scopes.push(new HashMap<>());
         for(Statement statement: block.statements){
             resolve(statement);
@@ -76,26 +85,29 @@ public class Resolver implements Statement.Visitor<Void>, Expression.Visitor<Voi
         return null;
     }
 
-    private void resolveFunction(Expression.Function function){
-        beginSope();
+    private void resolveFunction(Expression.Function function, FunctionType type){
+        FunctionType enclosingFunctionType = currentFunctionType;
+        currentFunctionType = type;
+        beginScope();
         for(Token param: function.parameters){
             declare(param);
             define(param);
         }
         resolve(function.block);
         endScope();
+        currentFunctionType = enclosingFunctionType;
     }
     @Override
     public Void visitFunction(Statement.Function function) {
         declare(function.name);
         define(function.name);
-        resolveFunction(function.function);
+        resolveFunction(function.function, FunctionType.FUNCTION);
         return null;
     }
 
     @Override
     public Void visitFunctionExpr(Expression.Function function) {
-        resolveFunction(function);
+        resolveFunction(function, FunctionType.FUNCTION);
         return null;
     }
 
@@ -129,13 +141,19 @@ public class Resolver implements Statement.Visitor<Void>, Expression.Visitor<Voi
 
     @Override
     public Void visitReturn(Statement.Return returnStatement) {
+        if(currentFunctionType == FunctionType.NONE){
+            Lox.error(returnStatement.keyword, "cannot return from the top level code");
+        }
         if(returnStatement.value != null) resolve(returnStatement.value);
         return null;
     }
     @Override
     public Void visitWhile(Statement.While whileStatement) {
+        Boolean enclosingLoop = isInLoop;
         resolve(whileStatement.condition);
+        isInLoop = true;
         resolve(whileStatement.body);
+        isInLoop = enclosingLoop;
         return null;
     }
 
@@ -178,13 +196,9 @@ public class Resolver implements Statement.Visitor<Void>, Expression.Visitor<Voi
         return null;
     }
 
-
-
-
-
-
     @Override
     public Void visitBreak(Statement.Break breakStatement) {
+        if(!isInLoop) Lox.error(breakStatement.name, "break could not be used outside of loops");
         return null;
     }
 
