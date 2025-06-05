@@ -13,6 +13,7 @@ public class Resolver implements Statement.Visitor<Void>, Expression.Visitor<Voi
     private Stack<Map<String, Boolean>> scopes = new Stack<>();
     private FunctionType currentFunctionType = FunctionType.NONE;
     private Boolean isInLoop = false;
+    private Map<String, Boolean> used = new HashMap<>();
 
     public Resolver(Interpreter interpreter) {
         this.interpreter = interpreter;
@@ -52,6 +53,7 @@ public class Resolver implements Statement.Visitor<Void>, Expression.Visitor<Voi
             resolve(variableDeclaration.initializer);
         }
         define(variableDeclaration.name);
+        used.put(variableDeclaration.name.lexeme, false);
         return null;
     }
 
@@ -61,6 +63,7 @@ public class Resolver implements Statement.Visitor<Void>, Expression.Visitor<Voi
             Lox.error(variable.name, "[Resolver Error]: Can't read local variable in its own initializer");
         }
         resolveLocal(variable, variable.name);
+        used.put(variable.name.lexeme, true);
         return null;
     }
     @Override
@@ -115,6 +118,16 @@ public class Resolver implements Statement.Visitor<Void>, Expression.Visitor<Voi
     }
     Void resolve(Statement statement){
         statement.accept(this);
+        return null;
+    }
+    Void checkUnusedVariables(){
+        final String ANSI_RESET = "\u001B[0m";
+        final String ANSI_YELLOW = "\u001B[33m";
+        for(String name: used.keySet()){
+            if(!used.get(name)){
+                System.out.println(ANSI_YELLOW + "[Warning]: Unused Variable: "+ name + " in the program" + ANSI_RESET);
+            }
+        }
         return null;
     }
 

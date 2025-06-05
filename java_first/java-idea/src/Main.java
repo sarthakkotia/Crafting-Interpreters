@@ -6,5 +6,6 @@ import java.io.IOException;
 public class Main {
     public static void main(String[] args) {
         System.out.println(1);
+        var a = 34;
     }
 }

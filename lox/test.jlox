@@ -1,0 +1,7 @@
+var a = 2;
+var b = "test";
+print b;
+{
+    var a = "hi";
+    print a;
+}

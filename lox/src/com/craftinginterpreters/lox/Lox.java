@@ -81,6 +81,7 @@ public class Lox {
         for(Statement statement: statements){
             resolver.resolve(statement);
         }
+        resolver.checkUnusedVariables();
         if(hadError) return;
         interpreter.interpret(statements);
     }
