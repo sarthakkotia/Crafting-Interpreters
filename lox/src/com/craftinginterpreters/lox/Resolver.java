@@ -16,8 +16,6 @@ public class Resolver implements Statement.Visitor<Void>, Expression.Visitor<Voi
 
     public Resolver(Interpreter interpreter) {
         this.interpreter = interpreter;
-        Map<String, Boolean>map = new HashMap<>();
-        scopes.push(map);
     }
 
 
@@ -31,7 +29,7 @@ public class Resolver implements Statement.Visitor<Void>, Expression.Visitor<Voi
         if(scopes.isEmpty()) return;
         Map<String, Boolean>scope = scopes.peek();
         if(scope.containsKey(name.lexeme)){
-            Lox.error(name, "A variable is already declared with the same name in the local scope");
+            Lox.error(name, "[Resolver Error]: A variable is already declared with the same name in the local scope");
         }
         scope.put(name.lexeme, false);
     }
@@ -60,7 +58,7 @@ public class Resolver implements Statement.Visitor<Void>, Expression.Visitor<Voi
     @Override
     public Void visitVariable(Expression.Variable variable) {
         if(!scopes.empty() && scopes.peek().get(variable.name.lexeme) == Boolean.FALSE){
-            Lox.error(variable.name, "Can't read local variable in its own initializer");
+            Lox.error(variable.name, "[Resolver Error]: Can't read local variable in its own initializer");
         }
         resolveLocal(variable, variable.name);
         return null;
@@ -142,7 +140,7 @@ public class Resolver implements Statement.Visitor<Void>, Expression.Visitor<Voi
     @Override
     public Void visitReturn(Statement.Return returnStatement) {
         if(currentFunctionType == FunctionType.NONE){
-            Lox.error(returnStatement.keyword, "cannot return from the top level code");
+            Lox.error(returnStatement.keyword, "[Resolver Error]: cannot return from the top level code");
         }
         if(returnStatement.value != null) resolve(returnStatement.value);
         return null;
@@ -198,7 +196,7 @@ public class Resolver implements Statement.Visitor<Void>, Expression.Visitor<Voi
 
     @Override
     public Void visitBreak(Statement.Break breakStatement) {
-        if(!isInLoop) Lox.error(breakStatement.name, "break could not be used outside of loops");
+        if(!isInLoop) Lox.error(breakStatement.name, "[Resolver Error]: break could not be used outside of loops");
         return null;
     }
 

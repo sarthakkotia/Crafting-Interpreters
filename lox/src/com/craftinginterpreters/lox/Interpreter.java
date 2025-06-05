@@ -316,6 +316,7 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
         }else{
             globals.assign(assignment.identifier, value);
         }
+        return value;
     }
 
     public void resolve(Expression expression, int depth){
