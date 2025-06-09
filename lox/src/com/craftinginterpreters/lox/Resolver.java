@@ -14,6 +14,7 @@ public class Resolver implements Statement.Visitor<Void>, Expression.Visitor<Voi
     private FunctionType currentFunctionType = FunctionType.NONE;
     private Boolean isInLoop = false;
     private Map<String, Boolean> used = new HashMap<>();
+    private SymbolTable symbolTable = new SymbolTable();
 
     public Resolver(Interpreter interpreter) {
         this.interpreter = interpreter;
@@ -22,9 +23,18 @@ public class Resolver implements Statement.Visitor<Void>, Expression.Visitor<Voi
 
     void beginScope(){
         scopes.push(new HashMap<String, Boolean>());
+        symbolTable = new SymbolTable(symbolTable);
     }
     void endScope(){
         scopes.pop();
+        // for all the values in the symbol table check if used or not
+        for(String key: symbolTable.map.keySet()){
+            SymbolTable.Pair p = symbolTable.map.get(key);
+            if(!p.value){
+                Lox.warning("Unused Variable: "+ key + " in the program", p.token);
+            }
+        }
+        symbolTable = symbolTable.parent;
     }
     void declare(Token name){
         if(scopes.isEmpty()) return;
@@ -53,7 +63,8 @@ public class Resolver implements Statement.Visitor<Void>, Expression.Visitor<Voi
             resolve(variableDeclaration.initializer);
         }
         define(variableDeclaration.name);
-        used.put(variableDeclaration.name.lexeme, false);
+//        used.put(variableDeclaration.name.lexeme, false);
+        symbolTable.put(variableDeclaration.name);
         return null;
     }
 
@@ -63,7 +74,8 @@ public class Resolver implements Statement.Visitor<Void>, Expression.Visitor<Voi
             Lox.error(variable.name, "[Resolver Error]: Can't read local variable in its own initializer");
         }
         resolveLocal(variable, variable.name);
-        used.put(variable.name.lexeme, true);
+//        used.put(variable.name.lexeme, true);
+        symbolTable.update(variable.name);
         return null;
     }
     @Override
@@ -121,11 +133,10 @@ public class Resolver implements Statement.Visitor<Void>, Expression.Visitor<Voi
         return null;
     }
     Void checkUnusedVariables(){
-        final String ANSI_RESET = "\u001B[0m";
-        final String ANSI_YELLOW = "\u001B[33m";
-        for(String name: used.keySet()){
-            if(!used.get(name)){
-                System.out.println(ANSI_YELLOW + "[Warning]: Unused Variable: "+ name + " in the program" + ANSI_RESET);
+        for(String name: symbolTable.map.keySet()){
+            SymbolTable.Pair p = symbolTable.map.get(name);
+            if(!p.value){
+                Lox.warning("Unused Variable: "+ name + " in the program", p.token);
             }
         }
         return null;

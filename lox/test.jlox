@@ -3,5 +3,6 @@ var b = "test";
 print b;
 {
     var a = "hi";
+    var b = "test2";
     print a;
 }
