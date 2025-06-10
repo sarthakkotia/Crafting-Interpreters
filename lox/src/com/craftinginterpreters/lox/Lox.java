@@ -81,7 +81,7 @@ public class Lox {
         for(Statement statement: statements){
             resolver.resolve(statement);
         }
-        resolver.checkUnusedVariables();
+//        resolver.checkUnusedVariables();
         if(hadError) return;
         interpreter.interpret(statements);
     }
@@ -108,7 +108,7 @@ public class Lox {
         System.err.println(error.getMessage() + "\n[line "+ error.token.line + "]");
         hadRuntimeError = true;
     }
-    static void warning(String message, Token token){
+    static void warning(Token token, String message){
         final String ANSI_RESET = "\u001B[0m";
         final String ANSI_YELLOW = "\u001B[33m";
         System.out.println(ANSI_YELLOW + " [line "+ token.line + "] "+"[Warning]: " + message +  ANSI_RESET);

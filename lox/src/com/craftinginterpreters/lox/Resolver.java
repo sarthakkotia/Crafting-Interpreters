@@ -5,16 +5,27 @@ import java.util.Map;
 import java.util.Stack;
 
 public class Resolver implements Statement.Visitor<Void>, Expression.Visitor<Void>{
+    private static class Variable{
+        final Token name;
+        VariableState state;
+        private Variable(Token name, VariableState variableState){
+            this.state = variableState;
+            this.name = name;
+        }
+    }
+    private enum VariableState{
+        DECLARED,
+        DEFINED,
+        READ
+    }
     enum FunctionType{
         NONE,
         FUNCTION
     }
     final Interpreter interpreter;
-    private Stack<Map<String, Boolean>> scopes = new Stack<>();
+    private Stack<Map<String, Variable>> scopes = new Stack<>();
     private FunctionType currentFunctionType = FunctionType.NONE;
     private Boolean isInLoop = false;
-    private Map<String, Boolean> used = new HashMap<>();
-    private SymbolTable symbolTable = new SymbolTable();
 
     public Resolver(Interpreter interpreter) {
         this.interpreter = interpreter;
@@ -22,36 +33,35 @@ public class Resolver implements Statement.Visitor<Void>, Expression.Visitor<Voi
 
 
     void beginScope(){
-        scopes.push(new HashMap<String, Boolean>());
-        symbolTable = new SymbolTable(symbolTable);
+        scopes.push(new HashMap<String, Variable>());
     }
     void endScope(){
-        scopes.pop();
-        // for all the values in the symbol table check if used or not
-        for(String key: symbolTable.map.keySet()){
-            SymbolTable.Pair p = symbolTable.map.get(key);
-            if(!p.value){
-                Lox.warning("Unused Variable: "+ key + " in the program", p.token);
+        Map<String, Variable> map = scopes.pop();
+        for (Map.Entry<String, Variable> entry : map.entrySet()) {
+            if (entry.getValue().state == VariableState.DEFINED) {
+                Lox.warning(entry.getValue().name, "Local variable " + entry.getKey() + " is not used.");
             }
         }
-        symbolTable = symbolTable.parent;
     }
     void declare(Token name){
         if(scopes.isEmpty()) return;
-        Map<String, Boolean>scope = scopes.peek();
+        Map<String, Variable>scope = scopes.peek();
         if(scope.containsKey(name.lexeme)){
             Lox.error(name, "[Resolver Error]: A variable is already declared with the same name in the local scope");
         }
-        scope.put(name.lexeme, false);
+        scope.put(name.lexeme, new Variable(name, VariableState.DECLARED));
     }
     void define(Token name){
         if(scopes.isEmpty()) return;
-        scopes.peek().put(name.lexeme, true);
+        scopes.peek().get(name.lexeme).state = VariableState.DEFINED;
     }
-    void resolveLocal(Expression expression, Token name){
+    void resolveLocal(Expression expression, Token name, boolean isRead){
         for(int i=scopes.size()-1; i>=0; i--){
             if(scopes.get(i).containsKey(name.lexeme)){
                 interpreter.resolve(expression, scopes.size()-i-1);
+                if(isRead){
+                    scopes.get(i).get(name.lexeme).state = VariableState.READ;
+                }
                 return;
             }
         }
@@ -64,24 +74,24 @@ public class Resolver implements Statement.Visitor<Void>, Expression.Visitor<Voi
         }
         define(variableDeclaration.name);
 //        used.put(variableDeclaration.name.lexeme, false);
-        symbolTable.put(variableDeclaration.name);
+//        symbolTable.put(variableDeclaration.name);
         return null;
     }
 
     @Override
     public Void visitVariable(Expression.Variable variable) {
-        if(!scopes.empty() && scopes.peek().get(variable.name.lexeme) == Boolean.FALSE){
+        if(!scopes.empty() && scopes.peek().get(variable.name.lexeme).state == VariableState.DECLARED){
             Lox.error(variable.name, "[Resolver Error]: Can't read local variable in its own initializer");
         }
-        resolveLocal(variable, variable.name);
+        resolveLocal(variable, variable.name, true);
 //        used.put(variable.name.lexeme, true);
-        symbolTable.update(variable.name);
+//        symbolTable.update(variable.name);
         return null;
     }
     @Override
     public Void visitAssignmentExpression(Expression.Assignment assignment) {
         resolve(assignment.expression);
-        resolveLocal(assignment, assignment.identifier);
+        resolveLocal(assignment, assignment.identifier, false);
         return null;
     }
 
@@ -132,15 +142,15 @@ public class Resolver implements Statement.Visitor<Void>, Expression.Visitor<Voi
         statement.accept(this);
         return null;
     }
-    Void checkUnusedVariables(){
-        for(String name: symbolTable.map.keySet()){
-            SymbolTable.Pair p = symbolTable.map.get(name);
-            if(!p.value){
-                Lox.warning("Unused Variable: "+ name + " in the program", p.token);
-            }
-        }
-        return null;
-    }
+//    Void checkUnusedVariables(){
+//        for(String name: symbolTable.map.keySet()){
+//            SymbolTable.Pair p = symbolTable.map.get(name);
+//            if(!p.value){
+//                Lox.warning("Unused Variable: "+ name + " in the program", p.token);
+//            }
+//        }
+//        return null;
+//    }
 
     @Override
     public Void visitExpressionStatement(Statement.ExpressionStatement expressionStatement) {
