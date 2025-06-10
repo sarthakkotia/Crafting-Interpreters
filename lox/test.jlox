@@ -1,8 +1,7 @@
-var a = 2;
-var b = "test";
-print b;
-{
-    var a = "hi";
-    var b = "test2";
-    print a;
+class DevonshireCream {
+  serveOn() {
+    return "Scones";
+  }
 }
+
+print DevonshireCream; // Prints "DevonshireCream".

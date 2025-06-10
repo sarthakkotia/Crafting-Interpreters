@@ -179,6 +179,14 @@ public class Resolver implements Statement.Visitor<Void>, Expression.Visitor<Voi
         if(returnStatement.value != null) resolve(returnStatement.value);
         return null;
     }
+
+    @Override
+    public Void visitLoxClass(Statement.LoxClass loxClass) {
+        declare(loxClass.name);
+        define(loxClass.name);
+        return null;
+    }
+
     @Override
     public Void visitWhile(Statement.While whileStatement) {
         Boolean enclosingLoop = isInLoop;

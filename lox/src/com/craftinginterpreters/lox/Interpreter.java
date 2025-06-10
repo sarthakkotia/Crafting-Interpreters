@@ -294,6 +294,14 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
         throw new ReturnException(value);
     }
 
+    @Override
+    public Void visitLoxClass(Statement.LoxClass loxClass) {
+        environment.define(loxClass.name.lexeme, null);
+        LoxClass loxclass = new LoxClass(loxClass.name.lexeme);
+        environment.assign(loxClass.name, loxclass);
+        return null;
+    }
+
     public void executeBlock(Statement.Block block, Environment environment){
         Environment previous = this.environment;
         try{

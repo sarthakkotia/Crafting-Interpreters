@@ -182,4 +182,14 @@ public class AstPrinter implements Expression.Visitor<String>, Statement.Visitor
         expressions.add(returnStatement.value);
         return parenthesize("return", expressions);
     }
+
+    @Override
+    public String visitLoxClass(Statement.LoxClass loxClass) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("class: " + loxClass.name.lexeme + ": ");
+        for(Statement.Function method: loxClass.methods){
+            sb.append(method.accept(this));
+        }
+        return sb.toString();
+    }
 }

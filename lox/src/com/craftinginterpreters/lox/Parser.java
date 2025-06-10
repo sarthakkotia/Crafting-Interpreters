@@ -21,6 +21,7 @@ public class Parser {
     }
     private Statement declaration(){
         try{
+            if(match(TokenType.CLASS)) return classDeclaration();
             if (check(TokenType.FUN) && checkNext(TokenType.IDENTIFIER)) {
                 consume(TokenType.FUN, null);
                 return function("function");
@@ -31,6 +32,18 @@ public class Parser {
             synchronize();
             return null;
         }
+    }
+    private Statement classDeclaration(){
+        Token name = consume(TokenType.IDENTIFIER, "Expect class name");
+        consume(TokenType.LEFT_BRACE, "Expected '{' before class body");
+
+        List<Statement.Function> methods = new ArrayList<>();
+        while(!check(TokenType.RIGHT_BRACE) && !isAtEnd()){
+            methods.add((Statement.Function)function("method"));
+        }
+
+        consume(TokenType.RIGHT_BRACE, "Expected '}' after class");
+        return new Statement.LoxClass(name, methods);
     }
     private Statement function(String kind){
         Token name = consume(TokenType.IDENTIFIER, "Expected " + kind + "name. ");

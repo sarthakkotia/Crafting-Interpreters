@@ -13,6 +13,7 @@ abstract class Statement {
         R visitBreak(Break breakStatement);
         R visitFunction(Function function);
         R visitReturn(Return returnStatement);
+        R visitLoxClass(LoxClass loxClass);
     }
     abstract <R> R accept(Visitor<R> visitor);
     static class ExpressionStatement extends Statement{
@@ -122,5 +123,18 @@ abstract class Statement {
 
         @Override
         <R> R accept(Visitor<R> visitor){ return visitor.visitReturn(this); }
+    }
+    static class LoxClass extends Statement{
+        final Token name;
+        final List<Statement.Function> methods;
+        LoxClass(Token name, List<Statement.Function> methods){
+            this.methods = methods;
+            this.name = name;
+        }
+
+        @Override
+        <R> R accept(Visitor<R> visitor){
+            return visitor.visitLoxClass(this);
+        }
     }
 }
