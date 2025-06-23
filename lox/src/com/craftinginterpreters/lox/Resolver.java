@@ -134,6 +134,12 @@ public class Resolver implements Statement.Visitor<Void>, Expression.Visitor<Voi
         return null;
     }
 
+    @Override
+    public Void visitGetExpression(Expression.Get get) {
+        resolve(get.object);
+        return null;
+    }
+
     Void resolve(Expression expression){
         expression.accept(this);
         return null;

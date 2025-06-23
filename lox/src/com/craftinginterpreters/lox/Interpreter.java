@@ -188,6 +188,15 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
         return new LoxFunction(null, function, environment);
     }
 
+    @Override
+    public Object visitGetExpression(Expression.Get get) {
+        Object object = evaluate(get.object);
+        if(object instanceof LoxInstance){
+            return ((LoxInstance)object).get(get.name);
+        }
+        throw new RuntimeError(get.name, "Only instances have propertis");
+    }
+
     public Object evaluate(Expression expression){
         return expression.accept(this);
     }
