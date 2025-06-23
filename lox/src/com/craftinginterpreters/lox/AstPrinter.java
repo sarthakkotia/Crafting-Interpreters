@@ -88,6 +88,11 @@ public class AstPrinter implements Expression.Visitor<String>, Statement.Visitor
         return get.object.accept(this) + " <get> " + get.name.lexeme;
     }
 
+    @Override
+    public String visitSetExpression(Expression.Set set) {
+        return set.object.accept(this) + "<set> " + set.name.lexeme + ": value: " + set.value.accept(this);
+    }
+
     String parenthesize(String name, List<Expression> expressions){
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("(").append(name);

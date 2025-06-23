@@ -140,6 +140,13 @@ public class Resolver implements Statement.Visitor<Void>, Expression.Visitor<Voi
         return null;
     }
 
+    @Override
+    public Void visitSetExpression(Expression.Set set) {
+        resolve(set.object);
+        resolve(set.value);
+        return null;
+    }
+
     Void resolve(Expression expression){
         expression.accept(this);
         return null;

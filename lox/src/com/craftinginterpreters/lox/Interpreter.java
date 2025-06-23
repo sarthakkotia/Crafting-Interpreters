@@ -194,7 +194,18 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
         if(object instanceof LoxInstance){
             return ((LoxInstance)object).get(get.name);
         }
-        throw new RuntimeError(get.name, "Only instances have propertis");
+        throw new RuntimeError(get.name, "Only instances have properties");
+    }
+
+    @Override
+    public Object visitSetExpression(Expression.Set set) {
+        Object object = evaluate(set.object);
+        if(object instanceof LoxInstance){
+            Object value = evaluate(set.value);
+            ((LoxInstance)object).set(set.name,value);
+            return value;
+        }
+        throw new RuntimeError(set.name, "Only instances have fields");
     }
 
     public Object evaluate(Expression expression){

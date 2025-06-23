@@ -15,6 +15,7 @@ abstract class Expression {
         R visitCall(Call call);
         R visitFunctionExpr(Function function);
         R visitGetExpression(Get get);
+        R visitSetExpression(Set set);
     }
     // this abstract method will be implemented by each child class to call the
     abstract <R> R accept(Visitor<R> visitor);
@@ -141,5 +142,19 @@ abstract class Expression {
 
          @Override
         <R> R accept(Visitor<R> visitor) { return visitor.visitGetExpression(this); }
+    }
+    static class Set extends Expression{
+        final Expression object;
+        final Token name;
+        final Expression value;
+
+        public Set(Expression object, Token name, Expression value){
+            this.name = name;
+            this.object = object;
+            this.value = value;
+        }
+
+        @Override
+        <R> R accept(Visitor<R> visitor) { return visitor.visitSetExpression(this); }
     }
 }
