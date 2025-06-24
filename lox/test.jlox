@@ -7,3 +7,5 @@ class A {
 //print DevonshireCream;
 var a = (A());
 print a;
+a.set = 0;
+print a.set;

@@ -225,7 +225,7 @@ public class Parser {
                 Token identifier = ((Expression.Variable)expression).name;
                 return new Expression.Assignment(identifier, value);
             }else if(expression instanceof Expression.Get){
-                return new Expression.Set(expression, ((Expression.Get) expression).name, value);
+                return new Expression.Set(((Expression.Get) expression).object, ((Expression.Get) expression).name, value);
             }
             error(equals, "Invalid assignment target");
         }
