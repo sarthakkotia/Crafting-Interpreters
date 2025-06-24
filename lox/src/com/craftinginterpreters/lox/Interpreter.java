@@ -317,7 +317,12 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
     @Override
     public Void visitLoxClass(Statement.LoxClass loxClass) {
         environment.define(loxClass.name.lexeme, null);
-        LoxClass loxclass = new LoxClass(loxClass.name.lexeme);
+        Map<String, LoxFunction> methods = new HashMap<>();
+        for(Statement.Function method: loxClass.methods){
+            LoxFunction loxFunction = new LoxFunction(method.name.lexeme, method.function, environment);
+            methods.put(method.name.lexeme, loxFunction);
+        }
+        LoxClass loxclass = new LoxClass(loxClass.name.lexeme, methods);
         environment.assign(loxClass.name, loxclass);
         return null;
     }

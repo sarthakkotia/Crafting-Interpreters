@@ -20,7 +20,8 @@ public class Resolver implements Statement.Visitor<Void>, Expression.Visitor<Voi
     }
     enum FunctionType{
         NONE,
-        FUNCTION
+        FUNCTION,
+        METHOD
     }
     final Interpreter interpreter;
     private Stack<Map<String, Variable>> scopes = new Stack<>();
@@ -120,6 +121,11 @@ public class Resolver implements Statement.Visitor<Void>, Expression.Visitor<Voi
         endScope();
         currentFunctionType = enclosingFunctionType;
     }
+    private void resolveMethod(Statement.Function function){
+        declare(function.name);
+        define(function.name);
+        resolveFunction(function.function, FunctionType.METHOD);
+    }
     @Override
     public Void visitFunction(Statement.Function function) {
         declare(function.name);
@@ -197,6 +203,9 @@ public class Resolver implements Statement.Visitor<Void>, Expression.Visitor<Voi
     public Void visitLoxClass(Statement.LoxClass loxClass) {
         declare(loxClass.name);
         define(loxClass.name);
+        for(Statement.Function method: loxClass.methods){
+            resolveMethod(method);
+        }
         return null;
     }
 
