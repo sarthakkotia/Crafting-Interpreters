@@ -1,12 +1,6 @@
-class A {
-  serveOn() {
-    return "Scones";
-  }
+class Bacon{
+    eat(){
+        print "Crunch crunch";
+    }
 }
-fun run(){
-    print "run away";
-}
-//print DevonshireCream;
-var a = (A());
-a.method = run;
-print a.serveOn();
+Bacon().eat();
