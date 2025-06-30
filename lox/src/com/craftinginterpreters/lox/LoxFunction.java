@@ -30,6 +30,11 @@ public class LoxFunction implements LoxCallable{
         }
         return null;
     }
+    LoxFunction bind(LoxInstance loxInstance, Token name){
+        Environment environment = new Environment(closure);
+        environment.define("this", loxInstance);
+        return new LoxFunction(name.lexeme, function, environment);
+    }
 
     @Override
     public String toString(){

@@ -208,6 +208,11 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
         throw new RuntimeError(set.name, "Only instances have fields");
     }
 
+    @Override
+    public Object visitThisExpression(Expression.This thisExpression) {
+        return lookUp(thisExpression.name, thisExpression);
+    }
+
     public Object evaluate(Expression expression){
         return expression.accept(this);
     }

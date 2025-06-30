@@ -367,6 +367,7 @@ public class Parser {
             return new Expression.Variable(previous());
         }
         if (match(TokenType.FUN)) return functionBody("function");
+        if (match(TokenType.THIS)) return new Expression.This(previous());
         throw error(peek(), "Expect expression");
     }
     private boolean checkNext(TokenType tokenType) {

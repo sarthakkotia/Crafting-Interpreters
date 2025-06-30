@@ -117,7 +117,9 @@ public class Resolver implements Statement.Visitor<Void>, Expression.Visitor<Voi
             declare(param);
             define(param);
         }
-        resolve(function.block);
+        for(Statement statement: function.block.statements){
+            resolve(statement);
+        }
         endScope();
         currentFunctionType = enclosingFunctionType;
     }
@@ -150,6 +152,12 @@ public class Resolver implements Statement.Visitor<Void>, Expression.Visitor<Voi
     public Void visitSetExpression(Expression.Set set) {
         resolve(set.object);
         resolve(set.value);
+        return null;
+    }
+
+    @Override
+    public Void visitThisExpression(Expression.This thisExpression) {
+        resolveLocal(thisExpression, thisExpression.name, false);
         return null;
     }
 
@@ -203,9 +211,12 @@ public class Resolver implements Statement.Visitor<Void>, Expression.Visitor<Voi
     public Void visitLoxClass(Statement.LoxClass loxClass) {
         declare(loxClass.name);
         define(loxClass.name);
+        beginScope();
+        scopes.peek().put("this", new Variable(loxClass.name, VariableState.READ));
         for(Statement.Function method: loxClass.methods){
             resolveMethod(method);
         }
+        endScope();
         return null;
     }
 
