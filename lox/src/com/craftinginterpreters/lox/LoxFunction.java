@@ -30,10 +30,10 @@ public class LoxFunction implements LoxCallable{
         }
         return null;
     }
-    LoxFunction bind(LoxInstance loxInstance, Token name){
+    LoxFunction bind(LoxInstance loxInstance, String name){
         Environment environment = new Environment(closure);
         environment.define("this", loxInstance);
-        return new LoxFunction(name.lexeme, function, environment);
+        return new LoxFunction(name, function, environment);
     }
 
     @Override
