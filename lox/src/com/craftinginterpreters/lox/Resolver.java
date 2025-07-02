@@ -18,15 +18,20 @@ public class Resolver implements Statement.Visitor<Void>, Expression.Visitor<Voi
         DEFINED,
         READ
     }
-    enum FunctionType{
+    private enum FunctionType{
         NONE,
         FUNCTION,
         METHOD
+    }
+    private enum ClassType{
+        NONE,
+        CLASS
     }
     final Interpreter interpreter;
     private Stack<Map<String, Variable>> scopes = new Stack<>();
     private FunctionType currentFunctionType = FunctionType.NONE;
     private Boolean isInLoop = false;
+    private ClassType currentClassType = ClassType.NONE;
 
     public Resolver(Interpreter interpreter) {
         this.interpreter = interpreter;
@@ -157,6 +162,10 @@ public class Resolver implements Statement.Visitor<Void>, Expression.Visitor<Voi
 
     @Override
     public Void visitThisExpression(Expression.This thisExpression) {
+        if(currentClassType == ClassType.NONE){
+            Lox.error(thisExpression.name, "[Resolver Error]: Can't use 'this' outside of class");
+            return null;
+        }
         resolveLocal(thisExpression, thisExpression.name, false);
         return null;
     }
@@ -209,6 +218,8 @@ public class Resolver implements Statement.Visitor<Void>, Expression.Visitor<Voi
 
     @Override
     public Void visitLoxClass(Statement.LoxClass loxClass) {
+        ClassType enclosingClassType = currentClassType;
+        currentClassType = ClassType.CLASS;
         declare(loxClass.name);
         define(loxClass.name);
         beginScope();
@@ -217,6 +228,7 @@ public class Resolver implements Statement.Visitor<Void>, Expression.Visitor<Voi
             resolveMethod(method);
         }
         endScope();
+        currentClassType = enclosingClassType;
         return null;
     }
 
