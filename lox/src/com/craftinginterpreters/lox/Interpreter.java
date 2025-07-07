@@ -135,7 +135,7 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
     private Object lookUp(Token name, Expression expression){
         Integer distance = locals.get(expression);
         if(distance != null){
-            return environment.getAt(name, distance);
+            return environment.getAt(name.lexeme, distance);
         }else{
             return globals.get(name);
         }
@@ -185,7 +185,7 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
 
     @Override
     public Object visitFunctionExpr(Expression.Function function) {
-        return new LoxFunction(null, function, environment);
+        return new LoxFunction(null, function, environment, false);
     }
 
     @Override
@@ -308,7 +308,7 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
     @Override
     public Void visitFunction(Statement.Function function) {
         String fnName = function.name.lexeme;
-        environment.define(fnName, new LoxFunction(fnName, function.function, environment));
+        environment.define(fnName, new LoxFunction(fnName, function.function, environment, false));
         return null;
     }
 
@@ -324,7 +324,7 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
         environment.define(loxClass.name.lexeme, null);
         Map<String, LoxFunction> methods = new HashMap<>();
         for(Statement.Function method: loxClass.methods){
-            LoxFunction loxFunction = new LoxFunction(method.name.lexeme, method.function, environment);
+            LoxFunction loxFunction = new LoxFunction(method.name.lexeme, method.function, environment, method.name.lexeme.equals("init"));
             methods.put(method.name.lexeme, loxFunction);
         }
         LoxClass loxclass = new LoxClass(loxClass.name.lexeme, methods);
