@@ -28,6 +28,7 @@ public class LoxFunction implements LoxCallable{
         try{
             interpreter.executeBlock(function.block, environment);
         } catch (ReturnException returnException){
+            if(this.isInitializer) return closure.getAt("this", 0);
             return returnException.value;
         }
         if(this.isInitializer) return closure.getAt("this", 0);

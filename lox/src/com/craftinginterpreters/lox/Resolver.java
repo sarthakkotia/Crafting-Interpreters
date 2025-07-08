@@ -21,7 +21,8 @@ public class Resolver implements Statement.Visitor<Void>, Expression.Visitor<Voi
     private enum FunctionType{
         NONE,
         FUNCTION,
-        METHOD
+        METHOD,
+        INITIALIZER
     }
     private enum ClassType{
         NONE,
@@ -131,7 +132,8 @@ public class Resolver implements Statement.Visitor<Void>, Expression.Visitor<Voi
     private void resolveMethod(Statement.Function function){
         declare(function.name);
         define(function.name);
-        resolveFunction(function.function, FunctionType.METHOD);
+        if(function.name.lexeme.equals("init")) resolveFunction(function.function, FunctionType.INITIALIZER);
+        else resolveFunction(function.function, FunctionType.METHOD);
     }
     @Override
     public Void visitFunction(Statement.Function function) {
@@ -212,7 +214,12 @@ public class Resolver implements Statement.Visitor<Void>, Expression.Visitor<Voi
         if(currentFunctionType == FunctionType.NONE){
             Lox.error(returnStatement.keyword, "[Resolver Error]: cannot return from the top level code");
         }
-        if(returnStatement.value != null) resolve(returnStatement.value);
+        if(returnStatement.value != null){
+            if(currentFunctionType == FunctionType.INITIALIZER){
+                Lox.error(returnStatement.keyword, "[Resolver Error]: cannot return a value from initializer");
+            }
+            resolve(returnStatement.value);
+        }
         return null;
     }
 
