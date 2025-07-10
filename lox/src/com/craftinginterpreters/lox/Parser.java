@@ -35,6 +35,11 @@ public class Parser {
     }
     private Statement classDeclaration(){
         Token name = consume(TokenType.IDENTIFIER, "Expect class name");
+        Expression.Variable superClass = null;
+        if(match(TokenType.LESS)){
+            consume(TokenType.IDENTIFIER, "Expect superclass name.");
+            superClass = new Expression.Variable(previous());
+        }
         consume(TokenType.LEFT_BRACE, "Expected '{' before class body");
 
         List<Statement.Function> methods = new ArrayList<>();
@@ -43,7 +48,7 @@ public class Parser {
         }
 
         consume(TokenType.RIGHT_BRACE, "Expected '}' after class");
-        return new Statement.LoxClass(name, methods);
+        return new Statement.LoxClass(name, methods, superClass);
     }
     private Statement function(String kind){
         Token name = consume(TokenType.IDENTIFIER, "Expected " + kind + "name. ");

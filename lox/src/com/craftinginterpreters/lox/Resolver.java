@@ -229,6 +229,10 @@ public class Resolver implements Statement.Visitor<Void>, Expression.Visitor<Voi
         currentClassType = ClassType.CLASS;
         declare(loxClass.name);
         define(loxClass.name);
+        if(loxClass.superClass != null && loxClass.superClass.name.lexeme.equals(loxClass.name.lexeme)){
+            Lox.error(loxClass.superClass.name, "A class can't inherit from itself.");
+        };
+        if(loxClass.superClass != null) resolve(loxClass.superClass);
         beginScope();
         scopes.peek().put("this", new Variable(loxClass.name, VariableState.READ));
         for(Statement.Function method: loxClass.methods){

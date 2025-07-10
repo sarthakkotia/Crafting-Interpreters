@@ -127,9 +127,11 @@ abstract class Statement {
     static class LoxClass extends Statement{
         final Token name;
         final List<Statement.Function> methods;
-        LoxClass(Token name, List<Statement.Function> methods){
+        final Expression.Variable superClass;
+        LoxClass(Token name, List<Statement.Function> methods, Expression.Variable superClass){
             this.methods = methods;
             this.name = name;
+            this.superClass = superClass;
         }
 
         @Override
