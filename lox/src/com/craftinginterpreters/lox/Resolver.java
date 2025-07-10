@@ -172,6 +172,11 @@ public class Resolver implements Statement.Visitor<Void>, Expression.Visitor<Voi
         return null;
     }
 
+    @Override
+    public Void visitSuperExpression(Expression.Super superExpression) {
+        return null;
+    }
+
     Void resolve(Expression expression){
         expression.accept(this);
         return null;

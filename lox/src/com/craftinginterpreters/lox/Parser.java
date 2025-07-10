@@ -373,6 +373,12 @@ public class Parser {
         }
         if (match(TokenType.FUN)) return functionBody("function");
         if (match(TokenType.THIS)) return new Expression.This(previous());
+        if(match(TokenType.SUPER)){
+            Token keyword = previous();
+            consume(TokenType.DOT, "Expect '.' after 'super'.");
+            Token method = consume(TokenType.IDENTIFIER, "Must be a valid method name");
+            return new Expression.Super(keyword, method);
+        }
         throw error(peek(), "Expect expression");
     }
     private boolean checkNext(TokenType tokenType) {

@@ -98,6 +98,11 @@ public class AstPrinter implements Expression.Visitor<String>, Statement.Visitor
         return "<this>";
     }
 
+    @Override
+    public String visitSuperExpression(Expression.Super superExpression) {
+        return "<super>: <method>: "+ superExpression.method.lexeme;
+    }
+
     String parenthesize(String name, List<Expression> expressions){
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("(").append(name);

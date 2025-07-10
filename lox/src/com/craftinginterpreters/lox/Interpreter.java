@@ -213,6 +213,11 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
         return lookUp(thisExpression.name, thisExpression);
     }
 
+    @Override
+    public Object visitSuperExpression(Expression.Super superExpression) {
+        return null;
+    }
+
     public Object evaluate(Expression expression){
         return expression.accept(this);
     }
