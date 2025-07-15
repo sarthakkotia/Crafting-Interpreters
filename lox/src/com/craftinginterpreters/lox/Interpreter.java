@@ -215,7 +215,14 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
 
     @Override
     public Object visitSuperExpression(Expression.Super superExpression) {
-        return null;
+        int distance = locals.get(superExpression);
+        LoxClass superClass = (LoxClass) environment.getAt("super", distance);
+        LoxInstance thisObject = (LoxInstance) environment.getAt("this", distance-1);
+        LoxFunction method = superClass.findMethod(superExpression.method.lexeme);
+        if(method == null){
+            throw new RuntimeError(superExpression.method, "Undefined property " + superExpression.method + ".");
+        }
+        return method.bind(thisObject, "this");
     }
 
     public Object evaluate(Expression expression){
@@ -327,17 +334,22 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
     @Override
     public Void visitLoxClass(Statement.LoxClass loxClass) {
         Object superClass = null;
+        environment.define(loxClass.name.lexeme, null);
         if(loxClass.superClass != null){
             superClass = evaluate(loxClass.superClass);
             if(!(superClass instanceof LoxClass)) throw new RuntimeError(loxClass.superClass.name, "Superclass must be a class");
+            Environment superEnvironment = new Environment(environment);
+            superEnvironment.define("super", superClass);
+            environment = superEnvironment;
         }
-        environment.define(loxClass.name.lexeme, null);
         Map<String, LoxFunction> methods = new HashMap<>();
         for(Statement.Function method: loxClass.methods){
             LoxFunction loxFunction = new LoxFunction(method.name.lexeme, method.function, environment, method.name.lexeme.equals("init"));
             methods.put(method.name.lexeme, loxFunction);
         }
         LoxClass loxclass = new LoxClass(loxClass.name.lexeme, methods, (LoxClass) superClass);
+        if(superClass != null)
+            environment = environment.parent;
         environment.assign(loxClass.name, loxclass);
         return null;
     }
