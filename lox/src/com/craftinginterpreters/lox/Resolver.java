@@ -26,7 +26,8 @@ public class Resolver implements Statement.Visitor<Void>, Expression.Visitor<Voi
     }
     private enum ClassType{
         NONE,
-        CLASS
+        CLASS,
+        SUBCLASS
     }
     final Interpreter interpreter;
     private Stack<Map<String, Variable>> scopes = new Stack<>();
@@ -177,6 +178,8 @@ public class Resolver implements Statement.Visitor<Void>, Expression.Visitor<Voi
         if(currentClassType == ClassType.NONE){
             Lox.error(superExpression.keyword, "[Resolver Error]: Can't use 'super' outside of class");
             return null;
+        }else if(currentClassType == ClassType.CLASS){
+            Lox.error(superExpression.keyword, "Can't use super in a class with no superclass");
         }
         resolveLocal(superExpression, superExpression.keyword, true);
         return null;
@@ -243,6 +246,7 @@ public class Resolver implements Statement.Visitor<Void>, Expression.Visitor<Voi
             Lox.error(loxClass.superClass.name, "A class can't inherit from itself.");
         };
         if(loxClass.superClass != null){
+            currentClassType = ClassType.SUBCLASS;
             resolve(loxClass.superClass);
             beginScope();
             scopes.peek().put("super", new Variable(loxClass.superClass.name, VariableState.READ));
