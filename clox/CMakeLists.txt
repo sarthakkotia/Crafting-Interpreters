@@ -3,4 +3,5 @@ project(clox)
 
 set(CMAKE_CXX_STANDARD 20)
 
-add_executable(clox main.cpp)
+add_executable(clox main.cpp
+        chunk.h)

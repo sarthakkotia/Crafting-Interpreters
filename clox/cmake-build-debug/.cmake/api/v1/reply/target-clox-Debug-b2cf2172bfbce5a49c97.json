@@ -66,10 +66,6 @@
 				"role" : "flags"
 			},
 			{
-				"fragment" : "",
-				"role" : "flags"
-			},
-			{
 				"fragment" : "-lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32",
 				"role" : "libraries"
 			}
@@ -91,6 +87,13 @@
 			[
 				0
 			]
+		},
+		{
+			"name" : "Header Files",
+			"sourceIndexes" : 
+			[
+				1
+			]
 		}
 	],
 	"sources" : 
@@ -100,6 +103,11 @@
 			"compileGroupIndex" : 0,
 			"path" : "main.cpp",
 			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"path" : "chunk.h",
+			"sourceGroupIndex" : 1
 		}
 	],
 	"type" : "EXECUTABLE"
