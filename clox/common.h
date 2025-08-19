@@ -3,4 +3,6 @@
 
 #include <stdint.h>
 
+#include <stdio.h>
+
 #endif //clox_common_h
