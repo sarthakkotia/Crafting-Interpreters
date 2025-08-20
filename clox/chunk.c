@@ -1,6 +1,6 @@
-#include "chunk.h"
 #include <stdlib.h>
-#include "string.h"
+#include "chunk.h"
+#include "memory.h"
 
 void initChunk(Chunk* chunk){
     chunk->count = 0;
@@ -9,18 +9,16 @@ void initChunk(Chunk* chunk){
 }
 
 void writeChunk(Chunk* chunk, uint8_t byte){
-    if(chunk->count == chunk->capacity){
-        // array is full
-        uint8_t* new_code = (uint8_t*)calloc((2*chunk->capacity + 1),(2*chunk->capacity + 1) * sizeof (uint8_t));
-        if(new_code == NULL){
-            printf("Memory allocation failed!");
-            return;
-        }
-        if(chunk->code != NULL) memcpy(new_code, chunk->code, chunk->capacity*sizeof(uint8_t));
-        chunk->code = new_code;
-        chunk->capacity = 2*chunk->capacity + 1;
+    if(chunk->capacity == chunk->count){
+        int oldCapacity = chunk->capacity;
+        chunk->capacity = GROW_CAPACITY(oldCapacity);
+        chunk->code = GROW_ARRAY(uint8_t, chunk->code, oldCapacity, chunk->capacity);
     }
-    // array is not full
     chunk->code[chunk->count] = byte;
     chunk->count++;
+}
+
+void freeChunk(Chunk* chunk){
+    FREE_ARRAY(uint8_t, chunk->code, chunk->capacity);
+    initChunk(chunk);
 }
