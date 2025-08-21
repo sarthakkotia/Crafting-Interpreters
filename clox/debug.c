@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include "debug.h"
 
-void simpleInstruction(char* name){
+static void simpleInstruction(const char* name){
     printf("%s\n", name);
     return;
 }
