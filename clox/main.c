@@ -7,7 +7,7 @@ int main(int argc, const char* argv[]) {
     initChunk(&chunk);
     writeChunk(&chunk, OP_RETURN);
 
-    disassembleChunk(&chunk);
+    disassembleChunk(&chunk, "test");
 
     freeChunk(&chunk);
     return 0;
