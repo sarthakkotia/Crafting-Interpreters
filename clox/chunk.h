@@ -18,6 +18,6 @@ typedef struct {
 void initChunk(Chunk* chunk);
 void writeChunk(Chunk* chunk, uint8_t byte);
 void freeChunk(Chunk* chunk);
-void addConstant(Chunk* chunk, Value value);
+int addConstant(Chunk* chunk, Value value);
 
 #endif //clox_chunk_h
