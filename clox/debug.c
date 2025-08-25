@@ -7,9 +7,9 @@ static int simpleInstruction(const char* name, int offset){
     return offset+1;
 }
 static int constantInstruction(const char* name, int offset, Chunk* chunk){
-    uint8_t constant = chunk->code[offset+1];
-    printf("%-16s %4d '", name, constant);
-    printValue(chunk->constants.values[constant]);
+    uint8_t constant_idx = chunk->code[offset+1];
+    printf("%-16s %4d '", name, constant_idx);
+    printValue(chunk->constants.values[constant_idx]);
     return offset+2;
 }
 int disassembleInstruction(Chunk* chunk, int offset){
