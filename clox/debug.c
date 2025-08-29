@@ -10,14 +10,23 @@ static int constantInstruction(const char* name, int offset, Chunk* chunk){
     uint8_t constant_idx = chunk->code[offset+1];
     printf("%-16s %4d '", name, constant_idx);
     printValue(chunk->constants.values[constant_idx]);
+    printf("\n");
     return offset+2;
+}
+int getLine(LinesArray* linesArray, int offset){
+    int sum = 0;
+    for(int i=0; i<linesArray->count; i++){
+        sum += linesArray->lines[i];
+        if(sum >= offset+1) return i+1;
+    }
+    return -1;
 }
 int disassembleInstruction(Chunk* chunk, int offset){
     printf("%04d ", offset);
-    if(offset > 0 && chunk->lines[offset] == chunk->lines[offset-1]){
+    if(offset > 0 && getLine(&chunk->linesArray, offset) == getLine(&chunk->linesArray, offset-1)){
         printf("   | ");
     }else{
-        printf("%04d ", chunk->lines[offset]);
+        printf("%04d ", getLine(&chunk->linesArray, offset));
     }
     uint8_t instruction = chunk->code[offset];
     switch (instruction) {
@@ -32,7 +41,7 @@ int disassembleInstruction(Chunk* chunk, int offset){
 }
 
 void disassembleChunk(Chunk* chunk, const char* name){
-    printf("opcodeNo|lineNo|opcode...constant\n");
+    printf("offset|lineNo|opcode...constant\n");
     printf("== %s ==\n", name);
     for(int i=0; i<chunk->count;){
         i = disassembleInstruction(chunk, i);
