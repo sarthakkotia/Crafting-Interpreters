@@ -9,5 +9,6 @@ typedef struct{
 
 void initVM();
 void freeVM();
+void interpret(Chunk* chunk);
 
 #endif //clox_vm_h
