@@ -7,24 +7,40 @@ void initVM(){}
 
 void freeVM(){}
 
-void interpret(Chunk* chunk){
-    int i = 0;
-    for(i=0; i<chunk->count;){
-        switch (chunk->code[i]) {
-            case OP_RETURN:
-                printf("OP_RETURN");
+static InterpretResult run(){
+#define READ_BYTE() ({\
+    uint8_t bytecode = *(vm.ip); \
+    vm.ip++;\
+    bytecode;\
+})
+#define READ_CONSTANT()({ \
+    uint8_t constantIndex = READ_BYTE();\
+    vm.chunk->constants.values[constantIndex];\
+})
+
+    for(;;){
+        uint8_t instruction = READ_BYTE();
+        switch (instruction) {
+            case OP_RETURN:{
+                return INTERPRET_OK;
+            }
+            case OP_CONSTANT:{
+                Value constant = READ_CONSTANT();
+                printValue(constant);
+                printf("\n");
                 break;
-            case OP_CONSTANT:
-                printf("OP_CONSTANT: ");
-                if(i >= chunk->count-1){
-                    //runtime error
-                    exit(1);
-                }
-                int constantIndex = chunk->code[i+1];
-                printf("%.2f", chunk->constants.values[constantIndex]);
-                i++;
+            }
+            
         }
-        printf("\n");
-        i++;
+
     }
+
+#undef READ_BYTE
+#undef READ_CONSTANT
+}
+
+InterpretResult interpret(Chunk* chunk){
+    vm.chunk = chunk;
+    vm.ip = vm.chunk->code;
+    return run();
 }
