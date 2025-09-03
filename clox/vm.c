@@ -1,12 +1,31 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "debug.h"
+#include "memory.h"
 #include "vm.h"
 VM vm;
 
-void initVM(){}
+static void resetStack(){
+    vm.stackTop = vm.stack;
+}
+
+void initVM(){
+    resetStack();
+}
 
 void freeVM(){}
+
+void push(Value value){
+    *(vm.stackTop) = value;
+    vm.stackTop++;
+}
+
+Value pop(){
+    vm.stackTop--;
+    Value value = *(vm.stackTop);
+    return value;
+}
+
 
 static InterpretResult run(){
 #define READ_BYTE() ({\
