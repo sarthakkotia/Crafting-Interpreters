@@ -8,6 +8,7 @@ typedef enum {
     OP_RETURN,
     // from this line all the opcodes have operands
     OP_CONSTANT,
+    OP_CONSTANT_LONG,
 } OpCode;
 
 typedef struct {

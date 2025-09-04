@@ -33,9 +33,16 @@ static InterpretResult run(){
     vm.ip++;\
     bytecode;\
 })
-#define READ_CONSTANT()({ \
+#define READ_CONSTANT()({\
     uint8_t constantIndex = READ_BYTE();\
     vm.chunk->constants.values[constantIndex];\
+})
+#define READ_LONG_CONSTANT()({\
+    uint8_t index1 = READ_BYTE();\
+    uint8_t index2 = READ_BYTE();\
+    uint8_t index3 = READ_BYTE();\
+    uint32_t result = index3<<16 | index2<<8 | index1;\
+    vm.chunk->constants.values[result];\
 })
 
     for(;;){
@@ -61,13 +68,19 @@ static InterpretResult run(){
                 push(constant);
                 break;
             }
+            case OP_CONSTANT_LONG:{
+                Value longConstant = READ_LONG_CONSTANT();
+                push(longConstant);
+                break;
+            }
             
         }
 
     }
 
-#undef READ_BYTE
+#undef READ_LONG_CONSTANT
 #undef READ_CONSTANT
+#undef READ_BYTE
 }
 
 InterpretResult interpret(Chunk* chunk){

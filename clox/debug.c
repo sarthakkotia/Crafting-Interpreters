@@ -13,6 +13,16 @@ static int constantInstruction(const char* name, int offset, Chunk* chunk){
     printf("\n");
     return offset+2;
 }
+static int longConstantInstruction(const char* name, int offset, Chunk* chunk){
+    uint8_t constant_idx1 = chunk->code[offset+1];
+    uint8_t constant_idx2 = chunk->code[offset+2];
+    uint8_t constant_idx3 = chunk->code[offset+3];
+    uint32_t result = (constant_idx3 << 16) | (constant_idx2 << 8) | (constant_idx1);
+    printf("%-16s %4d '", name, result);
+    printValue(chunk->constants.values[result]);
+    printf("\n");
+    return offset+4;
+}
 int getLine(LinesArray* linesArray, int offset){
     int sum = 0;
     for(int i=0; i<linesArray->count; i++){
@@ -34,6 +44,8 @@ int disassembleInstruction(Chunk* chunk, int offset){
             return simpleInstruction("OP_RETURN", offset);
         case OP_CONSTANT:
             return constantInstruction("OP_CONSTANT", offset, chunk);
+        case OP_CONSTANT_LONG:
+            return longConstantInstruction("OP_CONSTANT_LONG", offset, chunk);
         default:
             printf("Unknown opcode %d\n", instruction);
             return offset+1;
