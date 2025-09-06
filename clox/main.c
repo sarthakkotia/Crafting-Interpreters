@@ -10,11 +10,7 @@ int main(int argc, const char* argv[]) {
     int constant = addConstant(&chunk, 1.2);
     writeChunk(&chunk, OP_CONSTANT, 1);
     writeChunk(&chunk, constant, 1);
-    writeChunk(&chunk, OP_CONSTANT_LONG, 2);
-    int constant2 = 255;
-    writeChunk(&chunk, constant2, 2);
-    writeChunk(&chunk, constant2, 2);
-    writeChunk(&chunk, 127, 2);
+    writeChunk(&chunk, OP_NEGATE, 2);
     writeChunk(&chunk, OP_RETURN, 3);
 
     interpret(&chunk);

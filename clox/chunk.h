@@ -6,6 +6,7 @@
 
 typedef enum {
     OP_RETURN,
+    OP_NEGATE,
     // from this line all the opcodes have operands
     OP_CONSTANT,
     OP_CONSTANT_LONG,
