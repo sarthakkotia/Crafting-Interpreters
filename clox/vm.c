@@ -44,6 +44,11 @@ static InterpretResult run(){
     uint32_t result = index3<<16 | index2<<8 | index1;\
     vm.chunk->constants.values[result];\
 })
+#define BINARY_OPERATION(operator)({\
+    Value left = pop();\
+    Value right = pop();\
+    left operator right;\
+})
 
     for(;;){
 #ifdef DEBUG_TRACE_EXECUTION
@@ -63,8 +68,30 @@ static InterpretResult run(){
                 printf("\n");
                 return INTERPRET_OK;
             }
+            //unary operations
             case OP_NEGATE:{
                 Value value = -pop();
+                push(value);
+                break;
+            }
+            //binary operations
+            case OP_ADD:{
+                Value value = BINARY_OPERATION(+);
+                push(value);
+                break;
+            }
+            case OP_SUBTRACT:{
+                Value value = BINARY_OPERATION(-);
+                push(value);
+                break;
+            }
+            case OP_MULTIPLY:{
+                Value value = BINARY_OPERATION(*);
+                push(value);
+                break;
+            }
+            case OP_DIVIDE:{
+                Value value = BINARY_OPERATION(/);
                 push(value);
                 break;
             }
@@ -83,6 +110,7 @@ static InterpretResult run(){
 
     }
 
+#undef BINARY_OPERATION
 #undef READ_LONG_CONSTANT
 #undef READ_CONSTANT
 #undef READ_BYTE
