@@ -45,8 +45,8 @@ static InterpretResult run(){
     vm.chunk->constants.values[result];\
 })
 #define BINARY_OPERATION(operator)({\
-    Value left = pop();\
     Value right = pop();\
+    Value left = pop();\
     left operator right;\
 })
 

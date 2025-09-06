@@ -12,13 +12,13 @@ int main(int argc, const char* argv[]) {
     writeChunk(&chunk, constant, 1);
     writeChunk(&chunk, OP_NEGATE, 2);
 
-    constant = addConstant(&chunk, 2);
-    writeChunk(&chunk, OP_CONSTANT, 3);
-    writeChunk(&chunk, constant, 3);
     constant = addConstant(&chunk, 3);
     writeChunk(&chunk, OP_CONSTANT, 3);
     writeChunk(&chunk, constant, 3);
-    writeChunk(&chunk, OP_ADD, 3);
+    constant = addConstant(&chunk, 2);
+    writeChunk(&chunk, OP_CONSTANT, 3);
+    writeChunk(&chunk, constant, 3);
+    writeChunk(&chunk, OP_SUBTRACT, 3);
 
     writeChunk(&chunk, OP_RETURN, 4);
 
