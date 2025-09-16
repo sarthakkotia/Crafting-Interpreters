@@ -18,7 +18,7 @@ static Token makeToken(TokenType type){
     Token token;
     token.type = type;
     token.start = scanner.start;
-    token.length = (int)(scanner.current - scanner.start + 1);
+    token.length = (int)(scanner.current - scanner.start);
     token.line = scanner.line;
     return token;
 }
