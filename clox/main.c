@@ -9,7 +9,7 @@
 static char *readFile(const char *filePath){
     FILE *filePtr = fopen(filePath, "rb");
     if(filePtr == NULL){
-        fprintf(stderr, "Could not open file \" %s \". \n", filePath);
+        fprintf(stderr, "Could not open file \"%s\". \n", filePath);
         exit(74);
     }
 

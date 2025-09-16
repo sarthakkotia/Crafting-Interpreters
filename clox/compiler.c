@@ -8,6 +8,7 @@ void compile(const char *source){
     // converting it to bytecode
     // save them into chunks
     // save those chunks into bytecode
+    initScanner(source);
     int line = -1;
     for(;;){
         Token token = scanToken();
