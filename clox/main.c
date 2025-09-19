@@ -45,7 +45,6 @@ static void runFile(const char *file_path){
 
 static void repl(){
 #define MAX_LENGTH 1024
-
     char line[MAX_LENGTH];
     while(true){
         printf("> ");
@@ -63,8 +62,89 @@ static void repl(){
 
 int main(int argc, const char* argv[]) {
     initVM();
-//    Chunk chunk;
-//    initChunk(&chunk);
+    Chunk chunk;
+    initChunk(&chunk);
+
+    int constant = addConstant(&chunk, 4);
+    writeChunk(&chunk, OP_CONSTANT, 1);
+    writeChunk(&chunk, constant, 1);
+
+    constant = addConstant(&chunk, 3);
+    writeChunk(&chunk, OP_CONSTANT, 2);
+    writeChunk(&chunk, constant, 2);
+    constant = addConstant(&chunk, 2);
+    writeChunk(&chunk, OP_CONSTANT, 2);
+    writeChunk(&chunk, constant, 2);
+    writeChunk(&chunk, OP_NEGATE, 2);
+    writeChunk(&chunk, OP_MULTIPLY, 2);
+
+    writeChunk(&chunk, OP_SUBTRACT, 3);
+
+    writeChunk(&chunk, OP_RETURN, 4);
+
+//    int constant = addConstant(&chunk, 1);
+//    writeChunk(&chunk, OP_CONSTANT, 1);
+//    writeChunk(&chunk, constant, 1);
+//
+//    constant = addConstant(&chunk, 2);
+//    writeChunk(&chunk, OP_CONSTANT, 1);
+//    writeChunk(&chunk, constant, 1);
+//
+//    constant = addConstant(&chunk, 3);
+//    writeChunk(&chunk, OP_CONSTANT, 1);
+//    writeChunk(&chunk, constant, 1);
+//
+//    constant = addConstant(&chunk, 4);
+//    writeChunk(&chunk, OP_CONSTANT, 1);
+//    writeChunk(&chunk, constant, 1);
+//
+//    constant = addConstant(&chunk, 5);
+//    writeChunk(&chunk, OP_CONSTANT, 1);
+//    writeChunk(&chunk, constant, 1);
+//
+//    constant = addConstant(&chunk, 6);
+//    writeChunk(&chunk, OP_CONSTANT, 1);
+//    writeChunk(&chunk, constant, 1);
+//
+//    constant = addConstant(&chunk, 7);
+//    writeChunk(&chunk, OP_CONSTANT, 1);
+//    writeChunk(&chunk, constant, 1);
+//
+//    constant = addConstant(&chunk, 8);
+//    writeChunk(&chunk, OP_CONSTANT, 1);
+//    writeChunk(&chunk, constant, 1);
+//
+//    constant = addConstant(&chunk, 9);
+//    writeChunk(&chunk, OP_CONSTANT, 1);
+//    writeChunk(&chunk, constant, 1);
+//    constant = addConstant(&chunk, 10);
+//    writeChunk(&chunk, OP_CONSTANT, 1);
+//    writeChunk(&chunk, constant, 1);
+//    constant = addConstant(&chunk, 11);
+//    writeChunk(&chunk, OP_CONSTANT, 1);
+//    writeChunk(&chunk, constant, 1);
+//    constant = addConstant(&chunk, 12);
+//    writeChunk(&chunk, OP_CONSTANT, 1);
+//    writeChunk(&chunk, constant, 1);
+//    constant = addConstant(&chunk, 13);
+//    writeChunk(&chunk, OP_CONSTANT, 1);
+//    writeChunk(&chunk, constant, 1);
+//    constant = addConstant(&chunk, 14);
+//    writeChunk(&chunk, OP_CONSTANT, 1);
+//    writeChunk(&chunk, constant, 1);
+//    constant = addConstant(&chunk, 15);
+//    writeChunk(&chunk, OP_CONSTANT, 1);
+//    writeChunk(&chunk, constant, 1);
+//    constant = addConstant(&chunk, 16);
+//    writeChunk(&chunk, OP_CONSTANT, 1);
+//    writeChunk(&chunk, constant, 1);
+//    constant = addConstant(&chunk, 17);
+//    writeChunk(&chunk, OP_CONSTANT, 1);
+//    writeChunk(&chunk, constant, 1);
+
+//    writeChunk(&chunk, OP_RETURN, 2);
+
+    interpretChunk(&chunk);
 
     if(argc > 2){
         fprintf(stderr, "Usage clox [path]\n");
@@ -79,7 +159,7 @@ int main(int argc, const char* argv[]) {
 
 //    disassembleChunk(&chunk, "test");
 
+    freeChunk(&chunk);
     freeVM();
-//    freeChunk(&chunk);
     return 0;
 }

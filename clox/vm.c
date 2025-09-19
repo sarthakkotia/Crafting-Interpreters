@@ -4,28 +4,28 @@
 #include "memory.h"
 #include "vm.h"
 #include "compiler.h"
+#include "stack.h"
 
 VM vm;
 
 static void resetStack(){
-    vm.stackTop = vm.stack;
+    initVMStack(&vm.vmStack);
 }
 
 void initVM(){
     resetStack();
 }
 
-void freeVM(){}
+void freeVM(){
+    freeVMStack(&vm.vmStack);
+}
 
 void push(Value value){
-    *(vm.stackTop) = value;
-    vm.stackTop++;
+    pushVMStack(value, &vm.vmStack);
 }
 
 Value pop(){
-    vm.stackTop--;
-    Value value = *(vm.stackTop);
-    return value;
+    return popVMStack(&vm.vmStack);
 }
 
 
@@ -55,9 +55,9 @@ static InterpretResult run(){
     for(;;){
 #ifdef DEBUG_TRACE_EXECUTION
         printf("******** Stack trace ********\n");
-        for(Value* slot = vm.stack; slot<vm.stackTop; slot++){
+        for(int i = 0; i<vm.vmStack.count; i++){
             printf("[ ");
-            printValue(*slot);
+            printValue(vm.vmStack.stack[i]);
             printf(" ]");
         }
         printf("\n*****************************\n");
