@@ -72,8 +72,8 @@ static InterpretResult run(){
             }
             //unary operations
             case OP_NEGATE:{
-                Value value = -pop();
-                push(value);
+                Value *value = &vm.vmStack.stack[vm.vmStack.count-1];
+                *(value) = -(Value)(*(value));
                 break;
             }
             //binary operations
