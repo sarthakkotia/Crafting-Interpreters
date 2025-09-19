@@ -4,7 +4,6 @@
 
 void initVMStack(VMStack *vmStack){
     vmStack->stack = NULL;
-    vmStack->stackTop = NULL;
     vmStack->capacity = 0;
     vmStack->count = 0;
 }
@@ -14,17 +13,14 @@ void pushVMStack(Value value, VMStack *vmStack){
         int oldCapacity = vmStack->capacity;
         vmStack->capacity = GROW_CAPACITY(oldCapacity);
         vmStack->stack = GROW_ARRAY(Value, vmStack->stack, oldCapacity, vmStack->capacity);
-        vmStack->stackTop = vmStack->stack + vmStack->count;
     }
-    *(vmStack->stackTop) = value;
-    vmStack->stackTop++;
+    vmStack->stack[vmStack->count] = value;
     vmStack->count++;
 }
 
 Value popVMStack(VMStack *vmStack){
-    vmStack->stackTop--;
     vmStack->count--;
-    Value value = *(vmStack->stackTop);
+    Value value = vmStack->stack[vmStack->count];
     return value;
 }
 

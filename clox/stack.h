@@ -4,7 +4,6 @@
 #define clox_stack_h
 
 typedef struct {
-    Value *stackTop;
     Value *stack;
     int capacity;
     int count;
