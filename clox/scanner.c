@@ -60,6 +60,13 @@ static void skipWhitespace(){
         switch (ch) {
             case ' ':
             case '\r':
+            case '\t':
+                getChar();
+                break;
+            case '\n':
+                scanner.line++;
+                getChar();
+                break;
             case '/':
                 if(peekNext() == '/'){
                     while(peek() != '\n' && !isAtEnd())
@@ -67,16 +74,35 @@ static void skipWhitespace(){
                 }else{
                     return;
                 }
-            case '\t':
-                getChar();
-                break;
-            case '\n':
-                scanner.line++;
-                break;
             default:
                 return;
         }
     }
+}
+
+static Token handleString(){
+    char ch = peek();
+    while(ch != '"' && !isAtEnd()){
+        if(ch == '\n') scanner.line++;
+        getChar();
+        ch = peek();
+    }
+    if(isAtEnd()) return errorToken("Unterminated String. ");
+    getChar();
+    return makeToken(TOKEN_STRING);
+}
+
+static bool isDigit(char c){
+    return c >= '0' && c <= '9';
+}
+
+static Token handleNumber(){
+    while(isDigit(peek())) getChar();
+    if(peek() == '.' && isDigit(peekNext())){
+        getChar();
+        while (isDigit(peek())) getChar();
+    }
+    return makeToken(TOKEN_NUMBER);
 }
 
 Token scanToken(){
@@ -85,33 +111,33 @@ Token scanToken(){
     if(isAtEnd()) return makeToken(TOKEN_EOF);
     
     skipWhitespace();
-    
+
+    scanner.start = scanner.current;
+
+
     char c = getChar();
     switch (c) {
-        case '(': makeToken(TOKEN_LEFT_PAREN);
-        case ')': makeToken(TOKEN_RIGHT_PAREN);
-        case '{': makeToken(TOKEN_LEFT_BRACE);
-        case '}': makeToken(TOKEN_RIGHT_BRACE);
-        case ',': makeToken(TOKEN_COMMA);
-        case '.': makeToken(TOKEN_DOT);
-        case '-': makeToken(TOKEN_MINUS);
-        case '+': makeToken(TOKEN_PLUS);
-        case ';': makeToken(TOKEN_SEMICOLON);
-        case '/': makeToken(TOKEN_SLASH);
-        case '*': makeToken(TOKEN_STAR);
+        case '(': return makeToken(TOKEN_LEFT_PAREN);
+        case ')': return makeToken(TOKEN_RIGHT_PAREN);
+        case '{': return makeToken(TOKEN_LEFT_BRACE);
+        case '}': return makeToken(TOKEN_RIGHT_BRACE);
+        case ',': return makeToken(TOKEN_COMMA);
+        case '.': return makeToken(TOKEN_DOT);
+        case '-': return makeToken(TOKEN_MINUS);
+        case '+': return makeToken(TOKEN_PLUS);
+        case ';': return makeToken(TOKEN_SEMICOLON);
+        case '/': return makeToken(TOKEN_SLASH);
+        case '*': return makeToken(TOKEN_STAR);
 
-        case '!':
-            makeToken(match('=') ? TOKEN_BANG_EQUAL : TOKEN_BANG);
-            break;
-        case '=':
-            makeToken(match('=') ? TOKEN_EQUAL_EQUAL : TOKEN_EQUAL);
-            break;
-        case '>':
-            makeToken(match('=') ? TOKEN_GREATER_EQUAL : TOKEN_GREATER);
-            break;
-        case '<':
-            makeToken(match('=') ? TOKEN_LESS_EQUAL : TOKEN_LESS);
-            break;
+        case '!': return makeToken(match('=') ? TOKEN_BANG_EQUAL : TOKEN_BANG);
+        case '=': return makeToken(match('=') ? TOKEN_EQUAL_EQUAL : TOKEN_EQUAL);
+        case '>': return makeToken(match('=') ? TOKEN_GREATER_EQUAL : TOKEN_GREATER);
+        case '<': return makeToken(match('=') ? TOKEN_LESS_EQUAL : TOKEN_LESS);
+
+        case '"': return handleString();
+
+        default:
+            if(isDigit(c)) return handleNumber();
 
     }
 

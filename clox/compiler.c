@@ -20,6 +20,6 @@ void compile(const char *source){
         }
         printf("%2d '%.*s'\n", token.type, token.length, token.start);
 
-        if(token.type == EOF) break;
+        if(token.type == TOKEN_EOF) break;
     }
 }
