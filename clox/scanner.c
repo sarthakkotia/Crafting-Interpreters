@@ -105,6 +105,19 @@ static Token handleNumber(){
     return makeToken(TOKEN_NUMBER);
 }
 
+static bool isAlpha(char c){
+    return (c >= 'A' && c<= 'Z') || (c >= 'a' && c <= 'z') ||(c == '_');
+}
+
+static TokenType identifierType(){
+    return TOKEN_IDENTIFIER;
+}
+
+static Token handleIdentifiers(){
+    while(isDigit(peek()) || isAlpha(peek())) getChar();
+    return makeToken(identifierType());
+}
+
 Token scanToken(){
     scanner.start = scanner.current;
 
@@ -138,6 +151,7 @@ Token scanToken(){
 
         default:
             if(isDigit(c)) return handleNumber();
+            if(isAlpha(c)) return handleIdentifiers();
 
     }
 
