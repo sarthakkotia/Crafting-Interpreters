@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include "compiler.h"
 
 Parser parser;
@@ -22,6 +23,10 @@ static void errorAt(Token *token, const char *message){
     }
     fprintf(stderr, ": %s\n", message);
     parser.hadError = true;
+}
+
+static void error(const char* message) {
+    errorAt(&parser.previous, message);
 }
 
 static void errorAtCurrent(const char *message){
@@ -64,6 +69,23 @@ static void endCompiler(){
     emitReturn();
 }
 
+static uint8_t makeConstant(double value){
+    int constant_idx = addConstant(currentChunk(), value);
+    if(constant_idx > UINT8_MAX){
+        error("Too many constants in one chunk");
+        return 0;
+    }
+    return (uint8_t) constant_idx;
+}
+
+static void emitConstant(Value value){
+    emitBytes(OP_CONSTANT, makeConstant(value));
+}
+
+static void number(){
+    double value = strtod(parser.previous.start, NULL);
+    emitConstant(value);
+}
 bool compile(const char *source, Chunk *chunk){
     // lexing for that we will need the scanner
     // converting it to bytecode
@@ -76,7 +98,7 @@ bool compile(const char *source, Chunk *chunk){
     compilingChunk = chunk;
 
     advance();
-    expression();
+//    expression();
     consume(TOKEN_EOF, "Expect end of Expression");
     endCompiler();
     return !parser.hadError;
