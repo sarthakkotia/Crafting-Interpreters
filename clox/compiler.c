@@ -54,6 +54,8 @@ static void emitBytes(uint8_t byte1, uint8_t byte2){
     emitByte(byte1);
     emitByte(byte2);
 }
+//TODO: Add another helper function to write / emit the long byte operand as well the same way like we did the emit Bytes function
+
 static void emitReturn(){
     emitByte(OP_RETURN);
 }
