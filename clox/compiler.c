@@ -5,6 +5,8 @@
 Parser parser;
 Chunk *compilingChunk;
 
+static void parsePrecedence(Precedence precedence);
+
 static Chunk *currentChunk(){
     return compilingChunk;
 }
@@ -69,8 +71,12 @@ static void endCompiler(){
     emitReturn();
 }
 
+static void expression(){
+    parsePrecedence(PREC_ASSIGNMENT);
+}
+
 static void grouping(){
-//    expression()
+    expression();
     consume(TOKEN_RIGHT_PAREN, "Expect ')' after expression");
 }
 
@@ -91,6 +97,25 @@ static void number(){
     double value = strtod(parser.previous.start, NULL);
     emitConstant(value);
 }
+
+static void unary(){
+    TokenType operatorType = parser.previous.type;
+
+    parsePrecedence(PREC_UNARY);
+
+    switch (operatorType) {
+        case TOKEN_MINUS:
+            emitByte(OP_NEGATE);
+            break;
+        default: return;
+    }
+}
+
+static void parsePrecedence(Precedence precedence){
+
+}
+
+
 bool compile(const char *source, Chunk *chunk){
     // lexing for that we will need the scanner
     // converting it to bytecode
@@ -103,7 +128,7 @@ bool compile(const char *source, Chunk *chunk){
     compilingChunk = chunk;
 
     advance();
-//    expression();
+    expression();
     consume(TOKEN_EOF, "Expect end of Expression");
     endCompiler();
     return !parser.hadError;
