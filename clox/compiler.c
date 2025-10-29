@@ -1,6 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "compiler.h"
+#ifdef DEBUG_PRINT_CODE
+#include "debug.h"
+#endif
 
 Parser parser;
 Chunk *compilingChunk;
@@ -70,6 +73,11 @@ static void emitReturn(){
 
 static void endCompiler(){
     emitReturn();
+#ifdef DEBUG_PRINT_CODE
+    if(!parser.hadError){
+        disassembleChunk(currentChunk(), "code");
+    }
+#endif
 }
 
 static void binary(){

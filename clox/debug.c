@@ -68,5 +68,6 @@ void disassembleChunk(Chunk* chunk, const char* name){
     for(int i=0; i<chunk->count;){
         i = disassembleInstruction(chunk, i);
     }
+    printf("\n");
 }
 
