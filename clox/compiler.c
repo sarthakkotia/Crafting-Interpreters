@@ -40,8 +40,8 @@ static void errorAtCurrent(const char *message){
 static void advance(){
     parser.previous = parser.current;
     for(;;){
-        Token token = scanToken();
-        if(token.type == TOKEN_ERROR) errorAtCurrent(parser.current.start);
+        parser.current = scanToken();
+        if(parser.current.type == TOKEN_ERROR) errorAtCurrent(parser.current.start);
         else break;
     }
 }
@@ -182,7 +182,18 @@ ParseRule rules[] = {
 };
 
 static void parsePrecedence(Precedence precedence){
-
+    advance();
+    ParseFn prefixRule = getRule(parser.previous.type)->prefix;
+    if(prefixRule == NULL){
+        error("Expect a expression");
+        return;
+    }
+    prefixRule();
+    while (precedence <= getRule(parser.current.type)->precedence){
+        advance();
+        ParseFn infixRule = getRule(parser.previous.type)->infix;
+        infixRule();
+    }
 }
 
 static ParseRule* getRule(TokenType type){

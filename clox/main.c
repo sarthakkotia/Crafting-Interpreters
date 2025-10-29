@@ -62,25 +62,25 @@ static void repl(){
 
 int main(int argc, const char* argv[]) {
     initVM();
-    Chunk chunk;
-    initChunk(&chunk);
+//    Chunk chunk;
+//    initChunk(&chunk);
 
-    int constant = addConstant(&chunk, 4);
-    writeChunk(&chunk, OP_CONSTANT, 1);
-    writeChunk(&chunk, constant, 1);
-
-    constant = addConstant(&chunk, 3);
-    writeChunk(&chunk, OP_CONSTANT, 2);
-    writeChunk(&chunk, constant, 2);
-    constant = addConstant(&chunk, 2);
-    writeChunk(&chunk, OP_CONSTANT, 2);
-    writeChunk(&chunk, constant, 2);
-    writeChunk(&chunk, OP_NEGATE, 2);
-    writeChunk(&chunk, OP_MULTIPLY, 2);
-
-    writeChunk(&chunk, OP_SUBTRACT, 3);
-
-    writeChunk(&chunk, OP_RETURN, 4);
+//    int constant = addConstant(&chunk, 4);
+//    writeChunk(&chunk, OP_CONSTANT, 1);
+//    writeChunk(&chunk, constant, 1);
+//
+//    constant = addConstant(&chunk, 3);
+//    writeChunk(&chunk, OP_CONSTANT, 2);
+//    writeChunk(&chunk, constant, 2);
+//    constant = addConstant(&chunk, 2);
+//    writeChunk(&chunk, OP_CONSTANT, 2);
+//    writeChunk(&chunk, constant, 2);
+//    writeChunk(&chunk, OP_NEGATE, 2);
+//    writeChunk(&chunk, OP_MULTIPLY, 2);
+//
+//    writeChunk(&chunk, OP_SUBTRACT, 3);
+//
+//    writeChunk(&chunk, OP_RETURN, 4);
 
 //    int constant = addConstant(&chunk, 1);
 //    writeChunk(&chunk, OP_CONSTANT, 1);
@@ -144,7 +144,7 @@ int main(int argc, const char* argv[]) {
 
 //    writeChunk(&chunk, OP_RETURN, 2);
 
-    interpretChunk(&chunk);
+//    interpretChunk(&chunk);
 
     if(argc > 2){
         fprintf(stderr, "Usage clox [path]\n");
@@ -159,7 +159,7 @@ int main(int argc, const char* argv[]) {
 
 //    disassembleChunk(&chunk, "test");
 
-    freeChunk(&chunk);
+//    freeChunk(&chunk);
     freeVM();
     return 0;
 }
