@@ -3,7 +3,19 @@
 
 #include "common.h"
 
-typedef double Value;
+typedef enum {
+    VAL_BOOL,
+    VAL_NUMBER,
+    VAL_NIL
+} ValueType;
+
+typedef struct {
+    ValueType type;
+    union {
+        bool booloean;
+        double number;
+    } as;
+} Value;
 
 typedef struct{
     int capacity;
