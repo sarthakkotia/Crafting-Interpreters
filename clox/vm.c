@@ -1,3 +1,4 @@
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include "debug.h"
@@ -10,6 +11,19 @@ VM vm;
 
 static void resetStack(){
     initVMStack(&vm.vmStack);
+}
+
+static void runtimeError(const char *msg, ...) {
+    va_list args;
+    va_start(args, msg);
+    vfprintf(stderr, args, msg);
+    va_end(args);
+    fputs("\n", stderr);
+
+    size_t instruction = vm.ip - vm.chunk->code - 1;
+    int line = vm.chunk->linesArray.lines[instruction];
+    fprintf(stderr, "[line %d] in script\n", line);
+    resetStack();
 }
 
 void initVM(){
@@ -28,6 +42,9 @@ Value pop(){
     return popVMStack(&vm.vmStack);
 }
 
+Value peek(int distance) {
+    return vm.vmStack.stack[vm.vmStack.count - 1 - distance];
+}
 
 static InterpretResult run(){
 #define READ_BYTE() ({\
@@ -46,10 +63,14 @@ static InterpretResult run(){
     uint32_t result = index3<<16 | index2<<8 | index1;\
     vm.chunk->constants.values[result];\
 })
-#define BINARY_OPERATION(operator)({\
-    Value right = pop();\
-    Value left = pop();\
-    left operator right;\
+#define BINARY_OPERATION(valueType, operator)({\
+    if(!IS_NUMBER(peek(0)) || !IS_NUMBER(peek(1))){\
+        runtimeError("Operands must be numbers");\
+        return INTERPRET_RUNTIME_ERROR;\
+    }\
+    double right = AS_NUMBER(pop());\
+    double left = AS_NUMBER(pop());\
+    push(valueType(left operator right));\
 })
 
     for(;;){
@@ -72,29 +93,28 @@ static InterpretResult run(){
             }
             //unary operations
             case OP_NEGATE:{
-                Value *value = &vm.vmStack.stack[vm.vmStack.count-1];
-                *(value) = -(Value)(*(value));
+                if (!IS_NUMBER(peek(0))) {
+                    runtimeError("Operand must be a number.");
+                    return INTERPRET_RUNTIME_ERROR;
+                }
+                push(NUMBER_VAL(-AS_NUMBER(pop())));
                 break;
             }
             //binary operations
             case OP_ADD:{
-                Value value = BINARY_OPERATION(+);
-                push(value);
+                BINARY_OPERATION(NUMBER_VAL, +);
                 break;
             }
             case OP_SUBTRACT:{
-                Value value = BINARY_OPERATION(-);
-                push(value);
+                BINARY_OPERATION(NUMBER_VAL, -);
                 break;
             }
             case OP_MULTIPLY:{
-                Value value = BINARY_OPERATION(*);
-                push(value);
+                BINARY_OPERATION(NUMBER_VAL, *);
                 break;
             }
             case OP_DIVIDE:{
-                Value value = BINARY_OPERATION(/);
-                push(value);
+                BINARY_OPERATION(NUMBER_VAL, /);
                 break;
             }
             case OP_CONSTANT:{

@@ -112,7 +112,7 @@ static void grouping(){
     consume(TOKEN_RIGHT_PAREN, "Expect ')' after expression");
 }
 
-static uint8_t makeConstant(double value){
+static uint8_t makeConstant(Value value){
     int constant_idx = addConstant(currentChunk(), value);
     if(constant_idx > UINT8_MAX){
         error("Too many constants in one chunk");
@@ -127,7 +127,7 @@ static void emitConstant(Value value){
 
 static void number(){
     double value = strtod(parser.previous.start, NULL);
-    emitConstant(value);
+    emitConstant(NUMBER_VAL(value));
 }
 
 static void unary(){
