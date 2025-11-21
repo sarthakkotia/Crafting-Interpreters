@@ -27,7 +27,7 @@ typedef struct {
     ((value).type == VAL_NUMBER)
 
 #define AS_BOOL(value) \
-    ((value).as.booloean)
+    ((value).as.boolean)
 
 #define AS_NUMBER(value) \
     ((value).as.number)

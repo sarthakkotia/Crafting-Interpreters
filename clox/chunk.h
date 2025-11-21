@@ -11,6 +11,9 @@ typedef enum {
     OP_SUBTRACT,
     OP_MULTIPLY,
     OP_DIVIDE,
+    OP_NIL,
+    OP_TRUE,
+    OP_FALSE,
     // from this line all the opcodes have operands
     OP_CONSTANT,
     OP_CONSTANT_LONG,
