@@ -16,7 +16,7 @@ static void resetStack(){
 static void runtimeError(const char *msg, ...) {
     va_list args;
     va_start(args, msg);
-    vfprintf(stderr, args, msg);
+    vfprintf(stderr, msg, args);
     va_end(args);
     fputs("\n", stderr);
 
@@ -43,7 +43,12 @@ Value pop(){
 }
 
 Value peek(int distance) {
-    return vm.vmStack.stack[vm.vmStack.count - 1 - distance];
+    return vm.vmStack.stack[vm.vmStack.count - distance - 1];
+}
+
+static bool isFalsey(Value value) {
+    if (IS_NIL(value) || (IS_BOOL(value) && !AS_BOOL(value))) return true;
+    return false;
 }
 
 static InterpretResult run(){
@@ -86,13 +91,13 @@ static InterpretResult run(){
 #endif
         uint8_t instruction = READ_BYTE();
         switch (instruction) {
-            case OP_RETURN:{
+            case OP_RETURN: {
                 printValue(pop());
                 printf("\n");
                 return INTERPRET_OK;
             }
             //unary operations
-            case OP_NEGATE:{
+            case OP_NEGATE: {
                 if (!IS_NUMBER(peek(0))) {
                     runtimeError("Operand must be a number.");
                     return INTERPRET_RUNTIME_ERROR;
@@ -101,40 +106,44 @@ static InterpretResult run(){
                 break;
             }
             //binary operations
-            case OP_ADD:{
+            case OP_ADD: {
                 BINARY_OPERATION(NUMBER_VAL, +);
                 break;
             }
-            case OP_SUBTRACT:{
+            case OP_SUBTRACT: {
                 BINARY_OPERATION(NUMBER_VAL, -);
                 break;
             }
-            case OP_MULTIPLY:{
+            case OP_MULTIPLY: {
                 BINARY_OPERATION(NUMBER_VAL, *);
                 break;
             }
-            case OP_DIVIDE:{
+            case OP_DIVIDE: {
                 BINARY_OPERATION(NUMBER_VAL, /);
                 break;
             }
-            case OP_NIL:{
+            case OP_NIL: {
                 push(NIL_VAL);
                 break;
             }
-            case OP_TRUE:{
+            case OP_TRUE: {
                 push(BOOL_VAL(true));
                 break;
             }
-            case OP_FALSE:{
+            case OP_FALSE: {
                 push(BOOL_VAL(false));
                 break;
             }
-            case OP_CONSTANT:{
+            case OP_NOT: {
+                push(BOOL_VAL(isFalsey(pop())));
+                break;
+            }
+            case OP_CONSTANT: {
                 Value constant = READ_CONSTANT();
                 push(constant);
                 break;
             }
-            case OP_CONSTANT_LONG:{
+            case OP_CONSTANT_LONG: {
                 Value longConstant = READ_LONG_CONSTANT();
                 push(longConstant);
                 break;

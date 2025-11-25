@@ -14,6 +14,7 @@ typedef enum {
     OP_NIL,
     OP_TRUE,
     OP_FALSE,
+    OP_NOT,
     // from this line all the opcodes have operands
     OP_CONSTANT,
     OP_CONSTANT_LONG,
