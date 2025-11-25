@@ -46,9 +46,9 @@ Value peek(int distance) {
     return vm.vmStack.stack[vm.vmStack.count - distance - 1];
 }
 
-static bool isFalsey(Value value) {
-    if (IS_NIL(value) || (IS_BOOL(value) && !AS_BOOL(value))) return true;
-    return false;
+static bool isTruthy(Value value) {
+    if (IS_NIL(value) || (IS_BOOL(value) && !AS_BOOL(value))) return false;
+    return true;
 }
 
 static InterpretResult run(){
@@ -135,7 +135,7 @@ static InterpretResult run(){
                 break;
             }
             case OP_NOT: {
-                push(BOOL_VAL(isFalsey(pop())));
+                push(BOOL_VAL(!isTruthy(pop())));
                 break;
             }
             case OP_CONSTANT: {
