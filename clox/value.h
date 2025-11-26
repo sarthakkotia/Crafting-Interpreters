@@ -51,5 +51,6 @@ void initValueArray(ValueArray* valueArray);
 void writeValueArray(ValueArray* valueArray, Value value);
 void freeValueArray(ValueArray* valueArray);
 void printValue(Value value);
+bool valuesEquals(Value a, Value b);
 
 #endif //clox_value_h

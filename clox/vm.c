@@ -138,6 +138,20 @@ static InterpretResult run(){
                 push(BOOL_VAL(!isTruthy(pop())));
                 break;
             }
+            case OP_EQUAL: {
+                Value b = pop();
+                Value a = pop();
+                push(BOOL_VAL(valuesEquals(a, b)));
+                break;
+            }
+            case OP_LESS: {
+                BINARY_OPERATION(BOOL_VAL, <);
+                break;
+            }
+            case OP_GREATER: {
+                BINARY_OPERATION(BOOL_VAL, >);
+                break;
+            }
             case OP_CONSTANT: {
                 Value constant = READ_CONSTANT();
                 push(constant);
