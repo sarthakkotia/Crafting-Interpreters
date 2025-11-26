@@ -1,3 +1,4 @@
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include "debug.h"
@@ -10,6 +11,19 @@ VM vm;
 
 static void resetStack(){
     initVMStack(&vm.vmStack);
+}
+
+static void runtimeError(const char *msg, ...) {
+    va_list args;
+    va_start(args, msg);
+    vfprintf(stderr, msg, args);
+    va_end(args);
+    fputs("\n", stderr);
+
+    size_t instruction = vm.ip - vm.chunk->code - 1;
+    int line = vm.chunk->linesArray.lines[instruction];
+    fprintf(stderr, "[line %d] in script\n", line);
+    resetStack();
 }
 
 void initVM(){
@@ -28,6 +42,14 @@ Value pop(){
     return popVMStack(&vm.vmStack);
 }
 
+Value peek(int distance) {
+    return vm.vmStack.stack[vm.vmStack.count - distance - 1];
+}
+
+static bool isTruthy(Value value) {
+    if (IS_NIL(value) || (IS_BOOL(value) && !AS_BOOL(value))) return false;
+    return true;
+}
 
 static InterpretResult run(){
 #define READ_BYTE() ({\
@@ -46,10 +68,14 @@ static InterpretResult run(){
     uint32_t result = index3<<16 | index2<<8 | index1;\
     vm.chunk->constants.values[result];\
 })
-#define BINARY_OPERATION(operator)({\
-    Value right = pop();\
-    Value left = pop();\
-    left operator right;\
+#define BINARY_OPERATION(valueType, operator)({\
+    if(!IS_NUMBER(peek(0)) || !IS_NUMBER(peek(1))){\
+        runtimeError("Operands must be numbers");\
+        return INTERPRET_RUNTIME_ERROR;\
+    }\
+    double right = AS_NUMBER(pop());\
+    double left = AS_NUMBER(pop());\
+    push(valueType(left operator right));\
 })
 
     for(;;){
@@ -65,44 +91,73 @@ static InterpretResult run(){
 #endif
         uint8_t instruction = READ_BYTE();
         switch (instruction) {
-            case OP_RETURN:{
+            case OP_RETURN: {
                 printValue(pop());
                 printf("\n");
                 return INTERPRET_OK;
             }
             //unary operations
-            case OP_NEGATE:{
-                Value *value = &vm.vmStack.stack[vm.vmStack.count-1];
-                *(value) = -(Value)(*(value));
+            case OP_NEGATE: {
+                if (!IS_NUMBER(peek(0))) {
+                    runtimeError("Operand must be a number.");
+                    return INTERPRET_RUNTIME_ERROR;
+                }
+                push(NUMBER_VAL(-AS_NUMBER(pop())));
                 break;
             }
             //binary operations
-            case OP_ADD:{
-                Value value = BINARY_OPERATION(+);
-                push(value);
+            case OP_ADD: {
+                BINARY_OPERATION(NUMBER_VAL, +);
                 break;
             }
-            case OP_SUBTRACT:{
-                Value value = BINARY_OPERATION(-);
-                push(value);
+            case OP_SUBTRACT: {
+                BINARY_OPERATION(NUMBER_VAL, -);
                 break;
             }
-            case OP_MULTIPLY:{
-                Value value = BINARY_OPERATION(*);
-                push(value);
+            case OP_MULTIPLY: {
+                BINARY_OPERATION(NUMBER_VAL, *);
                 break;
             }
-            case OP_DIVIDE:{
-                Value value = BINARY_OPERATION(/);
-                push(value);
+            case OP_DIVIDE: {
+                BINARY_OPERATION(NUMBER_VAL, /);
                 break;
             }
-            case OP_CONSTANT:{
+            case OP_NIL: {
+                push(NIL_VAL);
+                break;
+            }
+            case OP_TRUE: {
+                push(BOOL_VAL(true));
+                break;
+            }
+            case OP_FALSE: {
+                push(BOOL_VAL(false));
+                break;
+            }
+            case OP_NOT: {
+                push(BOOL_VAL(!isTruthy(pop())));
+                break;
+            }
+            case OP_EQUAL: {
+                Value b = pop();
+                Value a = pop();
+                push(BOOL_VAL(valuesEquals(a, b)));
+                break;
+            }
+            case OP_LESS: {
+                BINARY_OPERATION(BOOL_VAL, <);
+                break;
+            }
+            case OP_GREATER: {
+                BINARY_OPERATION(BOOL_VAL, >);
+                break;
+            }
+            case OP_CONSTANT: {
                 Value constant = READ_CONSTANT();
                 push(constant);
                 break;
             }
-            case OP_CONSTANT_LONG:{
+            case OP_CONSTANT_LONG: {
                 Value longConstant = READ_LONG_CONSTANT();
                 push(longConstant);
                 break;
