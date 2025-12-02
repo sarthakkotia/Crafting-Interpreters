@@ -11,11 +11,11 @@ Chunk *compilingChunk;
 static ParseRule *getRule(TokenType type);
 static void parsePrecedence(Precedence precedence);
 
-static Chunk *currentChunk(){
+static Chunk *currentChunk() {
     return compilingChunk;
 }
 
-static void errorAt(Token *token, const char *message){
+static void errorAt(Token *token, const char *message) {
     if(parser.panicMode) return;
     parser.panicMode = true;
     fprintf(stderr, "[line %d] Error", token->line);
@@ -35,12 +35,12 @@ static void error(const char* message) {
     errorAt(&parser.previous, message);
 }
 
-static void errorAtCurrent(const char *message){
+static void errorAtCurrent(const char *message) {
     errorAt(&parser.current, message);
 }
 
 
-static void advance(){
+static void advance() {
     parser.previous = parser.current;
     for(;;){
         parser.current = scanToken();
@@ -49,7 +49,7 @@ static void advance(){
     }
 }
 
-static void consume(TokenType tokenType, const char *message){
+static void consume(TokenType tokenType, const char *message) {
     if(parser.current.type != tokenType){
         errorAt(&parser.current, message);
     }
@@ -57,21 +57,21 @@ static void consume(TokenType tokenType, const char *message){
     return;
 }
 
-static void emitByte(uint8_t byte){
+static void emitByte(uint8_t byte) {
     writeChunk(currentChunk(), byte, parser.previous.line);
 }
 
-static void emitBytes(uint8_t byte1, uint8_t byte2){
+static void emitBytes(uint8_t byte1, uint8_t byte2) {
     emitByte(byte1);
     emitByte(byte2);
 }
 //TODO: Add another helper function to write / emit the long byte operand as well the same way like we did the emit Bytes function
 
-static void emitReturn(){
+static void emitReturn() {
     emitByte(OP_RETURN);
 }
 
-static void endCompiler(){
+static void endCompiler() {
     emitReturn();
 #ifdef DEBUG_PRINT_CODE
     if(!parser.hadError){
@@ -80,7 +80,7 @@ static void endCompiler(){
 #endif
 }
 
-static void binary(){
+static void binary() {
     TokenType operatorType = parser.previous.type;
     ParseRule *rule = getRule(operatorType);
     parsePrecedence((Precedence)(rule->precedence + 1));
@@ -137,16 +137,16 @@ static void literal() {
     }
 }
 
-static void expression(){
+static void expression() {
     parsePrecedence(PREC_ASSIGNMENT);
 }
 
-static void grouping(){
+static void grouping() {
     expression();
     consume(TOKEN_RIGHT_PAREN, "Expect ')' after expression");
 }
 
-static uint8_t makeConstant(Value value){
+static uint8_t makeConstant(Value value) {
     int constant_idx = addConstant(currentChunk(), value);
     if(constant_idx > UINT8_MAX){
         error("Too many constants in one chunk");
@@ -155,13 +155,17 @@ static uint8_t makeConstant(Value value){
     return (uint8_t) constant_idx;
 }
 
-static void emitConstant(Value value){
+static void emitConstant(Value value) {
     emitBytes(OP_CONSTANT, makeConstant(value));
 }
 
-static void number(){
+static void number() {
     double value = strtod(parser.previous.start, NULL);
     emitConstant(NUMBER_VAL(value));
+}
+
+static void string() {
+    emitConstant(OBJ_VAL(copyString(parser.previous.start + 1, parser.previous.length - 2)));
 }
 
 static void unary(){
@@ -203,7 +207,7 @@ ParseRule rules[] = {
         [TOKEN_LESS_EQUAL] = {NULL, binary, PREC_COMPARISON},
 
         [TOKEN_IDENTIFIER] = {NULL, NULL, PREC_NONE},
-        [TOKEN_STRING] = {NULL, NULL, PREC_NONE},
+        [TOKEN_STRING] = {string, NULL, PREC_NONE},
         [TOKEN_NUMBER] = {number, NULL, PREC_NONE},
 
         [TOKEN_AND] = {NULL, NULL, PREC_NONE},

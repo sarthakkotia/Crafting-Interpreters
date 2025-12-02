@@ -3,6 +3,7 @@
 
 #include "chunk.h"
 #include "scanner.h"
+#include "object.h"
 
 typedef struct{
     Token current;
