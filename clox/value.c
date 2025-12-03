@@ -34,8 +34,10 @@ void printValue(Value value){
             break;
         case VAL_BOOL:
             printf(AS_BOOL(value) ? "true" : "false");
+            break;
         case VAL_OBJ:
-            printf("object_type->%d", AS_OBJ(value)->type);
+            printObject(value);
+            break;
     }
 }
 

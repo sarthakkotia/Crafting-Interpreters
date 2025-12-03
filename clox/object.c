@@ -1,4 +1,5 @@
 #include <string.h>
+#include <stdio.h>
 
 #include "object.h"
 #include "memory.h"
@@ -28,4 +29,12 @@ ObjString* copyString(const char *characters, int length) {
     memcpy(heapChars, characters, length);
     heapChars[length] = '\0';
     return allocateString(heapChars, length);
+}
+
+void printObject(Value value) {
+    switch (OBJ_TYPE(value)) {
+        case OBJ_STRING:
+            printf("%s", AS_CSTRING(value));
+            break;
+    }
 }
