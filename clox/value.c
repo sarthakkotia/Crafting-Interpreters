@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include "value.h"
 #include "memory.h"
+#include "object.h"
 
 void initValueArray(ValueArray* valueArray){
     valueArray->capacity = 0;
@@ -33,6 +34,8 @@ void printValue(Value value){
             break;
         case VAL_BOOL:
             printf(AS_BOOL(value) ? "true" : "false");
+        case VAL_OBJ:
+            printf("object_type->%d", AS_OBJ(value)->type);
     }
 }
 
