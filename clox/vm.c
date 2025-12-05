@@ -29,10 +29,12 @@ static void runtimeError(const char *msg, ...) {
 
 void initVM() {
     resetStack();
+    vm.objects = NULL;
 }
 
 void freeVM() {
     freeVMStack(&vm.vmStack);
+    freeObjects();
 }
 
 void push(Value value) {
