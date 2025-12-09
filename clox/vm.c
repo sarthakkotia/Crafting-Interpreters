@@ -1,6 +1,7 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "debug.h"
 #include "memory.h"
 #include "vm.h"
@@ -9,7 +10,7 @@
 
 VM vm;
 
-static void resetStack(){
+static void resetStack() {
     initVMStack(&vm.vmStack);
 }
 
@@ -26,19 +27,21 @@ static void runtimeError(const char *msg, ...) {
     resetStack();
 }
 
-void initVM(){
+void initVM() {
     resetStack();
+    vm.objects = NULL;
 }
 
-void freeVM(){
+void freeVM() {
     freeVMStack(&vm.vmStack);
+    freeObjects();
 }
 
-void push(Value value){
+void push(Value value) {
     pushVMStack(value, &vm.vmStack);
 }
 
-Value pop(){
+Value pop() {
     return popVMStack(&vm.vmStack);
 }
 
@@ -51,7 +54,20 @@ static bool isTruthy(Value value) {
     return true;
 }
 
-static InterpretResult run(){
+static void concatenate() {
+    ObjString *right = AS_STRING(pop());
+    ObjString *left = AS_STRING(pop());
+    int length = right->length + left->length;
+    char *result = ALLOCATE(char, length + 1);
+    memcpy(result, left->characters, left->length);
+    memcpy(result + left->length, right->characters, right->length);
+    result[length] = '\0';
+
+    ObjString *answer = takeString(result, length);
+    push(OBJ_VAL(answer));
+}
+
+static InterpretResult run() {
 #define READ_BYTE() ({\
     uint8_t bytecode = *(vm.ip); \
     vm.ip++;\
@@ -107,7 +123,11 @@ static InterpretResult run(){
             }
             //binary operations
             case OP_ADD: {
-                BINARY_OPERATION(NUMBER_VAL, +);
+                if (IS_STRING(peek(0)) && IS_STRING(peek(1))) {
+                    concatenate();
+                }else {
+                    BINARY_OPERATION(NUMBER_VAL, +);
+                }
                 break;
             }
             case OP_SUBTRACT: {
@@ -173,7 +193,7 @@ static InterpretResult run(){
 #undef READ_BYTE
 }
 
-InterpretResult interpret(const char* source){
+InterpretResult interpret(const char* source) {
     Chunk chunk;
     initChunk(&chunk);
 
@@ -189,7 +209,7 @@ InterpretResult interpret(const char* source){
     return result;
 }
 
-InterpretResult interpretChunk(Chunk* chunk){
+InterpretResult interpretChunk(Chunk* chunk) {
     vm.chunk = chunk;
     vm.ip = vm.chunk->code;
     return run();
