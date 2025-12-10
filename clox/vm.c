@@ -33,8 +33,8 @@ void initVM() {
 }
 
 void freeVM() {
-    freeVMStack(&vm.vmStack);
     freeObjects();
+    freeVMStack(&vm.vmStack);
 }
 
 void push(Value value) {
@@ -98,9 +98,9 @@ static InterpretResult run() {
 #ifdef DEBUG_TRACE_EXECUTION
         printf("******** Stack trace ********\n");
         for(int i = 0; i<vm.vmStack.count; i++){
-            printf("[ ");
+            printf("[");
             printValue(vm.vmStack.stack[i]);
-            printf(" ]");
+            printf("]");
         }
         printf("\n*****************************\n");
         disassembleInstruction(vm.chunk, (int) (vm.ip - vm.chunk->code));

@@ -30,9 +30,16 @@ void* reallocateWithZero(void* pointer, size_t oldSize, size_t newSize) {
 
 void freeObject(Obj *object) {
     switch (object->type) {
+        /*
         case OBJ_STRING: {
             ObjString *objectString = (ObjString *)object;
             FREE_ARRAY(char, objectString->characters, objectString->length);
+            FREE(ObjString, object);
+            break;
+        }
+        */
+        case OBJ_STRING: {
+            ObjString *objectString = (ObjString *)object;
             FREE(ObjString, object);
             break;
         }

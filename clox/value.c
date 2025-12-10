@@ -21,10 +21,21 @@ void writeValueArray(ValueArray* valueArray, Value value){
     valueArray->count++;
 }
 
+
 void freeValueArray(ValueArray* valueArray){
     FREE_ARRAY(Value, valueArray->values, valueArray->capacity);
     initValueArray(valueArray);
 }
+
+/*
+void freeValueArray(ValueArray* valueArray){
+    for (int i = 0; i<valueArray->count; i++) {
+        FREE(ObjString, valueArray->values + i);
+    }
+    initValueArray(valueArray);
+}
+*/
+
 
 void printValue(Value value){
     switch (value.type) {

@@ -1,5 +1,6 @@
 #include "stack.h"
 #include "memory.h"
+#include "object.h"
 #include "stdlib.h"
 
 void initVMStack(VMStack *vmStack){
@@ -23,6 +24,7 @@ Value popVMStack(VMStack *vmStack){
     Value value = vmStack->stack[vmStack->count];
     return value;
 }
+
 
 void freeVMStack(VMStack *vmStack){
     FREE_ARRAY(Value, vmStack->stack, vmStack->capacity);
