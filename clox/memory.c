@@ -40,7 +40,7 @@ void freeObject(Obj *object) {
         */
         case OBJ_STRING: {
             ObjString *objectString = (ObjString *)object;
-            FREE(ObjString, object);
+            reallocate(objectString, sizeof(objectString), 0);
             break;
         }
     }
