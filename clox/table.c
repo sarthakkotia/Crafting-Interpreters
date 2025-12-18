@@ -105,7 +105,7 @@ void tableAddAll(Table *from, Table *to) {
     }
 }
 
-ObjString *tableFindString(Table* table, const char* characters, int length, int hash) {
+ObjString *tableFindString(Table* table, const char* characters, int length, uint32_t hash) {
     if (table->count == 0) return NULL;
 
     uint32_t index = hash % table->capacity;
