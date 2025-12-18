@@ -42,6 +42,8 @@ ObjString* takeString(char *charactes, int length) {
 
 ObjString* copyString(const char *characters, int length) {
     uint32_t hash = hashString(characters, length);
+    ObjString *interned = tableFindString(&vm.strings, characters, length, hash);
+    if (interned != NULL) return interned;
     char *heapChars = ALLOCATE(char, length + 1);
     memcpy(heapChars, characters, length);
     heapChars[length] = '\0';
