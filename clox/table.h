@@ -20,5 +20,6 @@ bool tableGet(Table *table, ObjString *key, Value *value);
 bool tableSet(Table *table, ObjString *key, Value value);
 bool tableDelete(Table *table, ObjString *key);
 void tableAddAll(Table *from, Table *to);
+bool tableFindString(Table* table, const char* characters, int length, int hash);
 
 #endif //CLOX_TABLE_H

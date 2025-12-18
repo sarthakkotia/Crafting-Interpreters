@@ -21,6 +21,7 @@ static ObjString* allocateString(char *heapChars, int length, uint32_t hash) {
     string->length = length;
     string->characters = heapChars;
     string->hash = hash;
+    tableSet(&vm.strings, string, NIL_VAL);
     return string;
 }
 
