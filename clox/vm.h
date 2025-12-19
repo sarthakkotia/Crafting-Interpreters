@@ -3,14 +3,16 @@
 
 #include "chunk.h"
 #include "stack.h"
+#include "table.h"
 
 #define STACK_MAX 256
 
 typedef struct{
-   Chunk* chunk;
-   uint8_t* ip; // instruction pointer / program counter
-   VMStack vmStack;
-   Obj *objects;
+    Chunk* chunk;
+    uint8_t* ip; // instruction pointer / program counter
+    VMStack vmStack;
+    Table strings;
+    Obj *objects;
 }VM;
 
 typedef enum{
