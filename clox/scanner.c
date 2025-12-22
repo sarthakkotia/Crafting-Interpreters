@@ -158,9 +158,9 @@ static Token handleIdentifiers(){
 Token scanToken(){
     scanner.start = scanner.current;
 
-    if(isAtEnd()) return makeToken(TOKEN_EOF);
-    
     skipWhitespace();
+
+    if(isAtEnd()) return makeToken(TOKEN_EOF);
 
     scanner.start = scanner.current;
 
