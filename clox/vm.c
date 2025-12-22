@@ -110,8 +110,6 @@ static InterpretResult run() {
         uint8_t instruction = READ_BYTE();
         switch (instruction) {
             case OP_RETURN: {
-                printValue(pop());
-                printf("\n");
                 return INTERPRET_OK;
             }
             //unary operations
@@ -174,6 +172,14 @@ static InterpretResult run() {
                 BINARY_OPERATION(BOOL_VAL, >);
                 break;
             }
+            case OP_PRINT: {
+                printf("\n");
+                printValue(pop());
+                printf("\n");
+                break;
+            }
+            case OP_POP:
+                pop(); break;
             case OP_CONSTANT: {
                 Value constant = READ_CONSTANT();
                 push(constant);

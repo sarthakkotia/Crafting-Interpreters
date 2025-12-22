@@ -18,6 +18,8 @@ typedef enum {
     OP_EQUAL,
     OP_LESS,
     OP_GREATER,
+    OP_PRINT,
+    OP_POP,
     // from this line all the opcodes have operands
     OP_CONSTANT,
     OP_CONSTANT_LONG,
