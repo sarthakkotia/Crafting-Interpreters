@@ -31,12 +31,14 @@ void initVM() {
     resetStack();
     vm.objects = NULL;
     initTable(&vm.strings);
+    initTable(&vm.globals);
 }
 
 void freeVM() {
     freeVMStack(&vm.vmStack);
     freeObjects();
     freeTable(&vm.strings);
+    freeTable(&vm.globals);
 }
 
 void push(Value value) {
@@ -78,6 +80,9 @@ static InterpretResult run() {
 #define READ_CONSTANT()({\
     uint8_t constantIndex = READ_BYTE();\
     vm.chunk->constants.values[constantIndex];\
+})
+#define READ_STRING()({\
+    AS_STRING(READ_CONSTANT());\
 })
 #define READ_LONG_CONSTANT()({\
     uint8_t index1 = READ_BYTE();\
@@ -185,6 +190,12 @@ static InterpretResult run() {
                 push(constant);
                 break;
             }
+            case OP_DEFINE_GLOBAL: {
+                ObjString *name = READ_STRING();
+                tableSet(&vm.globals, name, peek(0));
+                pop();
+                break;
+            }
             case OP_CONSTANT_LONG: {
                 Value longConstant = READ_LONG_CONSTANT();
                 push(longConstant);
@@ -197,6 +208,7 @@ static InterpretResult run() {
 
 #undef BINARY_OPERATION
 #undef READ_LONG_CONSTANT
+#undef READ_STRING
 #undef READ_CONSTANT
 #undef READ_BYTE
 }

@@ -22,6 +22,7 @@ typedef enum {
     OP_POP,
     // from this line all the opcodes have operands
     OP_CONSTANT,
+    OP_DEFINE_GLOBAL,
     OP_CONSTANT_LONG,
 } OpCode;
 

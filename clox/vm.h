@@ -12,6 +12,7 @@ typedef struct{
     uint8_t* ip; // instruction pointer / program counter
     VMStack vmStack;
     Table strings;
+    Table globals;
     Obj *objects;
 }VM;
 
