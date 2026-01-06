@@ -196,6 +196,16 @@ static InterpretResult run() {
                 pop();
                 break;
             }
+            case OP_GET_GLOBAL: {
+                ObjString *name = READ_STRING();
+                Value value;
+                if (!tableGet(&vm.globals, name, &value)) {
+                    runtimeError("Undefined variable '%s'.", name->characters);
+                    return INTERPRET_COMPILE_ERROR;
+                }
+                push(value);
+                break;
+            }
             case OP_CONSTANT_LONG: {
                 Value longConstant = READ_LONG_CONSTANT();
                 push(longConstant);
