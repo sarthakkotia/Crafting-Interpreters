@@ -35,16 +35,20 @@ uint32_t hashString(const char *key, int length) {
     return hash;
 }
 
-ObjString* takeString(char *charactes, int length) {
-    uint32_t hash = hashString(charactes, length);
-    return allocateString(charactes, length, hash);
+ObjString* takeString(char *characters, int length) {
+    uint32_t hash = hashString(characters, length);
+    ObjString *interned = tableFindString(&vm.strings, characters, length, hash);
+    if (interned != NULL) {
+        FREE_ARRAY(char, characters, length + 1);
+        return interned;
+    }
+    return allocateString(characters, length, hash);
 }
 
 ObjString* copyString(const char *characters, int length) {
     uint32_t hash = hashString(characters, length);
     ObjString *interned = tableFindString(&vm.strings, characters, length, hash);
     if (interned != NULL) {
-        FREE_ARRAY(char, characters, length + 1);
         return interned;
     }
     char *heapChars = ALLOCATE(char, length + 1);
