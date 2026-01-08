@@ -161,7 +161,8 @@ static void emitConstant(Value value) {
 
 static void number() {
     double value = strtod(parser.previous.start, NULL);
-    emitConstant(NUMBER_VAL(value));
+    uint32_t hash = hashNumber(value);
+    emitConstant(NUMBER_VAL(value, hash));
 }
 
 static void string() {

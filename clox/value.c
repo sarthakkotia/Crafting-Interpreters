@@ -53,3 +53,15 @@ bool valuesEquals(Value a, Value b) {
         default: return false;
     }
 }
+
+uint32_t hashNumber(double number) {
+    /* FNV-1a algorithm */
+    uint32_t hash = 2166136261u;
+    const unsigned char* ptr = (const unsigned char*)&number;
+    int length = sizeof(number);
+    for (int i = 0; i < length; i++) {
+        hash ^= *ptr++;
+        hash *= 16777619;
+    }
+    return hash;
+}

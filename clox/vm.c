@@ -93,9 +93,20 @@ static InterpretResult run() {
     }\
     double right = AS_NUMBER(pop());\
     double left = AS_NUMBER(pop());\
-    push(valueType(left operator right));\
+    double answer = left operator right;\
+    uint32_t hash = hashNumber(answer);\
+    push(valueType(left operator right, hash));\
 })
-
+#define BINARY_CONDITIONAL_OPERATION(operator)({\
+    if(!IS_NUMBER(peek(0)) || !IS_NUMBER(peek(1))){\
+        runtimeError("Operands must be numbers");\
+        return INTERPRET_RUNTIME_ERROR;\
+    }\
+    double right = AS_NUMBER(pop());\
+    double left = AS_NUMBER(pop());\
+    bool answer = left operator right;\
+    push(BOOL_VAL(left operator right));\
+})
     for(;;){
 #ifdef DEBUG_TRACE_EXECUTION
         printf("******** Stack trace ********\n");
@@ -120,7 +131,9 @@ static InterpretResult run() {
                     runtimeError("Operand must be a number.");
                     return INTERPRET_RUNTIME_ERROR;
                 }
-                push(NUMBER_VAL(-AS_NUMBER(pop())));
+                double number = -AS_NUMBER(pop());
+                uint32_t hash = hashNumber(number);
+                push(NUMBER_VAL(number, hash));
                 break;
             }
             //binary operations
@@ -167,11 +180,11 @@ static InterpretResult run() {
                 break;
             }
             case OP_LESS: {
-                BINARY_OPERATION(BOOL_VAL, <);
+                BINARY_CONDITIONAL_OPERATION(<);
                 break;
             }
             case OP_GREATER: {
-                BINARY_OPERATION(BOOL_VAL, >);
+                BINARY_CONDITIONAL_OPERATION(>);
                 break;
             }
             case OP_CONSTANT: {

@@ -14,5 +14,9 @@ typedef struct {
     Entry *entries;
 } user_table;
 
+void initUserTable(user_table *user_table);
+void freeUserTable(user_table *user_table);
+
+
 
 #endif //CLOX_USER_TABLE_H
