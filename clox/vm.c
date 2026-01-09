@@ -66,7 +66,7 @@ static void concatenate() {
     result[length] = '\0';
 
     ObjString *answer = takeString(result, length);
-    push(OBJ_VAL(answer));
+    push(OBJ_VAL(answer, answer->hash));
 }
 
 static InterpretResult run() {

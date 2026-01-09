@@ -53,8 +53,8 @@ typedef struct {
 #define NIL_VAL \
     ((Value){VAL_NIL, 0, {.number = 0}})
 
-#define OBJ_VAL(value) \
-    ((Value){VAL_OBJ, 0, {.obj = (Obj *)value}})
+#define OBJ_VAL(value, hash) \
+    ((Value){VAL_OBJ, hash, {.obj = (Obj *)value}})
 
 typedef struct{
     int capacity;
