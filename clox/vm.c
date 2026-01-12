@@ -206,6 +206,15 @@ static InterpretResult run() {
                 push(value);
                 break;
             }
+            case OP_SET_GLOBAL: {
+                ObjString *name = READ_STRING();
+                if (tableSet(&vm.globals, name, peek(0))) {
+                    tableDelete(&vm.globals, name);
+                    runtimeError("Undefined variable '%s'.", name->characters);
+                    return INTERPRET_COMPILE_ERROR;
+                }
+                break;
+            }
             case OP_CONSTANT_LONG: {
                 Value longConstant = READ_LONG_CONSTANT();
                 push(longConstant);

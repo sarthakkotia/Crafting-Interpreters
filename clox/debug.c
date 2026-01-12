@@ -76,6 +76,8 @@ int disassembleInstruction(Chunk* chunk, int offset){
             return constantInstruction("OP_DEFINE_GLOBAL", offset, chunk);
         case OP_GET_GLOBAL:
             return constantInstruction("OP_GET_GLOBAL", offset, chunk);
+        case OP_SET_GLOBAL:
+            return constantInstruction("OP_SET_GLOBAL", offset, chunk);
         case OP_CONSTANT_LONG:
             return longConstantInstruction("OP_CONSTANT_LONG", offset, chunk);
         default:

@@ -24,6 +24,7 @@ typedef enum {
     OP_CONSTANT,
     OP_DEFINE_GLOBAL,
     OP_GET_GLOBAL,
+    OP_SET_GLOBAL,
     OP_CONSTANT_LONG,
 } OpCode;
 
