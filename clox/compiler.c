@@ -6,6 +6,7 @@
 #endif
 
 Parser parser;
+Compiler *current = NULL;
 Chunk *compilingChunk;
 
 static void declaration();
@@ -242,6 +243,12 @@ static void emitConstant(Value value) {
     emitBytes(OP_CONSTANT, makeConstant(value));
 }
 
+static void initCompiler(Compiler *compiler) {
+    compiler->localCount = 0;
+    compiler->scopeDepth = 0;
+    current = compiler;
+}
+
 static void number(bool canAssign) {
     double value = strtod(parser.previous.start, NULL);
     emitConstant(NUMBER_VAL(value));
@@ -372,6 +379,8 @@ bool compile(const char *source, Chunk *chunk){
     // save them into chunks
     // save those chunks into bytecode
     initScanner(source);
+    Compiler compiler;
+    initCompiler(&compiler);
 
     parser.hadError = false;
     parser.panicMode = false;
