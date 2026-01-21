@@ -1,14 +1,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "compiler.h"
+#include "table.h"
 #ifdef DEBUG_PRINT_CODE
 #include "debug.h"
-#include "global_identifier_stack.h"
 #endif
 
 Parser parser;
 Chunk *compilingChunk;
-global_identifier_stack *stack;
+Table identifiers;
 
 static void declaration();
 static void statement();
@@ -254,14 +254,9 @@ static void string(bool canAssign) {
 }
 
 static void namedVariable(Token name, bool canAssign) {
-    int idx = lookupIdentifier(stack, name);
-    uint8_t arg = -1;
-
-    if (idx == -1) arg = identifierConstant(&name);
-    else arg = getIndex(stack, idx);
+    uint8_t arg = identifierConstant(&name);
 
     if (canAssign && match(TOKEN_EQUAL)) {
-        insertName(stack, name, arg);
         expression();
         emitBytes(OP_SET_GLOBAL, arg);
     } else {
@@ -365,7 +360,17 @@ static void defineVariable(uint8_t global) {
 }
 
 static uint8_t identifierConstant(Token *name) {
-    return makeConstant(OBJ_VAL(copyString(name->start, name->length)));
+    // See if we already have it.
+    ObjString* string = copyString(name->start, name->length);
+    Value indexValue;
+    if (tableGet(&identifiers, string, &indexValue)) {
+        // We do.
+        return (uint8_t)AS_NUMBER(indexValue);
+    }
+
+    uint8_t index = makeConstant(OBJ_VAL(string));
+    tableSet(&identifiers, string, NUMBER_VAL((double)index));
+    return index;
 }
 
 static ParseRule* getRule(TokenType type){
@@ -379,13 +384,11 @@ bool compile(const char *source, Chunk *chunk){
     // save them into chunks
     // save those chunks into bytecode
     initScanner(source);
-    global_identifier_stack identifier_stack;
-    initGlobalIdentifierStack(&identifier_stack);
-    stack = &identifier_stack;
 
     parser.hadError = false;
     parser.panicMode = false;
     compilingChunk = chunk;
+    initTable(&identifiers);
 
     advance();
     while (!match(TOKEN_EOF)) {
