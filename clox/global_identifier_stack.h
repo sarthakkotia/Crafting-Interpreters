@@ -1,10 +1,10 @@
 #ifndef CLOX_GLOBAL_IDENTIFIER_STACK_H
 #define CLOX_GLOBAL_IDENTIFIER_STACK_H
 #include "common.h"
-#include "object.h"
+#include "scanner.h"
 
 typedef struct {
-    ObjString *name;
+    Token name;
     uint8_t index;
 } identifier;
 
@@ -14,7 +14,9 @@ typedef struct {
 } global_identifier_stack;
 
 void initGlobalIdentifierStack(global_identifier_stack *global_identifier_stack);
-void insertIdentifier(global_identifier_stack *global_identifier_stack, identifier identifier);
-int lookupIdentifier(global_identifier_stack *global_identifier_stack, ObjString *identifier);
+static void insertIdentifier(global_identifier_stack *global_identifier_stack, identifier identifier);
+int lookupIdentifier(global_identifier_stack *global_identifier_stack, Token name);
+int getIndex(global_identifier_stack *global_identifier_stack, int index);
+void insertName(global_identifier_stack *global_identifier_stack, Token name, int index);
 
 #endif //CLOX_GLOBAL_IDENTIFIER_STACK_H

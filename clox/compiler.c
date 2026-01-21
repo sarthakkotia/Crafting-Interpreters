@@ -3,10 +3,12 @@
 #include "compiler.h"
 #ifdef DEBUG_PRINT_CODE
 #include "debug.h"
+#include "global_identifier_stack.h"
 #endif
 
 Parser parser;
 Chunk *compilingChunk;
+global_identifier_stack *stack;
 
 static void declaration();
 static void statement();
@@ -252,9 +254,14 @@ static void string(bool canAssign) {
 }
 
 static void namedVariable(Token name, bool canAssign) {
-    uint8_t arg = identifierConstant(&name);
+    int idx = lookupIdentifier(stack, name);
+    uint8_t arg = -1;
+
+    if (idx == -1) arg = identifierConstant(&name);
+    else arg = getIndex(stack, idx);
 
     if (canAssign && match(TOKEN_EQUAL)) {
+        insertName(stack, name, arg);
         expression();
         emitBytes(OP_SET_GLOBAL, arg);
     } else {
@@ -372,6 +379,9 @@ bool compile(const char *source, Chunk *chunk){
     // save them into chunks
     // save those chunks into bytecode
     initScanner(source);
+    global_identifier_stack identifier_stack;
+    initGlobalIdentifierStack(&identifier_stack);
+    stack = &identifier_stack;
 
     parser.hadError = false;
     parser.panicMode = false;
