@@ -97,6 +97,14 @@ static void endCompiler() {
 #endif
 }
 
+static void beginScope() {
+    current->scopeDepth++;
+}
+
+static void endScope() {
+    current->scopeDepth--;
+}
+
 static void binary(bool canAssign) {
     TokenType operatorType = parser.previous.type;
     ParseRule *rule = getRule(operatorType);
@@ -156,6 +164,13 @@ static void literal(bool canAssign) {
 
 static void expression() {
     parsePrecedence(PREC_ASSIGNMENT);
+}
+
+static void block() {
+    while (!check(TOKEN_RIGHT_BRACE) && !match(TOKEN_EOF)) {
+        declaration();
+    }
+    consume(TOKEN_RIGHT_BRACE, "Expect '}' after the block.");
 }
 
 static void variableDeclaration() {
@@ -219,6 +234,10 @@ static void declaration() {
 static void statement() {
         if (match(TOKEN_PRINT)) {
             printStatement();
+        } else if (match(TOKEN_LEFT_BRACE)) {
+            beginScope();
+            block();
+            endScope();
         } else {
             expressionStatement();
         }
