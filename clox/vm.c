@@ -215,6 +215,16 @@ static InterpretResult run() {
                 }
                 break;
             }
+            case OP_GET_LOCAL: {
+                uint8_t index = READ_BYTE();
+                push(vm.vmStack.stack[index]);
+                break;
+            }
+            case OP_SET_LOCAL: {
+                uint8_t index = READ_BYTE();
+                vm.vmStack.stack[index] = peek(0);
+                break;
+            }
             case OP_CONSTANT_LONG: {
                 Value longConstant = READ_LONG_CONSTANT();
                 push(longConstant);
