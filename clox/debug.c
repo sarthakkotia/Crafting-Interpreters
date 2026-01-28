@@ -13,6 +13,11 @@ static int constantInstruction(const char* name, int offset, Chunk* chunk){
     printf("\n");
     return offset+2;
 }
+static int byteInstruction(const char *name, int offset, Chunk *chunk) {
+    uint8_t index = chunk->code[offset+1];
+    printf("%-16s %4d\n", name, index);
+    return offset+2;
+}
 static int longConstantInstruction(const char* name, int offset, Chunk* chunk){
     uint8_t constant_idx1 = chunk->code[offset+1];
     uint8_t constant_idx2 = chunk->code[offset+2];
@@ -78,6 +83,10 @@ int disassembleInstruction(Chunk* chunk, int offset){
             return constantInstruction("OP_GET_GLOBAL", offset, chunk);
         case OP_SET_GLOBAL:
             return constantInstruction("OP_SET_GLOBAL", offset, chunk);
+        case OP_GET_LOCAL:
+            return byteInstruction("OP_GET_LOCAL", offset, chunk);
+        case OP_SET_LOCAL:
+            return byteInstruction("OP_SET_LOCAL", offset, chunk);
         case OP_CONSTANT_LONG:
             return longConstantInstruction("OP_CONSTANT_LONG", offset, chunk);
         default:
