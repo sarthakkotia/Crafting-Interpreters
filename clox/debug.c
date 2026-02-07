@@ -96,9 +96,9 @@ int disassembleInstruction(Chunk* chunk, int offset){
         case OP_SET_LOCAL:
             return byteInstruction("OP_SET_LOCAL", offset, chunk);
         case OP_JUMP:
-            return jumpInstruction("OP_JUMP", 1, offset, chunk);
+            return jumpInstruction("OP_JUMP", 1, chunk, offset);
         case OP_JUMP_IF_FALSE:
-            return jumpInstruction("OP_JUMP_IF_FALSE", 1,  offset, chunk);
+            return jumpInstruction("OP_JUMP_IF_FALSE", 1,  chunk, offset);
         case OP_CONSTANT_LONG:
             return longConstantInstruction("OP_CONSTANT_LONG", offset, chunk);
         default:
