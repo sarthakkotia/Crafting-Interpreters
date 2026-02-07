@@ -81,6 +81,11 @@ static InterpretResult run() {
     uint8_t constantIndex = READ_BYTE();\
     vm.chunk->constants.values[constantIndex];\
 })
+#define READ_SHORT()({\
+    uint16_t jump = (uint16_t)((uint8_t)(vm.ip) | ((uint8_t)(vm.ip + 1) << 8));\
+    vm.ip = vm.ip + 2;\
+    jump;\
+})
 #define READ_STRING()({\
     AS_STRING(READ_CONSTANT());\
 })
@@ -225,6 +230,11 @@ static InterpretResult run() {
                 vm.vmStack.stack[index] = peek(0);
                 break;
             }
+            case OP_JUMP_IF_FALSE: {
+                uint16_t offset = READ_SHORT();
+                if (isFalsey(peek(0))) vm.ip += offset;
+                break;
+            }
             case OP_CONSTANT_LONG: {
                 Value longConstant = READ_LONG_CONSTANT();
                 push(longConstant);
@@ -238,6 +248,7 @@ static InterpretResult run() {
 #undef BINARY_OPERATION
 #undef READ_LONG_CONSTANT
 #undef READ_STRING
+#undef READ_SHORT
 #undef READ_CONSTANT
 #undef READ_BYTE
 }
