@@ -71,6 +71,7 @@ static void skipWhitespace(){
                 if(peekNext() == '/'){
                     while(peek() != '\n' && !isAtEnd())
                         getChar();
+                    break;
                 }else{
                     return;
                 }
@@ -156,13 +157,12 @@ static Token handleIdentifiers(){
 }
 
 Token scanToken(){
-    scanner.start = scanner.current;
 
     skipWhitespace();
+    scanner.start = scanner.current;
 
     if(isAtEnd()) return makeToken(TOKEN_EOF);
 
-    scanner.start = scanner.current;
 
 
     char c = getChar();
