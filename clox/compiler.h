@@ -4,6 +4,7 @@
 #include "chunk.h"
 #include "scanner.h"
 #include "object.h"
+#include "table.h"
 
 typedef struct{
     Token current;
@@ -43,6 +44,7 @@ typedef struct {
     Local locals[UINT8_COUNT];
     int localCount;
     int scopeDepth;
+    Table constStrings;
 } Compiler;
 
 bool compile(const char *source, Chunk *chunk);

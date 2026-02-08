@@ -13,6 +13,7 @@ typedef struct{
     VMStack vmStack;
     Table strings;
     Table globals;
+    Table consts;
     Obj *objects;
 }VM;
 

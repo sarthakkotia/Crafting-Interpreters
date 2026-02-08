@@ -20,7 +20,9 @@ static uint8_t identifierConstant(Token *name);
 static void declareVariable();
 static void defineVariable(uint8_t global);
 static int resolveLocal(Compiler *compiler, Token *name);
-
+static void defineConstVariable(uint8_t global);
+static uint8_t parseConstVariable(const char *errMsg);
+static void freeCompiler(Compiler *compiler);
 
 static Chunk *currentChunk() {
     return compilingChunk;
@@ -99,6 +101,7 @@ static void endCompiler() {
         disassembleChunk(currentChunk(), "code");
     }
 #endif
+    freeCompiler(current);
 }
 
 static void beginScope() {
@@ -195,6 +198,20 @@ static void variableDeclaration() {
 
 }
 
+static void constDeclaration() {
+    // uint8_t const_idx = parseConstVariable("Expect variable name");
+    uint8_t const_idx = parseConstVariable("Expect variable name");
+    if (match(TOKEN_EQUAL)) {
+        expression();
+    } else {
+        error("Constant variable can never be nil or uninitialized");
+    }
+    consume(TOKEN_SEMICOLON,"Expect ';' after variable declaration");
+
+     defineConstVariable(const_idx);
+    // defineVariable(const_idx);
+}
+
 static void expressionStatement() {
     expression();
     consume(TOKEN_SEMICOLON, "Expect ';' at the end of expression");
@@ -234,6 +251,8 @@ static void synchronize() {
 static void declaration() {
     if (match(TOKEN_VAR)) {
         variableDeclaration();
+    } else if (match(TOKEN_CONST)){
+        constDeclaration();
     } else {
         statement();
     }
@@ -274,7 +293,12 @@ static void emitConstant(Value value) {
 static void initCompiler(Compiler *compiler) {
     compiler->localCount = 0;
     compiler->scopeDepth = 0;
+    initTable(&compiler->constStrings);
     current = compiler;
+}
+
+static void freeCompiler(Compiler *compiler) {
+    freeTable(&compiler->constStrings);
 }
 
 static void number(bool canAssign) {
@@ -299,7 +323,14 @@ static void namedVariable(Token name, bool canAssign) {
         setOp = OP_SET_GLOBAL;
     }
 
-    if (canAssign && match(TOKEN_EQUAL)) {
+    if (canAssign && check(TOKEN_EQUAL)) {
+        ObjString *string = AS_STRING(compilingChunk->constants.values[arg]);
+        ObjString *stringInConst = tableFindString(&current->constStrings, string->characters, string->length, string->hash);
+        if (stringInConst != NULL) {
+            free(string);
+            error("const variable cannot be reinitialized.");
+        }
+        consume(TOKEN_EQUAL, "expect '=' after variable");
         expression();
         emitBytes(setOp, (uint8_t)arg);
     } else {
@@ -396,8 +427,35 @@ static void parsePrecedence(Precedence precedence){
 static uint8_t parseVariable(const char *errMsg) {
     consume(TOKEN_IDENTIFIER, errMsg);
 
+    ObjString *string = AS_STRING(OBJ_VAL(copyString(parser.previous.start, parser.previous.length)));
+    ObjString *stringInConst = tableFindString(&current->constStrings, string->characters, string->length, string->hash);
+    if (stringInConst != NULL) {
+        free(string);
+        error("const variable already exist.");
+        return -1;
+    }
+
     declareVariable();
     if (current->scopeDepth > 0) return 0;
+    return identifierConstant(&parser.previous);
+}
+
+static uint8_t parseConstVariable(const char *errMsg) {
+    consume(TOKEN_IDENTIFIER, errMsg);
+
+    ObjString *string = AS_STRING(OBJ_VAL(copyString(parser.previous.start, parser.previous.length)));
+    ObjString *stringInConst = tableFindString(&current->constStrings, string->characters, string->length, string->hash);
+    if (stringInConst != NULL) {
+        free(string);
+        error("const variable already exist.");
+        return -1;
+    }
+
+    tableSet(&current->constStrings, string, NIL_VAL);
+    if (current->scopeDepth > 0) {
+        error("const variables are only declared in global scope");
+        return 0;
+    }
     return identifierConstant(&parser.previous);
 }
 
@@ -411,6 +469,10 @@ static void defineVariable(uint8_t global) {
         return;
     }
     emitBytes(OP_DEFINE_GLOBAL, global);
+}
+
+static void defineConstVariable(uint8_t global) {
+    emitBytes(OP_DEFINE_CONST, global);
 }
 
 static uint8_t identifierConstant(Token *name) {

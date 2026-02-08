@@ -31,6 +31,7 @@ void initVM() {
     resetStack();
     vm.objects = NULL;
     initTable(&vm.strings);
+    initTable(&vm.consts);
     initTable(&vm.globals);
 }
 
@@ -38,6 +39,7 @@ void freeVM() {
     freeVMStack(&vm.vmStack);
     freeObjects();
     freeTable(&vm.strings);
+    freeTable(&vm.consts);
     freeTable(&vm.globals);
 }
 
@@ -200,8 +202,12 @@ static InterpretResult run() {
                 ObjString *name = READ_STRING();
                 Value value;
                 if (!tableGet(&vm.globals, name, &value)) {
-                    runtimeError("Undefined variable '%s'.", name->characters);
-                    return INTERPRET_COMPILE_ERROR;
+                    if (!tableGet(&vm.consts, name, &value)) {
+                        runtimeError("Undefined variable '%s'.", name->characters);
+                        return INTERPRET_COMPILE_ERROR;
+                    }
+                    push(value);
+                    break;
                 }
                 push(value);
                 break;
@@ -214,6 +220,13 @@ static InterpretResult run() {
                     return INTERPRET_COMPILE_ERROR;
                 }
                 break;
+            }
+            case OP_DEFINE_CONST: {
+                ObjString *name = READ_STRING();
+                tableSet(&vm.consts, name, peek(0));
+                pop();
+                break;
+
             }
             case OP_GET_LOCAL: {
                 uint8_t index = READ_BYTE();

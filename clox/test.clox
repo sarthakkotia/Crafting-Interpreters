@@ -1,8 +1,7 @@
-var a = 0;
-{
-    var a = 9;
-    {
-        print a;
-    }
-}
-print a;
+var a = 2;
+const b = 1;
+// b = 4;
+var c = 3;
+c = 4;
+print b;
+print c;
