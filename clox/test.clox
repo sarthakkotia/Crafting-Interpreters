@@ -1,5 +1,5 @@
 var a = 2;
-if(a == 2) {
+if(a == 2 and a == 2) {
     print a;
 }
 print 1;
