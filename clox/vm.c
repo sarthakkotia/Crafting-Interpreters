@@ -82,7 +82,7 @@ static InterpretResult run() {
     vm.chunk->constants.values[constantIndex];\
 })
 #define READ_SHORT()({\
-    uint16_t jump = (uint16_t)((uint8_t)(vm.ip) | ((uint8_t)(vm.ip + 1) << 8));\
+    uint16_t jump = (uint16_t)((uint8_t)(*vm.ip) << 8 | ((uint8_t)(*(vm.ip + 1))));\
     vm.ip = vm.ip + 2;\
     jump;\
 })
