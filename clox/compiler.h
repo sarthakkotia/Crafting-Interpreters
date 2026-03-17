@@ -40,7 +40,7 @@ typedef struct {
 } Local;
 
 typedef struct {
-    Local locals[UINT8_COUNT];
+    Local locals[UINT16_COUNT];
     int localCount;
     int scopeDepth;
 } Compiler;

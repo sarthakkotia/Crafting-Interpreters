@@ -77,6 +77,11 @@ static InterpretResult run() {
     vm.ip++;\
     bytecode;\
 })
+#define READ_SHORT()({\
+    uint16_t arg = (uint16_t)((uint8_t)(*vm.ip) << 8 | ((uint8_t)*(vm.ip + 1)));\
+    vm.ip = vm.ip + 2;\
+    arg;\
+})
 #define READ_CONSTANT()({\
     uint8_t constantIndex = READ_BYTE();\
     vm.chunk->constants.values[constantIndex];\
@@ -216,12 +221,12 @@ static InterpretResult run() {
                 break;
             }
             case OP_GET_LOCAL: {
-                uint8_t index = READ_BYTE();
+                uint16_t index = READ_SHORT();
                 push(vm.vmStack.stack[index]);
                 break;
             }
             case OP_SET_LOCAL: {
-                uint8_t index = READ_BYTE();
+                uint16_t index = READ_SHORT();
                 vm.vmStack.stack[index] = peek(0);
                 break;
             }
@@ -239,6 +244,7 @@ static InterpretResult run() {
 #undef READ_LONG_CONSTANT
 #undef READ_STRING
 #undef READ_CONSTANT
+#undef READ_SHORT
 #undef READ_BYTE
 }
 

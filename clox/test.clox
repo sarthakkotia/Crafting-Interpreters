@@ -1,8 +1,31 @@
-var a = 0;
 {
-    var a = 9;
-    {
-        print a;
-    }
+var a = "0"; var b = "0"; var c = "0"; var d = "0"; var e = "0"; var f = "0"; var g = "0"; var h = "0"; var i = "0"; var j = "0"; var k = "0"; var l = "0"; var m = "0"; var n = "0"; var o = "0"; var p = "0"; var q = "0"; var r = "0"; var s = "0"; var t = "0"; var u = "0"; var v = "0"; var w = "0"; var x = "0"; var y = "0"; var z = "0";
+
+
+var aa; var ab; var ac; var ad; var ae; var af; var ag; var ah; var ai; var aj; var ak; var al; var am; var an; var ao; var ap; var aq; var ar; var as; var at; var au; var av; var aw; var ax; var ay; var az;
+
+
+var ba; var bb; var bc; var bd; var be; var bf; var bg; var bh; var bi; var bj; var bk; var bl; var bm; var bn; var bo; var bp; var bq; var br; var bs; var bt; var bu; var bv; var bw; var bx; var by; var bz;
+
+
+var ca; var cb; var cc; var cd; var ce; var cf; var cg; var ch; var ci; var cj; var ck; var cl; var cm; var cn; var co; var cp; var cq; var cr; var cs; var ct; var cu; var cv; var cw; var cx; var cy; var cz;
+
+
+var da; var db; var dc; var dd; var de; var df; var dg; var dh; var di; var dj; var dk; var dl; var dm; var dn; var do; var dp; var dq; var dr; var ds; var dt; var du; var dv; var dw; var dx; var dy; var dz;
+
+
+var ea; var eb; var ec; var ed; var ee; var ef; var eg; var eh; var ei; var ej; var ek; var el; var em; var en; var eo; var ep; var eq; var er; var es; var et; var eu; var ev; var ew; var ex; var ey; var ez;
+
+
+var fa = "0"; var fb = "0"; var fc = "0"; var fd = "0"; var fe = "0"; var ff = "0"; var fg = "0"; var fh = "0"; var fi = "0"; var fj = "0"; var fk = "0"; var fl = "0"; var fm = "0"; var fn = "0"; var fo = "0"; var fp = "0"; var fq = "0"; var fr = "0"; var fs = "0"; var ft = "0"; var fu = "0"; var fv = "0"; var fw = "0"; var fx = "0"; var fy = "0"; var fz = "0";
+
+
+var ga = "0"; var gb = "0"; var gc = "0"; var gd = "0"; var ge = "0"; var gf = "0"; var gg = "0"; var gh = "0"; var gi = "0"; var gj = "0"; var gk = "0"; var gl = "0"; var gm = "0"; var gn = "0"; var go = "0"; var gp = "0"; var gq = "0"; var gr = "0"; var gs = "0"; var gt = "0"; var gu = "0"; var gv = "0"; var gw = "0"; var gx = "0"; var gy = "0"; var gz = "0";
+
+
+var ha = "0"; var hb = "0"; var hc = "0"; var hd = "0"; var he = "0"; var hf = "0"; var hg = "0"; var hh = "0"; var hi = "0"; var hj = "0"; var hk = "0"; var hl = "0"; var hm = "0"; var hn = "0"; var ho = "0"; var hp = "0"; var hq = "0"; var hr = "0"; var hs = "0"; var ht = "0"; var hu = "0"; var hv = "0"; var hw = "0"; var hx = "0"; var hy = "0"; var hz = "0";
+
+
+var ia = "0"; var ib = "0"; var ic = "0"; var id = "0"; var ie = "0"; var if_var = "0"; var ig = "0"; var ih = "0"; var ii = "0"; var ij = "0"; var ik = "0"; var il = "0"; var im = "0"; var in_var = "0"; var io = "0"; var ip = "0"; var iq = "0"; var ir = "0"; var is_var = "0"; var it = "0"; var iu = "0"; var iv = "0"; var iw = "0"; var ix = "0";
+print ix;
 }
-print a;

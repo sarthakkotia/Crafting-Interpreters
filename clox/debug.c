@@ -36,6 +36,12 @@ int getLine(LinesArray* linesArray, int offset){
     }
     return -1;
 }
+static int shortInstruction(const char *name, int offset, Chunk *chunk) {
+    uint16_t arg = (uint16_t) chunk->code[offset+1] << 8;
+    arg = arg | chunk->code[offset + 2];
+    printf("%-16s %4d %4d\n", name, offset, arg);
+    return offset + 3;
+}
 int disassembleInstruction(Chunk* chunk, int offset){
     printf("%04d ", offset);
     if(offset > 0 && getLine(&chunk->linesArray, offset) == getLine(&chunk->linesArray, offset-1)){
@@ -84,9 +90,9 @@ int disassembleInstruction(Chunk* chunk, int offset){
         case OP_SET_GLOBAL:
             return constantInstruction("OP_SET_GLOBAL", offset, chunk);
         case OP_GET_LOCAL:
-            return byteInstruction("OP_GET_LOCAL", offset, chunk);
+            return shortInstruction("OP_GET_LOCAL", offset, chunk);
         case OP_SET_LOCAL:
-            return byteInstruction("OP_SET_LOCAL", offset, chunk);
+            return shortInstruction("OP_SET_LOCAL", offset, chunk);
         case OP_CONSTANT_LONG:
             return longConstantInstruction("OP_CONSTANT_LONG", offset, chunk);
         default:

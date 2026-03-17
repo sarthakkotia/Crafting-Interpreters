@@ -301,9 +301,23 @@ static void namedVariable(Token name, bool canAssign) {
 
     if (canAssign && match(TOKEN_EQUAL)) {
         expression();
-        emitBytes(setOp, (uint8_t)arg);
+        if (setOp == OP_SET_LOCAL) {
+            emitByte(setOp);
+            uint8_t highByte = (arg >> 8) & 0xFF;
+            uint8_t lowByte = (arg) & 0xFF;
+            emitBytes(highByte, lowByte);
+        } else {
+            emitBytes(setOp, (uint8_t)arg);
+        }
     } else {
-        emitBytes(getOp, (uint8_t)arg);
+        if (getOp == OP_GET_LOCAL) {
+            emitByte(getOp);
+            uint8_t highByte = (arg >> 8) & 0xFF;
+            uint8_t lowByte = arg & 0xFF;
+            emitBytes(highByte, lowByte);
+        } else {
+            emitBytes(getOp, (uint8_t)arg);
+        }
     }
 }
 
@@ -436,7 +450,7 @@ static int resolveLocal(Compiler *compiler, Token *name) {
 }
 
 static void addLocal(Token name) {
-    if (current->localCount == UINT8_COUNT) {
+    if (current->localCount == UINT16_COUNT) {
         error("Too many local variables in a block");
         return;
     }
