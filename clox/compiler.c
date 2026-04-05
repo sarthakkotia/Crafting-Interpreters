@@ -96,6 +96,15 @@ static int emitJump(uint8_t instruction) {
 }
 //TODO: Add another helper function to write / emit the long byte operand as well the same way like we did the emit Bytes function
 
+static void emitLoop(int loopStart) {
+    emitByte(OP_LOOP);
+    int offset = currentChunk()->count - loopStart + 2;
+    if (offset > UINT16_MAX) error("Loop body too large");
+
+    emitByte((offset >> 8) & 0xFF);
+    emitByte(offset & 0XFF);
+}
+
 static void emitReturn() {
     emitByte(OP_RETURN);
 }
@@ -228,6 +237,20 @@ static void ifStatement() {
     patchJump(elseJump);
 }
 
+static void whileStatement() {
+    consume(TOKEN_LEFT_PAREN, "Expect '(' after while keyword");
+    int loopStart = currentChunk()->count;
+    expression();
+    consume(TOKEN_RIGHT_PAREN, "Expect ')' after condition");
+    int endOfLoopJump = emitJump(OP_JUMP_IF_FALSE);
+    emitByte(OP_POP);
+    statement();
+    emitLoop(loopStart);
+
+    patchJump(endOfLoopJump);
+    emitByte(OP_POP);
+}
+
 static void printStatement() {
     expression();
     consume(TOKEN_SEMICOLON, "Expect ';' at the end of expression");
@@ -277,7 +300,9 @@ static void statement() {
             beginScope();
             block();
             endScope();
-        }else {
+        } else if (match(TOKEN_WHILE)) {
+            whileStatement();
+        } else {
             expressionStatement();
         }
 }
