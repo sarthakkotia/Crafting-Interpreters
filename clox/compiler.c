@@ -293,6 +293,67 @@ static void forStatement() {
     endScope();
 }
 
+static bool isStatement () {
+    return check(TOKEN_PRINT) || check(TOKEN_IF) || check(TOKEN_LEFT_BRACE) || check(TOKEN_WHILE) || check(TOKEN_FOR) || check(TOKEN_SWITCH);
+}
+
+static int switchCaseStatement (int prevJump) {
+    expression();
+    emitByte(OP_EQUAL);
+    int nextCase = emitJump(OP_JUMP_IF_FALSE);
+    emitByte(OP_POP);
+    consume(TOKEN_COLON, "Expect ':' after case keyword");
+
+    while (!check(TOKEN_CASE) && !check(TOKEN_DEFAULT) && !check(TOKEN_RIGHT_BRACE)) {
+        statement();
+    }
+
+    if (prevJump != -1)
+        patchJump(prevJump);
+
+    int exitSwitch = emitJump(OP_JUMP);
+
+    patchJump(nextCase);
+    emitByte(OP_POP);
+    return exitSwitch;
+}
+
+static int defaultCaseStatement (int prevJump) {
+    consume(TOKEN_COLON, "Expect ':' after case keyword");
+
+    while (!check(TOKEN_RIGHT_BRACE) && !check(TOKEN_DEFAULT) && !check(TOKEN_CASE)) {
+        statement();
+    }
+
+    if (prevJump != -1)
+        patchJump(prevJump);
+
+    int exitSwitch = emitJump(OP_JUMP);
+    return exitSwitch;
+}
+
+static void switchStatement () {
+    consume(TOKEN_LEFT_PAREN, "Expect '(' after switch keyword");
+    expression();
+    consume(TOKEN_RIGHT_PAREN, "Expect ')' after expression");
+    consume(TOKEN_LEFT_BRACE, "Expect '{' after switch statement");
+
+    int nextCase = -1;
+    while (match(TOKEN_CASE)) {
+        emitByte(OP_CLONE);
+        nextCase = switchCaseStatement(nextCase);
+    }
+    emitByte(OP_POP);
+
+    if (match(TOKEN_DEFAULT)) {
+        nextCase = defaultCaseStatement(nextCase);
+    }
+
+    consume(TOKEN_RIGHT_BRACE, "Expect '}' after switch statement");
+    if (nextCase != -1)
+        patchJump(nextCase);
+}
+
 static void printStatement() {
     expression();
     consume(TOKEN_SEMICOLON, "Expect ';' at the end of expression");
@@ -346,7 +407,9 @@ static void statement() {
             whileStatement();
         } else if (match(TOKEN_FOR)) {
             forStatement();
-        } else {
+        } else if (match(TOKEN_SWITCH)) {
+            switchStatement();
+        }else {
             expressionStatement();
         }
 }

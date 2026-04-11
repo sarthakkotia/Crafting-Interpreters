@@ -20,6 +20,7 @@ typedef enum {
     OP_GREATER,
     OP_PRINT,
     OP_POP,
+    OP_CLONE,
     // from this line all the opcodes have operands
     OP_CONSTANT,
     OP_DEFINE_GLOBAL,
