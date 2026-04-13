@@ -293,10 +293,6 @@ static void forStatement() {
     endScope();
 }
 
-static bool isStatement () {
-    return check(TOKEN_PRINT) || check(TOKEN_IF) || check(TOKEN_LEFT_BRACE) || check(TOKEN_WHILE) || check(TOKEN_FOR) || check(TOKEN_SWITCH);
-}
-
 static int switchCaseStatement (int prevJump) {
     expression();
     emitByte(OP_EQUAL);
@@ -343,7 +339,6 @@ static void switchStatement () {
         emitByte(OP_CLONE);
         nextCase = switchCaseStatement(nextCase);
     }
-    emitByte(OP_POP);
 
     if (match(TOKEN_DEFAULT)) {
         nextCase = defaultCaseStatement(nextCase);
@@ -352,6 +347,8 @@ static void switchStatement () {
     consume(TOKEN_RIGHT_BRACE, "Expect '}' after switch statement");
     if (nextCase != -1)
         patchJump(nextCase);
+
+    emitByte(OP_POP);
 }
 
 static void printStatement() {

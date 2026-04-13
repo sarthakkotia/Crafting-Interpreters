@@ -1,2 +1,5 @@
 var i = 3;
-switch (i) {}
+    switch (i) {
+        default: print i;
+        default: print i;
+    }
