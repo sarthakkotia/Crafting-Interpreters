@@ -43,6 +43,11 @@ typedef struct {
     Local locals[UINT8_COUNT];
     int localCount;
     int scopeDepth;
+
+    // handling continue statements
+    int isLoop;
+    int loopDepth;
+    int continueInstruction;
 } Compiler;
 
 bool compile(const char *source, Chunk *chunk);

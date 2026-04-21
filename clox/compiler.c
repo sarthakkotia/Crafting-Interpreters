@@ -244,11 +244,20 @@ static void whileStatement() {
     consume(TOKEN_RIGHT_PAREN, "Expect ')' after condition");
     int endOfLoopJump = emitJump(OP_JUMP_IF_FALSE);
     emitByte(OP_POP);
+
+    current->isLoop = current->isLoop + 1;
+    int prevLoopDepth = current->loopDepth;
+    current->loopDepth = current->scopeDepth;
+    current->continueInstruction = loopStart;
+
     statement();
     emitLoop(loopStart);
 
     patchJump(endOfLoopJump);
     emitByte(OP_POP);
+
+    current->loopDepth = prevLoopDepth;
+    current->isLoop = current->isLoop - 1;
 }
 
 static void forStatement() {
@@ -282,6 +291,11 @@ static void forStatement() {
         patchJump(jumpToBody);
     }
 
+    current->isLoop = current->isLoop + 1;
+    int prevLoopDepth = current->loopDepth;
+    current->loopDepth = current->scopeDepth;
+    current->continueInstruction = loopStart;
+
     statement();
     emitLoop(loopStart);
 
@@ -291,6 +305,27 @@ static void forStatement() {
     }
 
     endScope();
+
+    current->isLoop = current->isLoop - 1;
+    current->loopDepth = prevLoopDepth;
+}
+
+static void continueStatement() {
+    consume(TOKEN_SEMICOLON, "Expect ';' at the end of the statement");
+    int ScopeDepth = current->scopeDepth;
+    int localCount = current->localCount;
+    Local locals[256];
+    memcpy(locals, current->locals, sizeof(current->locals));
+
+    while (ScopeDepth > current->loopDepth) {
+        ScopeDepth--;
+
+        while (localCount > 0 && locals[localCount - 1].depth > ScopeDepth) {
+            emitByte(OP_POP);
+            localCount--;
+        }
+    }
+    emitLoop(current->continueInstruction);
 }
 
 static void printStatement() {
@@ -346,7 +381,14 @@ static void statement() {
             whileStatement();
         } else if (match(TOKEN_FOR)) {
             forStatement();
-        } else {
+        } else if (match(TOKEN_CONTINUE)) {
+            if (current->isLoop > 0) {
+                continueStatement();
+            } else {
+                error("cannot use continue statement outside of a loop");
+            }
+        }
+        else {
             expressionStatement();
         }
 }
@@ -385,6 +427,12 @@ static void patchJump(int offset) {
 static void initCompiler(Compiler *compiler) {
     compiler->localCount = 0;
     compiler->scopeDepth = 0;
+
+    /* handling continue statements */
+    compiler->isLoop = 0;
+    compiler->loopDepth = -1;
+    compiler->continueInstruction = -1;
+
     current = compiler;
 }
 
