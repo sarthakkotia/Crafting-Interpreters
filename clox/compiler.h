@@ -39,12 +39,20 @@ typedef struct {
     int depth;
 } Local;
 
+typedef enum {
+    TYPE_FUNCTION,
+    TYPE_SCRIPT,
+} FunctionType;
+
 typedef struct {
+    ObjFunction *function;
+    FunctionType type;
+
     Local locals[UINT8_COUNT];
     int localCount;
     int scopeDepth;
 } Compiler;
 
-bool compile(const char *source, Chunk *chunk);
+ObjFunction* compile(const char *source, Chunk *chunk);
 
 #endif //clox_compiler_h

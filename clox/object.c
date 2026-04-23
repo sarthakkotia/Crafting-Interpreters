@@ -26,6 +26,10 @@ static ObjString* allocateString(char *heapChars, int length, uint32_t hash) {
 }
 
 static void printFunction(ObjFunction *objFunction) {
+    if (objFunction->name == NULL) {
+        printf("<script>");
+        return;
+    }
     printf("<fn %s>", objFunction->name->characters);
 }
 
