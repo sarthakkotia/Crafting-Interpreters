@@ -9,7 +9,6 @@
 
 Parser parser;
 Compiler *current = NULL;
-Chunk *compilingChunk;
 
 static void declaration();
 static void statement();
@@ -609,7 +608,7 @@ static ParseRule* getRule(TokenType type){
 }
 
 
-ObjFunction* compile(const char *source, Chunk *chunk){
+ObjFunction* compile(const char *source){
     // lexing for that we will need the scanner
     // converting it to bytecode
     // save them into chunks
@@ -620,7 +619,6 @@ ObjFunction* compile(const char *source, Chunk *chunk){
 
     parser.hadError = false;
     parser.panicMode = false;
-    compilingChunk = chunk;
 
     advance();
     while (!match(TOKEN_EOF)) {

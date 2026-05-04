@@ -21,14 +21,16 @@ static void runtimeError(const char *msg, ...) {
     va_end(args);
     fputs("\n", stderr);
 
-    size_t instruction = vm.ip - vm.chunk->code - 1;
-    int line = vm.chunk->linesArray.lines[instruction];
+    CallFrame *frame = &vm.frames[vm.frameCount - 1];
+    size_t instruction = frame->ip - frame->function->chunk.code - 1;
+    int line = frame->function->chunk.linesArray.lines[instruction];
     fprintf(stderr, "[line %d] in script\n", line);
     resetStack();
 }
 
 void initVM() {
     resetStack();
+    vm.frameCount = 0;
     vm.objects = NULL;
     initTable(&vm.strings);
     initTable(&vm.globals);
@@ -72,18 +74,20 @@ static void concatenate() {
 }
 
 static InterpretResult run() {
+    CallFrame *frame = &vm.frames[vm.frameCount - 1];
+
 #define READ_BYTE() ({\
-    uint8_t bytecode = *(vm.ip); \
-    vm.ip++;\
+    uint8_t bytecode = *(frame->ip); \
+    frame->ip++;\
     bytecode;\
 })
 #define READ_CONSTANT()({\
     uint8_t constantIndex = READ_BYTE();\
-    vm.chunk->constants.values[constantIndex];\
+    frame->function->chunk.constants.values[constantIndex];\
 })
 #define READ_SHORT()({\
-    uint16_t jump = (uint16_t)((uint8_t)(*vm.ip) << 8 | ((uint8_t)(*(vm.ip + 1))));\
-    vm.ip = vm.ip + 2;\
+    uint16_t jump = (uint16_t)((uint8_t)(*frame->ip) << 8 | ((uint8_t)(*(frame->ip + 1))));\
+    frame->ip = frame->ip + 2;\
     jump;\
 })
 #define READ_STRING()({\
@@ -94,7 +98,7 @@ static InterpretResult run() {
     uint8_t index2 = READ_BYTE();\
     uint8_t index3 = READ_BYTE();\
     uint32_t result = index3<<16 | index2<<8 | index1;\
-    vm.chunk->constants.values[result];\
+    frame->function->chunk.constants.values[result];\
 })
 #define BINARY_OPERATION(valueType, operator)({\
     if(!IS_NUMBER(peek(0)) || !IS_NUMBER(peek(1))){\
@@ -115,7 +119,7 @@ static InterpretResult run() {
             printf(" ]");
         }
         printf("\n*****************************\n");
-        disassembleInstruction(vm.chunk, (int) (vm.ip - vm.chunk->code));
+        disassembleInstruction(&frame->function->chunk, (int) (frame->ip - frame->function->chunk.code));
 #endif
         uint8_t instruction = READ_BYTE();
         switch (instruction) {
@@ -222,27 +226,27 @@ static InterpretResult run() {
             }
             case OP_GET_LOCAL: {
                 uint8_t index = READ_BYTE();
-                push(vm.vmStack.stack[index]);
+                push(frame->slots[index]);
                 break;
             }
             case OP_SET_LOCAL: {
                 uint8_t index = READ_BYTE();
-                vm.vmStack.stack[index] = peek(0);
+                frame->slots[index] = peek(0);
                 break;
             }
             case OP_JUMP: {
                 uint16_t offset = READ_SHORT();
-                vm.ip += offset;
+                frame->ip += offset;
                 break;
             }
             case OP_JUMP_IF_FALSE: {
                 uint16_t offset = READ_SHORT();
-                if (!isTruthy(peek(0))) vm.ip += offset;
+                if (!isTruthy(peek(0))) frame->ip += offset;
                 break;
             }
             case OP_LOOP: {
                 uint16_t offset = READ_SHORT();
-                vm.ip -= offset;
+                frame->ip -= offset;
                 break;
             }
             case OP_CONSTANT_LONG: {
@@ -264,23 +268,14 @@ static InterpretResult run() {
 }
 
 InterpretResult interpret(const char* source) {
-    Chunk chunk;
-    initChunk(&chunk);
+    ObjFunction *function = compile(source);
+    if (function == NULL) return INTERPRET_COMPILE_ERROR;
 
-    if(!compile(source, &chunk)){
-        freeChunk(&chunk);
-        return INTERPRET_COMPILE_ERROR;
-    }
-    vm.chunk = &chunk;
-    vm.ip = vm.chunk->code;
+    push(OBJ_VAL(function));
+    CallFrame *frame = &vm.frames[vm.frameCount++];
+    frame->function = function;
+    frame->ip = function->chunk.code;
+    frame->slots = vm.vmStack.stack;
 
-    InterpretResult result = run();
-    freeChunk(&chunk);
-    return result;
-}
-
-InterpretResult interpretChunk(Chunk* chunk) {
-    vm.chunk = chunk;
-    vm.ip = vm.chunk->code;
     return run();
 }
