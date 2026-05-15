@@ -12,6 +12,7 @@ VM vm;
 
 static void resetStack() {
     initVMStack(&vm.vmStack);
+    vm.frameCount = 0;
 }
 
 static void runtimeError(const char *msg, ...) {

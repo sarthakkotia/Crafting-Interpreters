@@ -20,6 +20,10 @@ static void declareVariable();
 static void defineVariable(uint8_t global);
 static int resolveLocal(Compiler *compiler, Token *name);
 static void patchJump(int offset);
+static void markInitialized();
+static void initCompiler(Compiler *compiler, FunctionType type);
+static uint8_t makeConstant(Value value);
+static void variable(bool canAssign);
 
 
 static Chunk *currentChunk() {
@@ -116,7 +120,7 @@ static ObjFunction* endCompiler() {
         disassembleChunk(currentChunk(), function->name != NULL ? function->name->characters: "<script>");
     }
 #endif
-
+    current = current->enclosing;
     return function;
 }
 
@@ -190,6 +194,10 @@ static void literal(bool canAssign) {
     }
 }
 
+static void emitFunction(Value value) {
+    emitBytes(OP_FUNCTION, makeConstant(value));
+}
+
 static void expression() {
     parsePrecedence(PREC_ASSIGNMENT);
 }
@@ -211,7 +219,25 @@ static void variableDeclaration() {
     consume(TOKEN_SEMICOLON,"Expect ';' after variable declaration");
 
     defineVariable(global_idx);
+}
 
+static void function(FunctionType type) {
+    Compiler compiler;
+    initCompiler(&compiler, type);
+    beginScope();
+    consume(TOKEN_LEFT_PAREN, "Expect '(' after function name");
+    consume(TOKEN_RIGHT_PAREN, "Expect ')' after parameters");
+    consume(TOKEN_LEFT_BRACE, "Expect '{' before function body");
+    block();
+    ObjFunction *function = endCompiler();
+    emitBytes(OP_CONSTANT, makeConstant(OBJ_VAL(function)));
+}
+
+static void funDeclaration() {
+    uint8_t global = parseVariable("Expect function name.");
+    markInitialized();
+    function(TYPE_FUNCTION);
+    defineVariable(global);
 }
 
 static void expressionStatement() {
@@ -329,6 +355,8 @@ static void synchronize() {
 static void declaration() {
     if (match(TOKEN_VAR)) {
         variableDeclaration();
+    } else if (match(TOKEN_FUN)) {
+        funDeclaration();
     } else {
         statement();
     }
@@ -385,6 +413,7 @@ static void patchJump(int offset) {
 }
 
 static void initCompiler(Compiler *compiler, FunctionType type) {
+    compiler->enclosing = current;
     compiler->function = NULL;
     compiler->type = type;
 
@@ -542,6 +571,7 @@ static uint8_t parseVariable(const char *errMsg) {
 }
 
 static void markInitialized() {
+    if (current->scopeDepth == 0) return;
     current->locals[current->localCount-1].depth = current->scopeDepth;
 }
 
