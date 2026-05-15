@@ -1,7 +1,5 @@
-{
-    var a = 0;
+fun f() {
+    print "testing";
 }
 
-fun fib(n) {
-    print n;
-}
+print f;

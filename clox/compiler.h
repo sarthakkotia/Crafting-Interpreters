@@ -44,7 +44,7 @@ typedef enum {
     TYPE_SCRIPT,
 } FunctionType;
 
-typedef struct {
+typedef struct Compiler {
     struct Compiler *enclosing;
     ObjFunction *function;
     FunctionType type;
