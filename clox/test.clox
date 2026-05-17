@@ -1,5 +1,6 @@
-fun f() {
+fun f(a) {
+    print a;
     print "testing";
 }
-
-print f;
+var a = 10;
+f(a);

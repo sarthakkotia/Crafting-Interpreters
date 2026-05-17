@@ -255,7 +255,34 @@ static InterpretResult run() {
                 push(longConstant);
                 break;
             }
-            
+            case OP_CALL: {
+                uint8_t argCount = READ_BYTE();
+                Value arguments[argCount];
+                for (int i = 0; i < argCount; i = i + 1) {
+                    arguments[i] = pop();
+                }
+                Value function = peek(0); // may not need later
+                if (IS_FUNCTION(function)) {
+                    pop();
+                    ObjFunction *f = AS_FUNCTION(function);
+                    if (f->arity == argCount) {
+                        for ( int i = 0; i < argCount; i = i + 1) {
+                            push(arguments[i]);
+                        }
+                        CallFrame *frame = &vm.frames[vm.frameCount++];
+                        frame->function = f;
+                        frame->ip = f->chunk.code;
+                        frame->slots = vm.vmStack.stack;
+                        run();
+                    } else {
+                        runtimeError("function arguments doesn't match with declared function parameters");
+                    }
+
+                } else {
+                    runtimeError("is not a function");
+                }
+                break;
+            }
         }
 
     }
