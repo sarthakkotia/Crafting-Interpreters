@@ -1,6 +1,5 @@
-fun f(a) {
-    print a;
-    print "testing";
+fun sum(a, b, c) {
+    print a + b + c;
 }
-var a = 10;
-f(a);
+
+print 4 + sum(1,2,3);

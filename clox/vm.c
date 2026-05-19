@@ -56,6 +56,27 @@ Value peek(int distance) {
     return vm.vmStack.stack[vm.vmStack.count - distance - 1];
 }
 
+static bool call(ObjFunction *function, int argCount) {
+    CallFrame *frame = &vm.frames[vm.frameCount++];
+    frame->function = function;
+    frame->ip = function->chunk.code;
+    frame->slots = vm.vmStack.stack + vm.vmStack.count - argCount - 1;
+    return true;
+}
+
+static bool callValue(Value callee, int argCount) {
+    if (IS_OBJ(callee)) {
+        switch (OBJ_TYPE(callee)) {
+            case OBJ_FUNCTION:
+                return call(AS_FUNCTION(callee), argCount);
+            default:
+                break;
+        }
+    }
+    runtimeError("Can ony call functions and classes");
+    return false;
+}
+
 static bool isTruthy(Value value) {
     if (IS_NIL(value) || (IS_BOOL(value) && !AS_BOOL(value))) return false;
     return true;
@@ -257,30 +278,10 @@ static InterpretResult run() {
             }
             case OP_CALL: {
                 uint8_t argCount = READ_BYTE();
-                Value arguments[argCount];
-                for (int i = 0; i < argCount; i = i + 1) {
-                    arguments[i] = pop();
+                if (!callValue(peek(argCount), argCount)) {
+                    return INTERPRET_RUNTIME_ERROR;
                 }
-                Value function = peek(0); // may not need later
-                if (IS_FUNCTION(function)) {
-                    pop();
-                    ObjFunction *f = AS_FUNCTION(function);
-                    if (f->arity == argCount) {
-                        for ( int i = 0; i < argCount; i = i + 1) {
-                            push(arguments[i]);
-                        }
-                        CallFrame *frame = &vm.frames[vm.frameCount++];
-                        frame->function = f;
-                        frame->ip = f->chunk.code;
-                        frame->slots = vm.vmStack.stack;
-                        run();
-                    } else {
-                        runtimeError("function arguments doesn't match with declared function parameters");
-                    }
-
-                } else {
-                    runtimeError("is not a function");
-                }
+                frame = &vm.frames[vm.frameCount - 1];
                 break;
             }
         }
@@ -300,10 +301,7 @@ InterpretResult interpret(const char* source) {
     if (function == NULL) return INTERPRET_COMPILE_ERROR;
 
     push(OBJ_VAL(function));
-    CallFrame *frame = &vm.frames[vm.frameCount++];
-    frame->function = function;
-    frame->ip = function->chunk.code;
-    frame->slots = vm.vmStack.stack;
+    call(function, 0);
 
     return run();
 }
