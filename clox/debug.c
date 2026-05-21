@@ -36,20 +36,13 @@ static int longConstantInstruction(const char* name, int offset, Chunk* chunk){
     printf("\n");
     return offset+4;
 }
-int getLine(LinesArray* linesArray, int offset){
-    int sum = 0;
-    for(int i=0; i<linesArray->count; i++){
-        sum += linesArray->lines[i];
-        if(sum >= offset+1) return i+1;
-    }
-    return -1;
-}
+
 int disassembleInstruction(Chunk* chunk, int offset){
     printf("%04d ", offset);
-    if(offset > 0 && getLine(&chunk->linesArray, offset) == getLine(&chunk->linesArray, offset-1)){
+    if(offset > 0 && chunk->lines[offset] == chunk->lines[offset - 1]){
         printf("   | ");
     }else{
-        printf("%04d ", getLine(&chunk->linesArray, offset));
+        printf("%04d ", chunk->lines[offset]);
     }
     uint8_t instruction = chunk->code[offset];
     switch (instruction) {

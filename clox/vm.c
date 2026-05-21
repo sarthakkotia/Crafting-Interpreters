@@ -22,10 +22,13 @@ static void runtimeError(const char *msg, ...) {
     va_end(args);
     fputs("\n", stderr);
 
-    CallFrame *frame = &vm.frames[vm.frameCount - 1];
-    size_t instruction = frame->ip - frame->function->chunk.code - 1;
-    int line = frame->function->chunk.linesArray.lines[instruction];
-    fprintf(stderr, "[line %d] in script\n", line);
+    for (int i = vm.frameCount - 1; i >= 0; i--) {
+        CallFrame *frame = &vm.frames[i];
+        char *name = frame->function->name->characters;
+        size_t instruction = frame->ip - frame->function->chunk.code - 1;
+        int line = frame->function->chunk.lines[instruction];
+        fprintf(stderr, "[line %d] in %s\n", line, name);
+    }
     resetStack();
 }
 

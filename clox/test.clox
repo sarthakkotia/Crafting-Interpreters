@@ -1,5 +1,17 @@
+fun f() {
+    print "f";
+}
+fun e() {
+    f(1);
+}
+
+fun d() {
+    e();
+}
+
+
 fun sum(a, b, c) {
     print a + b + c;
 }
 
-print 4 + sum(1,2,3);
+print sum(1,2,3);
