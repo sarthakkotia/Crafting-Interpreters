@@ -24,10 +24,16 @@ static void runtimeError(const char *msg, ...) {
 
     for (int i = vm.frameCount - 1; i >= 0; i--) {
         CallFrame *frame = &vm.frames[i];
-        char *name = frame->function->name->characters;
+        ObjFunction *function = frame->function;
         size_t instruction = frame->ip - frame->function->chunk.code - 1;
         int line = frame->function->chunk.lines[instruction];
-        fprintf(stderr, "[line %d] in %s\n", line, name);
+        fprintf(stderr, "[line %d] in ", line);
+        if (function->name == NULL) {
+            fprintf(stderr, "script\n");
+        } else {
+            char *name = frame->function->name->characters;
+            fprintf(stderr, "%s()\n", name);
+        }
     }
     resetStack();
 }
@@ -157,7 +163,16 @@ static InterpretResult run() {
         uint8_t instruction = READ_BYTE();
         switch (instruction) {
             case OP_RETURN: {
-                return INTERPRET_OK;
+                Value result = pop();
+                vm.frameCount = vm.frameCount - 1;
+                if (vm.frameCount == 0) {
+                    pop();
+                    return INTERPRET_OK;
+                }
+                vm.vmStack.count--;
+                push(result);
+                frame = &vm.frames[vm.frameCount - 1];
+                break;
             }
             //unary operations
             case OP_NEGATE: {

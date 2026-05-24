@@ -1,17 +1,5 @@
-fun f() {
-    print "f";
-}
-fun e() {
-    f(1);
+fun sum(a, b, c){
+    a+b+c;
 }
 
-fun d() {
-    e();
-}
-
-
-fun sum(a, b, c) {
-    print a + b + c;
-}
-
-print sum(1,2,3);
+sum(5, 6, 7);
