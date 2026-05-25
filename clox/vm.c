@@ -169,7 +169,8 @@ static InterpretResult run() {
                     pop();
                     return INTERPRET_OK;
                 }
-                vm.vmStack.count--;
+                int diff = &vm.vmStack.stack[vm.vmStack.count] - frame->slots;
+                vm.vmStack.count -= diff;
                 push(result);
                 frame = &vm.frames[vm.frameCount - 1];
                 break;
