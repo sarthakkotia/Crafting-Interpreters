@@ -338,6 +338,19 @@ static void printStatement() {
     emitByte(OP_PRINT);
 }
 
+static void returnStatement() {
+    if (current->enclosing == NULL) {
+        error("Can't return from top lover code");
+        return;
+    }
+    if (match(TOKEN_SEMICOLON)) {
+        emitReturn();
+    } else {
+        expression();
+        consume(TOKEN_SEMICOLON, "Expect ';' after return value");
+        emitByte(OP_RETURN);
+    }
+}
 
 static void synchronize() {
     parser.panicMode = false;
@@ -368,6 +381,8 @@ static void declaration() {
         variableDeclaration();
     } else if (match(TOKEN_FUN)) {
         funDeclaration();
+    } else if (match(TOKEN_RETURN)) {
+        returnStatement();
     } else {
         statement();
     }
