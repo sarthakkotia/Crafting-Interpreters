@@ -381,8 +381,6 @@ static void declaration() {
         variableDeclaration();
     } else if (match(TOKEN_FUN)) {
         funDeclaration();
-    } else if (match(TOKEN_RETURN)) {
-        returnStatement();
     } else {
         statement();
     }
@@ -402,6 +400,8 @@ static void statement() {
             whileStatement();
         } else if (match(TOKEN_FOR)) {
             forStatement();
+        }  else if (match(TOKEN_RETURN)) {
+            returnStatement();
         } else {
             expressionStatement();
         }
