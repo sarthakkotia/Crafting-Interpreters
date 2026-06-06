@@ -6,12 +6,11 @@
 #include "memory.h"
 #include "vm.h"
 #include "compiler.h"
-#include "stack.h"
 
 VM vm;
 
 static void resetStack() {
-    initVMStack(&vm.vmStack);
+    vm.stackTop = vm.stack;
     vm.frameCount = 0;
 }
 
@@ -47,22 +46,23 @@ void initVM() {
 }
 
 void freeVM() {
-    freeVMStack(&vm.vmStack);
     freeObjects();
     freeTable(&vm.strings);
     freeTable(&vm.globals);
 }
 
 void push(Value value) {
-    pushVMStack(value, &vm.vmStack);
+    *vm.stackTop = value;
+    vm.stackTop++;
 }
 
 Value pop() {
-    return popVMStack(&vm.vmStack);
+    vm.stackTop--;
+    return *vm.stackTop;
 }
 
 Value peek(int distance) {
-    return vm.vmStack.stack[vm.vmStack.count - distance - 1];
+    return vm.stackTop[-1 - distance];
 }
 
 static bool call(ObjFunction *function, int argCount) {
@@ -77,7 +77,7 @@ static bool call(ObjFunction *function, int argCount) {
     CallFrame *frame = &vm.frames[vm.frameCount++];
     frame->function = function;
     frame->ip = function->chunk.code;
-    frame->slots = vm.vmStack.stack + vm.vmStack.count - argCount - 1;
+    frame->slots = vm.stackTop - argCount - 1;
     return true;
 }
 
@@ -152,9 +152,9 @@ static InterpretResult run() {
     for(;;){
 #ifdef DEBUG_TRACE_EXECUTION
         printf("******** Stack trace ********\n");
-        for(int i = 0; i<vm.vmStack.count; i++){
+        for(Value *slot = vm.stack; slot < vm.stackTop; slot++){
             printf("[ ");
-            printValue(vm.vmStack.stack[i]);
+            printValue(*slot);
             printf(" ]");
         }
         printf("\n*****************************\n");
@@ -169,8 +169,8 @@ static InterpretResult run() {
                     pop();
                     return INTERPRET_OK;
                 }
-                int diff = &vm.vmStack.stack[vm.vmStack.count] - frame->slots;
-                vm.vmStack.count -= diff;
+
+                vm.stackTop = frame->slots;
                 push(result);
                 frame = &vm.frames[vm.frameCount - 1];
                 break;

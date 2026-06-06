@@ -2,12 +2,11 @@
 #define clox_vm_h
 
 #include "chunk.h"
-#include "stack.h"
 #include "table.h"
 #include "object.h"
 
 #define FRAMES_MAX 64
-#define STACK_MAX (FRAMES_MAX * UINT8_COUNT);
+#define STACK_MAX (FRAMES_MAX * UINT8_COUNT)
 
 
 typedef struct {
@@ -21,7 +20,8 @@ typedef struct{
     CallFrame frames[FRAMES_MAX];
     int frameCount;
 
-    VMStack vmStack;
+    Value stack[STACK_MAX];
+    Value *stackTop;
     Table strings;
     Table globals;
     Obj *objects;
