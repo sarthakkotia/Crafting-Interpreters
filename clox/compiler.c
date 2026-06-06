@@ -109,7 +109,6 @@ static void emitLoop(int loopStart) {
 }
 
 static void emitReturn() {
-    emitByte(OP_NIL);
     emitByte(OP_RETURN);
 }
 
@@ -340,7 +339,7 @@ static void printStatement() {
 
 static void returnStatement() {
     if (current->enclosing == NULL) {
-        error("Can't return from top lover code");
+        error("Can't return from top level code");
         return;
     }
     if (match(TOKEN_SEMICOLON)) {
