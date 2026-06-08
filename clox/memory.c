@@ -36,6 +36,16 @@ void freeObject(Obj *object) {
             FREE(ObjString, object);
             break;
         }
+        case OBJ_FUNCTION: {
+            ObjFunction *objFunction = (ObjFunction *)object;
+            freeChunk(&objFunction->chunk);
+            FREE(ObjFunction, object);
+            break;
+        }
+        case OBJ_NATIVE: {
+            FREE(ObjNative,object);
+            break;
+        }
     }
 }
 

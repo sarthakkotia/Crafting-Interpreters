@@ -3,6 +3,7 @@
 
 #include "common.h"
 #include "value.h"
+#include "chunk.h"
 
 #define OBJ_TYPE(value) \
     (AS_OBJ(value)->type)
@@ -16,14 +17,43 @@
 #define AS_CSTRING(value) \
     (((ObjString *)AS_OBJ(value))->characters)
 
+#define IS_FUNCTION(object) \
+    (isObjType(object, OBJ_FUNCTION))
+
+#define IS_NATIVE(object) \
+    (isObjType(object,OBJ_NATIVE))
+
+#define AS_FUNCTION(value) \
+    ((ObjFunction *)AS_OBJ(value))
+
+#define AS_NATIVE(value) \
+    (((ObjNative *)AS_OBJ(value))->function)
+
+
 typedef enum {
     OBJ_STRING,
+    OBJ_FUNCTION,
+    OBJ_NATIVE,
 } ObjectType;
 
 struct Obj {
     ObjectType type;
     struct Obj *next;
 };
+
+typedef struct {
+    Obj obj;
+    int arity; /* no. of parameters */
+    Chunk chunk;
+    ObjString *name;
+} ObjFunction;
+
+typedef Value (*NativeFn)(int argCount, Value *args);
+
+typedef struct {
+    Obj obj;
+    NativeFn function;
+} ObjNative;
 
 struct ObjString {
     Obj obj;
@@ -32,6 +62,8 @@ struct ObjString {
     uint32_t hash;
 };
 
+ObjFunction* newFunction();
+ObjNative* newNative(NativeFn function);
 ObjString* takeString(char *characters, int length);
 ObjString* copyString(const char *characters, int length);
 void printObject(Value value);
