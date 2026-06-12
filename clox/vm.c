@@ -137,11 +137,13 @@ static void concatenate() {
 }
 
 static InterpretResult run() {
+    register uint8_t *ip;
     CallFrame *frame = &vm.frames[vm.frameCount - 1];
+    ip = frame->ip;
 
 #define READ_BYTE() ({\
-    uint8_t bytecode = *(frame->ip); \
-    frame->ip++;\
+    uint8_t bytecode = *(ip); \
+    ip++;\
     bytecode;\
 })
 #define READ_CONSTANT()({\
@@ -149,8 +151,8 @@ static InterpretResult run() {
     frame->function->chunk.constants.values[constantIndex];\
 })
 #define READ_SHORT()({\
-    uint16_t jump = (uint16_t)((uint8_t)(*frame->ip) << 8 | ((uint8_t)(*(frame->ip + 1))));\
-    frame->ip = frame->ip + 2;\
+    uint16_t jump = (uint16_t)((uint8_t)(*ip)) << 8 | ((uint8_t)(*(ip + 1)));\
+    ip = ip + 2;\
     jump;\
 })
 #define READ_STRING()({\
@@ -165,6 +167,7 @@ static InterpretResult run() {
 })
 #define BINARY_OPERATION(valueType, operator)({\
     if(!IS_NUMBER(peek(0)) || !IS_NUMBER(peek(1))){\
+        frame->ip = ip;\
         runtimeError("Operands must be numbers");\
         return INTERPRET_RUNTIME_ERROR;\
     }\
@@ -183,6 +186,7 @@ static InterpretResult run() {
         }
         printf("\n*****************************\n");
         disassembleInstruction(&frame->function->chunk, (int) (frame->ip - frame->function->chunk.code));
+        // disassembleInstruction(&frame->function->chunk, (int) (ip - frame->function->chunk.code));
 #endif
         uint8_t instruction = READ_BYTE();
         switch (instruction) {
@@ -197,11 +201,13 @@ static InterpretResult run() {
                 vm.stackTop = frame->slots;
                 push(result);
                 frame = &vm.frames[vm.frameCount - 1];
+                ip = frame->ip;
                 break;
             }
             //unary operations
             case OP_NEGATE: {
                 if (!IS_NUMBER(peek(0))) {
+                    frame->ip = ip;
                     runtimeError("Operand must be a number.");
                     return INTERPRET_RUNTIME_ERROR;
                 }
@@ -282,6 +288,7 @@ static InterpretResult run() {
                 ObjString *name = READ_STRING();
                 Value value;
                 if (!tableGet(&vm.globals, name, &value)) {
+                    frame->ip = ip;
                     runtimeError("Undefined variable '%s'.", name->characters);
                     return INTERPRET_COMPILE_ERROR;
                 }
@@ -292,6 +299,7 @@ static InterpretResult run() {
                 ObjString *name = READ_STRING();
                 if (tableSet(&vm.globals, name, peek(0))) {
                     tableDelete(&vm.globals, name);
+                    frame->ip = ip;
                     runtimeError("Undefined variable '%s'.", name->characters);
                     return INTERPRET_COMPILE_ERROR;
                 }
@@ -309,17 +317,17 @@ static InterpretResult run() {
             }
             case OP_JUMP: {
                 uint16_t offset = READ_SHORT();
-                frame->ip += offset;
+                ip += offset;
                 break;
             }
             case OP_JUMP_IF_FALSE: {
                 uint16_t offset = READ_SHORT();
-                if (!isTruthy(peek(0))) frame->ip += offset;
+                if (!isTruthy(peek(0))) ip += offset;
                 break;
             }
             case OP_LOOP: {
                 uint16_t offset = READ_SHORT();
-                frame->ip -= offset;
+                ip -= offset;
                 break;
             }
             case OP_CONSTANT_LONG: {
@@ -329,10 +337,12 @@ static InterpretResult run() {
             }
             case OP_CALL: {
                 uint8_t argCount = READ_BYTE();
+                frame->ip = ip;
                 if (!callValue(peek(argCount), argCount)) {
                     return INTERPRET_RUNTIME_ERROR;
                 }
                 frame = &vm.frames[vm.frameCount - 1];
+                ip = frame->ip;
                 break;
             }
         }
