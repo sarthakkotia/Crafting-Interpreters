@@ -33,6 +33,7 @@ typedef enum {
     OP_CONSTANT_LONG,
     OP_FUNCTION,
     OP_CALL,
+    OP_CLOSURE,
 } OpCode;
 
 typedef struct {

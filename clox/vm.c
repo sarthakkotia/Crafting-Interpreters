@@ -30,14 +30,14 @@ static void runtimeError(const char *msg, ...) {
 
     for (int i = vm.frameCount - 1; i >= 0; i--) {
         CallFrame *frame = &vm.frames[i];
-        ObjFunction *function = frame->function;
-        size_t instruction = frame->ip - frame->function->chunk.code - 1;
-        int line = frame->function->chunk.lines[instruction];
+        ObjFunction *function = frame->closure->function;
+        size_t instruction = frame->ip - frame->closure->function->chunk.code - 1;
+        int line = frame->closure->function->chunk.lines[instruction];
         fprintf(stderr, "[line %d] in ", line);
         if (function->name == NULL) {
             fprintf(stderr, "script\n");
         } else {
-            char *name = frame->function->name->characters;
+            char *name = frame->closure->function->name->characters;
             fprintf(stderr, "%s()\n", name);
         }
     }
@@ -82,7 +82,8 @@ Value peek(int distance) {
     return vm.stackTop[-1 - distance];
 }
 
-static bool call(ObjFunction *function, int argCount) {
+static bool call(ObjClosure *closure, int argCount) {
+    ObjFunction *function = closure->function;
     if (argCount != function->arity) {
         runtimeError("Expect %d arguments, but got %d", function->arity, argCount);
         return false;
@@ -92,7 +93,7 @@ static bool call(ObjFunction *function, int argCount) {
         return false;
     }
     CallFrame *frame = &vm.frames[vm.frameCount++];
-    frame->function = function;
+    frame->closure = closure;
     frame->ip = function->chunk.code;
     frame->slots = vm.stackTop - argCount - 1;
     return true;
@@ -101,8 +102,9 @@ static bool call(ObjFunction *function, int argCount) {
 static bool callValue(Value callee, int argCount) {
     if (IS_OBJ(callee)) {
         switch (OBJ_TYPE(callee)) {
-            case OBJ_FUNCTION:
-                return call(AS_FUNCTION(callee), argCount);
+            case OBJ_CLOSURE: {
+                return call(AS_CLOSURE(callee), argCount);
+            }
             case OBJ_NATIVE: {
                 NativeFn native = AS_NATIVE(callee);
                 Value result = native(argCount, vm.stackTop-argCount);
@@ -146,7 +148,7 @@ static InterpretResult run() {
 })
 #define READ_CONSTANT()({\
     uint8_t constantIndex = READ_BYTE();\
-    frame->function->chunk.constants.values[constantIndex];\
+    frame->closure->function->chunk.constants.values[constantIndex];\
 })
 #define READ_SHORT()({\
     uint16_t jump = (uint16_t)((uint8_t)(*frame->ip) << 8 | ((uint8_t)(*(frame->ip + 1))));\
@@ -161,7 +163,7 @@ static InterpretResult run() {
     uint8_t index2 = READ_BYTE();\
     uint8_t index3 = READ_BYTE();\
     uint32_t result = index3<<16 | index2<<8 | index1;\
-    frame->function->chunk.constants.values[result];\
+    frame->closure->function->chunk.constants.values[result];\
 })
 #define BINARY_OPERATION(valueType, operator)({\
     if(!IS_NUMBER(peek(0)) || !IS_NUMBER(peek(1))){\
@@ -182,7 +184,7 @@ static InterpretResult run() {
             printf(" ]");
         }
         printf("\n*****************************\n");
-        disassembleInstruction(&frame->function->chunk, (int) (frame->ip - frame->function->chunk.code));
+        disassembleInstruction(&frame->closure->function->chunk, (int) (frame->ip - frame->closure->function->chunk.code));
 #endif
         uint8_t instruction = READ_BYTE();
         switch (instruction) {
@@ -335,6 +337,12 @@ static InterpretResult run() {
                 frame = &vm.frames[vm.frameCount - 1];
                 break;
             }
+            case OP_CLOSURE: {
+                ObjFunction *function = AS_FUNCTION(READ_CONSTANT());
+                ObjClosure *closure = newClosure(function);
+                push(OBJ_VAL(closure));
+                break;
+            }
         }
 
     }
@@ -352,7 +360,11 @@ InterpretResult interpret(const char* source) {
     if (function == NULL) return INTERPRET_COMPILE_ERROR;
 
     push(OBJ_VAL(function));
-    call(function, 0);
+    ObjClosure *closure = newClosure(function);
+    pop();
+    push(OBJ_VAL(closure));
+
+    call(closure, 0);
 
     return run();
 }

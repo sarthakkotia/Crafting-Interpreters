@@ -58,6 +58,12 @@ ObjNative* newNative(NativeFn function) {
     return native;
 }
 
+ObjClosure* newClosure(ObjFunction *function) {
+    ObjClosure *closure = ALLOCATE_OBJ(ObjClosure, OBJ_CLOSURE);
+    closure->function = function;
+    return closure;
+}
+
 ObjString* takeString(char *characters, int length) {
     uint32_t hash = hashString(characters, length);
     ObjString *interned = tableFindString(&vm.strings, characters, length, hash);
@@ -90,6 +96,9 @@ void printObject(Value value) {
             break;
         case OBJ_NATIVE:
             printf("<native fn>");
+            break;
+        case OBJ_CLOSURE:
+            printFunction(AS_CLOSURE(value)->function);
             break;
     }
 }
