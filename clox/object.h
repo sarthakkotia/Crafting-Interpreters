@@ -53,6 +53,7 @@ typedef struct {
     int arity; /* no. of parameters */
     Chunk chunk;
     ObjString *name;
+    int upvalueCount;
 } ObjFunction;
 
 typedef struct {

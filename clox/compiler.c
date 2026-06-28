@@ -19,6 +19,7 @@ static uint8_t identifierConstant(Token *name);
 static void declareVariable();
 static void defineVariable(uint8_t global);
 static int resolveLocal(Compiler *compiler, Token *name);
+static int resolveUpvalue(Compiler *compiler, Token *name);
 static void patchJump(int offset);
 static void markInitialized();
 static void initCompiler(Compiler *compiler, FunctionType type);
@@ -472,6 +473,9 @@ static void namedVariable(Token name, bool canAssign) {
     if (arg != -1) {
         getOp = OP_GET_LOCAL;
         setOp = OP_SET_LOCAL;
+    } else if ((arg = resolveUpvalue(current, &name)) != -1) {
+        getOp = OP_GET_UPVALUE;
+        setOp = OP_SET_UPVALUE;;
     } else {
         arg = identifierConstant(&name);
         getOp = OP_GET_GLOBAL;
@@ -650,6 +654,34 @@ static int resolveLocal(Compiler *compiler, Token *name) {
             return i;
         }
     }
+    return -1;
+}
+
+static int addUpValue(Compiler *compiler, uint8_t index, bool isLocal) {
+    int upvalueCount = compiler->function->upvalueCount;
+    for (int i = 0; i < upvalueCount; i = i + 1) {
+        Upvalue *upvalue = &compiler->upvalues[i];
+        if (upvalue->index == index && upvalue->isLocal == isLocal) {
+            return i;
+        }
+    }
+    if (upvalueCount == UINT8_COUNT) {
+        error("Too many closure variables in the function");
+        return 0;
+    }
+    compiler->upvalues[upvalueCount].isLocal = isLocal;
+    compiler->upvalues[upvalueCount].index = index;
+
+    compiler->function->upvalueCount = compiler->function->upvalueCount + 1;
+    return compiler->function->upvalueCount - 1;
+}
+static int resolveUpvalue(Compiler *compiler, Token *name) {
+    if (compiler->enclosing == NULL) return -1;
+
+    int local = resolveLocal(compiler->enclosing, name);
+    if (local != -1)
+        return addUpValue(compiler, (uint8_t) local, true);
+
     return -1;
 }
 

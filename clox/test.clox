@@ -1,9 +1,10 @@
-fun makeClosure(value) {
-    fun closure() {
-        print value;
-    }
-    return closure;
+fun a() {
+    var x = 0;
+    x = 10;
+//    fun inner() {
+//        print x;
+//    }
+//    inner();
 }
 
-var c= makeClosure("sk");
-c();
+a();
