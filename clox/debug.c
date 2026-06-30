@@ -1,5 +1,7 @@
 #include <stdio.h>
 #include "debug.h"
+
+#include "object.h"
 #include "value.h"
 
 static int simpleInstruction(const char* name, int offset){
@@ -84,6 +86,10 @@ int disassembleInstruction(Chunk* chunk, int offset){
             return constantInstruction("OP_GET_GLOBAL", offset, chunk);
         case OP_SET_GLOBAL:
             return constantInstruction("OP_SET_GLOBAL", offset, chunk);
+        case OP_GET_UPVALUE:
+            return constantInstruction("OP_GET_UPVALUE", offset, chunk);
+        case OP_SET_UPVALUE:
+            return constantInstruction("OP_SET_UPVALUE", offset, chunk);
         case OP_GET_LOCAL:
             return byteInstruction("OP_GET_LOCAL", offset, chunk);
         case OP_SET_LOCAL:
@@ -104,6 +110,15 @@ int disassembleInstruction(Chunk* chunk, int offset){
             printf("%-16s %4d", "OP_CLOSURE", constant);
             printValue(chunk->constants.values[constant]);
             printf("\n");
+
+            ObjFunction *function = AS_FUNCTION(chunk->constants.values[constant]);
+            for (int i = 0; i < function->upvalueCount; i = i + 1) {
+                int isLocal = chunk->code[offset];
+                offset = offset + 1;
+                int index = chunk->code[offset];
+                offset = offset + 1;
+                printf("%04d    |               %s %d\n", offset - 2, isLocal ? "local": "upvalue", index);
+            }
             return offset;
         }
         default:
