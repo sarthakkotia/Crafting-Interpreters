@@ -12,8 +12,13 @@
 
 VM vm;
 
-static Value clockNative(int argCount, Value *args) {
-    return NUMBER_VAL((double) clock() / CLOCKS_PER_SEC);
+static Value clockNative(int argCount, Value *args, int *errorcode, char *errString) {
+    long int answer = clock();
+    if (answer < 0) {
+        *errorcode = -1;
+        strcpy(errString, "invalid value, clock() unable to call");
+    }
+    return NUMBER_VAL((double) answer / CLOCKS_PER_SEC);
 }
 
 static void resetStack() {
@@ -105,7 +110,12 @@ static bool callValue(Value callee, int argCount) {
                 return call(AS_FUNCTION(callee), argCount);
             case OBJ_NATIVE: {
                 NativeFn native = AS_NATIVE(callee);
-                Value result = native(argCount, vm.stackTop-argCount);
+                int errcode = 0;
+                char err[100] = "errorString";
+                Value result = native(argCount, vm.stackTop-argCount, &errcode, err);
+                if (errcode < 0) {
+                    runtimeError(err);
+                }
                 vm.stackTop = vm.stackTop - argCount - 1;
                 push(result);
                 return true;
