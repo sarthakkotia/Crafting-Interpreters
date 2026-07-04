@@ -57,9 +57,16 @@ typedef struct {
     int upvalueCount;
 } ObjFunction;
 
+typedef struct ObjUpvalue {
+    Obj obj;
+    Value *location;
+} ObjUpvalue;
+
 typedef struct {
     Obj obj;
     ObjFunction *function;
+    ObjUpvalue **upvalues;
+    int upvalueCount;
 } ObjClosure;
 
 
@@ -77,10 +84,6 @@ struct ObjString {
     uint32_t hash;
 };
 
-typedef struct ObjUpvalue {
-    Obj obj;
-    Value *location;
-} ObjUpvalue;
 
 ObjFunction* newFunction();
 ObjNative* newNative(NativeFn function);
