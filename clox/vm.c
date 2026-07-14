@@ -19,6 +19,7 @@ static Value clockNative(int argCount, Value *args) {
 static void resetStack() {
     vm.stackTop = vm.stack;
     vm.frameCount = 0;
+    vm.openUpvalues = NULL;
 }
 
 static void runtimeError(const char *msg, ...) {
@@ -121,8 +122,25 @@ static bool callValue(Value callee, int argCount) {
 }
 
 static ObjUpvalue* captureUpvalue(Value *local) {
-    ObjUpvalue *upvalue = newUpvalue(local);
-    return upvalue;
+    ObjUpvalue *prev = NULL;
+    ObjUpvalue *upvalue = vm.openUpvalues;
+    while (upvalue != NULL && upvalue->location > local) {
+        prev = upvalue;
+        upvalue = upvalue->next;
+    }
+    if (upvalue != NULL && upvalue->location == local) {
+        return upvalue;
+    }
+
+    ObjUpvalue *newupvalue = newUpvalue(local);
+    newupvalue->next = upvalue;
+    if (prev == NULL) {
+        vm.openUpvalues = newupvalue;
+    } else {
+        prev->next = newupvalue;
+    }
+
+    return newupvalue;
 }
 
 static bool isTruthy(Value value) {
