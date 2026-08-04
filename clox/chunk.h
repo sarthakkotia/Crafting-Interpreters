@@ -20,6 +20,7 @@ typedef enum {
     OP_GREATER,
     OP_PRINT,
     OP_POP,
+    OP_CLOSE_UPVALUE,
     // from this line all the opcodes have operands
     OP_CONSTANT,
     OP_DEFINE_GLOBAL,
@@ -33,6 +34,9 @@ typedef enum {
     OP_CONSTANT_LONG,
     OP_FUNCTION,
     OP_CALL,
+    OP_CLOSURE,
+    OP_GET_UPVALUE,
+    OP_SET_UPVALUE,
 } OpCode;
 
 typedef struct {

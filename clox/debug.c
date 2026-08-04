@@ -1,5 +1,7 @@
 #include <stdio.h>
 #include "debug.h"
+
+#include "object.h"
 #include "value.h"
 
 static int simpleInstruction(const char* name, int offset){
@@ -76,6 +78,8 @@ int disassembleInstruction(Chunk* chunk, int offset){
             return simpleInstruction("OP_PRINT", offset);
         case OP_POP:
             return simpleInstruction("OP_POP", offset);
+        case OP_CLOSE_UPVALUE:
+            return simpleInstruction("OP_CLOSE_UPVALUE", offset);
         case OP_CONSTANT:
             return constantInstruction("OP_CONSTANT", offset, chunk);
         case OP_DEFINE_GLOBAL:
@@ -98,6 +102,27 @@ int disassembleInstruction(Chunk* chunk, int offset){
             return longConstantInstruction("OP_CONSTANT_LONG", offset, chunk);
         case OP_CALL:
             return byteInstruction("OP_CALL", offset, chunk);
+        case OP_CLOSURE: {
+            offset++;
+            uint8_t constant = chunk->code[offset++];
+            printf("%-16s %4d", "OP_CLOSURE", constant);
+            printValue(chunk->constants.values[constant]);
+            printf("\n");
+
+            ObjFunction *function = AS_FUNCTION(chunk->constants.values[constant]);
+            for (int i = 0; i < function->upvalueCount; i = i + 1) {
+                int isLocal = chunk->code[offset];
+                offset = offset + 1;
+                int index = chunk->code[offset];
+                offset = offset + 1;
+                printf("%04d    |               %s %d\n", offset - 2, isLocal ? "local": "upvalue", index);
+            }
+            return offset;
+        }
+        case OP_GET_UPVALUE:
+            return byteInstruction("OP_GET_UPVALUE", offset, chunk);
+        case OP_SET_UPVALUE:
+            return byteInstruction("OP_SET_UPVALUE", offset, chunk);
         default:
             printf("Unknown opcode %d\n", instruction);
             return offset+1;
