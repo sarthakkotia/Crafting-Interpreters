@@ -15,9 +15,6 @@
 #define GROW_ARRAY(type, pointer, oldCap, newCap) \
     ((type*)reallocate(pointer, sizeof(type)*oldCap, sizeof(type)*newCap))
 
-#define GROW_ARRAY_WITH_ZERO(type, pointer, oldCap, newCap) \
-    ((type*)reallocateWithZero(pointer, sizeof(type)*oldCap, sizeof(type)*newCap))
-
 #define FREE_ARRAY(type, pointer, capacity) \
     (reallocate(pointer, sizeof(type)*capacity, 0))
 
