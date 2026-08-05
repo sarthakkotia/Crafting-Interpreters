@@ -13,6 +13,11 @@ static Obj* allocateObject(size_t size, ObjectType objectType) {
     object->type = objectType;
     object->next = vm.objects;
     vm.objects = object;
+
+#ifdef DEBUG_LOG_GC
+    printf("%p allocate %zu for %d\n", object, size, objectType);
+#endif
+
     return object;
 }
 
