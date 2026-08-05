@@ -68,11 +68,44 @@ void freeObjects() {
     }
 }
 
+
+void markObject(Obj *object) {
+    if (object == NULL) return;
+#ifdef DEBUG_LOG_GC
+    printf("%p mark ", object);
+    printValue(OBJ_VAL(object));
+    printf("\n");
+#endif
+
+    object->isMarked = true;
+}
+
+void markValue(Value value) {
+    if (IS_OBJ(value)) markObject(AS_OBJ(value));
+}
+
+void markTable(Table table) {
+    for (int i = 0; i < table.capacity; i = i + 1) {
+        Entry *entry = &table.entries[i];
+        markObject((Obj *)entry->key);
+        markValue(entry->value);
+    }
+}
+
+static void markRoots() {
+    for (Value *slot = vm.stack; slot < vm.stackTop; slot = slot + 1) {
+        markValue(*slot);
+    }
+    markTable(vm.globals);
+}
+
 void collectGarbage() {
 
 #ifdef DEBUG_LOG_GC
     printf("-- gc begin\n");
 #endif
+
+    markRoots();
 
 #ifdef DEBUG_LOG_GC
     printf("-- gc end\n");

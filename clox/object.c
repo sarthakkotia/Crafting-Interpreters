@@ -12,6 +12,7 @@ static Obj* allocateObject(size_t size, ObjectType objectType) {
     Obj *object = (Obj* )reallocate(NULL, 0, size);
     object->type = objectType;
     object->next = vm.objects;
+    object->isMarked = false;
     vm.objects = object;
 
 #ifdef DEBUG_LOG_GC
