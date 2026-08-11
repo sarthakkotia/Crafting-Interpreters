@@ -173,6 +173,27 @@ static void trackReferences() {
     }
 }
 
+static void sweep() {
+    Obj *obj = vm.objects;
+    Obj *previous = NULL;
+    while (obj != NULL) {
+        if (obj->isMarked) {
+            obj->isMarked = false;
+            previous = obj;
+            obj = obj->next;
+        } else {
+            Obj *unreachable = obj;
+            obj = obj->next;
+            if (previous == NULL) {
+                vm.objects = obj;
+            } else {
+                previous->next = obj;
+            }
+            freeObject(unreachable);
+        }
+    }
+}
+
 void collectGarbage() {
 
 #ifdef DEBUG_LOG_GC
@@ -181,6 +202,7 @@ void collectGarbage() {
 
     markRoots();
     trackReferences();
+    sweep();
 
 #ifdef DEBUG_LOG_GC
     printf("-- gc end\n");
