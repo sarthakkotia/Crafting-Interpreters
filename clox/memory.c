@@ -194,6 +194,13 @@ static void sweep() {
     }
 }
 
+static void tableRemoveWhite(Table *table) {
+    for (int i = 0; i < table->count; i = i + 1) {
+        Entry *entry = &table->entries[i];
+        if (entry->key != NULL && !entry->key->obj.isMarked) tableDelete(table, entry->key);
+    }
+}
+
 void collectGarbage() {
 
 #ifdef DEBUG_LOG_GC
@@ -202,6 +209,7 @@ void collectGarbage() {
 
     markRoots();
     trackReferences();
+    tableRemoveWhite(&vm.strings);
     sweep();
 
 #ifdef DEBUG_LOG_GC
