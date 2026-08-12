@@ -19,6 +19,8 @@
 #define FREE_ARRAY(type, pointer, capacity) \
     (reallocate(pointer, sizeof(type)*capacity, 0))
 
+#define GC_HEAP_GROW_FACTOR 2
+
 void* reallocate(void* pointer, size_t oldSize, size_t newSize);
 void* reallocateWithZero(void* pointer, size_t oldSize, size_t newSize);
 void freeObjects();
