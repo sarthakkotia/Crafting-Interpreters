@@ -172,6 +172,8 @@ static void concatenate() {
     result[length] = '\0';
 
     ObjString *answer = takeString(result, length);
+    pop();
+    pop();
     push(OBJ_VAL(answer));
 }
 
