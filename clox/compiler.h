@@ -63,5 +63,6 @@ typedef struct Compiler {
 } Compiler;
 
 ObjFunction* compile(const char *source);
+void markCompilerRoots();
 
 #endif //clox_compiler_h

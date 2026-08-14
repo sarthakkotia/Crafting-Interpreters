@@ -12,7 +12,13 @@ static Obj* allocateObject(size_t size, ObjectType objectType) {
     Obj *object = (Obj* )reallocate(NULL, 0, size);
     object->type = objectType;
     object->next = vm.objects;
+    object->isMarked = false;
     vm.objects = object;
+
+#ifdef DEBUG_LOG_GC
+    printf("%p allocate %zu for %d\n", object, size, objectType);
+#endif
+
     return object;
 }
 
@@ -21,7 +27,9 @@ static ObjString* allocateString(char *heapChars, int length, uint32_t hash) {
     string->length = length;
     string->characters = heapChars;
     string->hash = hash;
+    push(OBJ_VAL(string));
     tableSet(&vm.strings, string, NIL_VAL);
+    pop();
     return string;
 }
 
