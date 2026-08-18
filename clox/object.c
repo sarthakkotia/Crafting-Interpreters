@@ -111,6 +111,12 @@ ObjUpvalue* newUpvalue(Value *slot) {
     return upvalue;
 }
 
+ObjClass* newClass(ObjString *name) {
+    ObjClass *class = ALLOCATE_OBJ(ObjClass, OBJ_CLASS);
+    class->name = name;
+    return class;
+}
+
 void printObject(Value value) {
     switch (OBJ_TYPE(value)) {
         case OBJ_STRING:
@@ -127,6 +133,9 @@ void printObject(Value value) {
             break;
         case OBJ_UPVALUE:
             printf("upvalue");
+            break;
+        case OBJ_CLASS:
+            printf("class - %s", AS_CLASS(value)->name->characters);
             break;
     }
 }

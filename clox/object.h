@@ -26,6 +26,9 @@
 #define IS_CLOSURE(object) \
     (isObjType((object, OBJ_CLOSURE)))
 
+#define IS_CLASS(object) \
+    (isObjType((object, OBJ_CLASS)))
+
 #define AS_FUNCTION(value) \
     ((ObjFunction *)AS_OBJ(value))
 
@@ -35,6 +38,9 @@
 #define AS_CLOSURE(value) \
     ((ObjClosure *)AS_OBJ(value))
 
+#define AS_CLASS(value) \
+    ((ObjClass *)AS_OBJ(value))
+
 
 typedef enum {
     OBJ_STRING,
@@ -42,6 +48,7 @@ typedef enum {
     OBJ_NATIVE,
     OBJ_CLOSURE,
     OBJ_UPVALUE,
+    OBJ_CLASS,
 } ObjectType;
 
 struct Obj {
@@ -87,6 +94,10 @@ struct ObjString {
     uint32_t hash;
 };
 
+typedef struct {
+    Obj obj;
+    ObjString *name;
+} ObjClass;
 
 ObjFunction* newFunction();
 ObjNative* newNative(NativeFn function);
@@ -94,6 +105,7 @@ ObjClosure* newClosure(ObjFunction* function);
 ObjString* takeString(char *characters, int length);
 ObjString* copyString(const char *characters, int length);
 ObjUpvalue* newUpvalue(Value *slot);
+ObjClass* newClass(ObjString *name);
 void printObject(Value value);
 
 static inline bool isObjType(Value object, ObjectType type) {
