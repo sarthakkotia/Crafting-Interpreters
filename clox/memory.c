@@ -56,6 +56,10 @@ void freeObject(Obj *object) {
             FREE(ObjUpvalue, object);
             break;
         }
+        case OBJ_CLASS: {
+            FREE(ObjClass, obkect);
+            break;
+        }
     }
 }
 
@@ -160,7 +164,11 @@ static void blackenObject(Obj *obj) {
             }
             break;
         }
-
+        case OBJ_CLASS: {
+            ObjClass *class = (ObjClass *)obj;
+            markObject((Obj *)class->name);
+            break;
+        }
     }
 }
 
