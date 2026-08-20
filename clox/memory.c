@@ -166,7 +166,7 @@ static void blackenObject(Obj *obj) {
 
 static void trackReferences() {
     while (vm.grayCount > 0) {
-        Obj *obj = vm.grayStack[vm.grayCount];
+        Obj *obj = vm.grayStack[vm.grayCount - 1];
         vm.grayCount = vm.grayCount - 1;
         blackenObject(obj);
         while (obj != NULL) {
