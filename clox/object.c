@@ -117,6 +117,13 @@ ObjClass* newClass(ObjString *name) {
     return class;
 }
 
+ObjClassInstance* newClassInstance(ObjClass *class) {
+    ObjClassInstance *instance = ALLOCATE_OBJ(ObjClassInstance, OBJ_INSTANCE);
+    instance->class = class;
+    initTable(&instance->fields);
+    return instance;
+}
+
 void printObject(Value value) {
     switch (OBJ_TYPE(value)) {
         case OBJ_STRING:
@@ -136,6 +143,9 @@ void printObject(Value value) {
             break;
         case OBJ_CLASS:
             printf("class - %s", AS_CLASS(value)->name->characters);
+            break;
+        case OBJ_INSTANCE:
+            printf("Instance of %s", AS_INSTANCE(value)->class->name->characters);
             break;
     }
 }

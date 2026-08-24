@@ -28,7 +28,7 @@ void* reallocate(void* pointer, size_t oldSize, size_t newSize) {
     return result;
 }
 
-void freeObject(Obj *object) {
+static void freeObject(Obj *object) {
     switch (object->type) {
         case OBJ_STRING: {
             ObjString *objectString = (ObjString *)object;
@@ -57,7 +57,13 @@ void freeObject(Obj *object) {
             break;
         }
         case OBJ_CLASS: {
-            FREE(ObjClass, obkect);
+            FREE(ObjClass, object);
+            break;
+        }
+        case OBJ_INSTANCE: {
+            ObjClassInstance *instance = (ObjClassInstance *)object;
+            freeTable(&instance->fields);
+            FREE(ObjClassInstance, object);
             break;
         }
     }
@@ -169,6 +175,12 @@ static void blackenObject(Obj *obj) {
             markObject((Obj *)class->name);
             break;
         }
+        case OBJ_INSTANCE: {
+            ObjClassInstance *instance = (ObjClassInstance *)obj;
+            markTable(instance->fields);
+            markObject((Obj *)instance->class);
+            break;
+        }
     }
 }
 
@@ -228,7 +240,7 @@ void collectGarbage() {
 
 #ifdef DEBUG_LOG_GC
     printf("-- gc end\n");
-    printf("collected %zu bytes from (%zu to %zu) next at %zu", before - vm.bytesAllocated, before, vm.bytesAllocated, vm.nextGC);
+    printf("collected %zu bytes from (%zu to %zu) next at %zu\n", before - vm.bytesAllocated, before, vm.bytesAllocated, vm.nextGC);
 #endif
 
 }
