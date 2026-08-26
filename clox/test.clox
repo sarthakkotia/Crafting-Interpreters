@@ -1,2 +1,3 @@
-class Brioche {}
-print Brioche;
+class Parent {}
+var p = Parent();
+p.name = "sarthak";

@@ -24,14 +24,14 @@
 #define IS_NATIVE(object) \
     (isObjType(object,OBJ_NATIVE))
 
-#define IS_CLOSURE(object) \
-    (isObjType((object, OBJ_CLOSURE)))
+#define IS_CLOSURE(value) \
+    (isObjType(value, OBJ_CLOSURE))
 
-#define IS_CLASS(object) \
-    (isObjType((object, OBJ_CLASS)))
+#define IS_CLASS(value) \
+    (isObjType(value, OBJ_CLASS))
 
-#define IS_INSTANCE(object) \
-    (isObjType((object, OBJ_INSTANCE)))
+#define IS_INSTANCE(value) \
+    (isObjType(value, OBJ_INSTANCE))
 
 #define AS_FUNCTION(value) \
     ((ObjFunction *)AS_OBJ(value))
@@ -123,8 +123,8 @@ ObjClass* newClass(ObjString *name);
 ObjClassInstance* newClassInstance(ObjClass *class);
 void printObject(Value value);
 
-static inline bool isObjType(Value object, ObjectType type) {
-    return (IS_OBJ(object) && AS_OBJ(object)->type == type);
+static inline bool isObjType(Value value, ObjectType type) {
+    return (IS_OBJ(value) && AS_OBJ(value)->type == type);
 }
 
 #endif //CLOX_OBJECT_H

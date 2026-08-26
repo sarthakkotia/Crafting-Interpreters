@@ -574,13 +574,28 @@ static void call(bool canAssign) {
     emitBytes(OP_CALL, argCount);
 }
 
+static void access(bool canAssign) {
+    uint8_t getOp = OP_GET_FIELD;
+    uint8_t setOp = OP_SET_FIELD;
+
+    consume(TOKEN_IDENTIFIER, "Expect a field name");
+    uint8_t arg = identifierConstant(&parser.previous);
+
+    if (canAssign && match(TOKEN_EQUAL)) {
+        expression();
+        emitBytes(setOp, arg);
+    } else {
+        emitBytes(getOp, arg);
+    }
+}
+
 ParseRule rules[] = {
         [TOKEN_LEFT_PAREN] = {grouping, call, PREC_CALL},
         [TOKEN_RIGHT_PAREN] = {NULL, NULL, PREC_NONE},
         [TOKEN_LEFT_BRACE] = {NULL, NULL, PREC_NONE},
         [TOKEN_RIGHT_BRACE] = {NULL, NULL, PREC_NONE},
         [TOKEN_COMMA] = {NULL, NULL, PREC_NONE},
-        [TOKEN_DOT] = {NULL, NULL, PREC_NONE},
+        [TOKEN_DOT] = {NULL, access, PREC_ASSIGNMENT},
         [TOKEN_MINUS] = {unary, binary, PREC_TERM},
         [TOKEN_PLUS] = {NULL, binary, PREC_TERM},
         [TOKEN_SEMICOLON] = {NULL, NULL, PREC_NONE},

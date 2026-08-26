@@ -416,6 +416,35 @@ static InterpretResult run() {
                 push(OBJ_VAL(newClass(READ_STRING())));
                 break;
             }
+            case OP_GET_FIELD: {
+                ObjString *name = READ_STRING();
+                Value v = peek(0);
+                if (!IS_INSTANCE(v)) {
+                    runtimeError("Expect a class instance");
+                }
+                ObjClassInstance *classInstance = AS_INSTANCE(v);
+                Value value;
+                if (!tableGet(&classInstance->fields, name, &value)){
+                    runtimeError("field not present");
+                    return INTERPRET_COMPILE_ERROR;
+                }
+                push(value);
+                break;
+            }
+            case OP_SET_FIELD: {
+                ObjString *name = READ_STRING();
+                Value v = peek(1);
+                if (!IS_INSTANCE(v)) {
+                    runtimeError("Expect a class Instance.");
+                }
+                ObjClassInstance *classInstance = AS_INSTANCE(v);
+                // if (tableGet(vm))
+                if (!tableSet(&classInstance->fields, name, peek(0))) {
+                    runtimeError("Cannot set field");
+                    return INTERPRET_COMPILE_ERROR;
+                }
+                break;
+            }
         }
 
     }
