@@ -416,33 +416,35 @@ static InterpretResult run() {
                 push(OBJ_VAL(newClass(READ_STRING())));
                 break;
             }
-            case OP_GET_FIELD: {
-                ObjString *name = READ_STRING();
-                Value v = peek(0);
-                if (!IS_INSTANCE(v)) {
-                    runtimeError("Expect a class instance");
+            case OP_GET_PROPERTY: {
+                if (!IS_INSTANCE(peek(0))) {
+                    runtimeError("Only instances have properties");
+                    return INTERPRET_RUNTIME_ERROR;
                 }
-                ObjClassInstance *classInstance = AS_INSTANCE(v);
+                ObjClassInstance *instance = AS_INSTANCE(peek(0));
+                ObjString *name = READ_STRING();
+
                 Value value;
-                if (!tableGet(&classInstance->fields, name, &value)){
-                    runtimeError("field not present");
-                    return INTERPRET_COMPILE_ERROR;
+                if (tableGet(&instance->fields, name, &value)){
+                    pop();
+                    push(value);
+                    break;
                 }
-                push(value);
-                break;
+                runtimeError("Undefined property %s", name->characters);
+                return INTERPRET_RUNTIME_ERROR;
             }
-            case OP_SET_FIELD: {
+            case OP_SET_PROPERTY: {
+                if (!IS_INSTANCE(peek(1))) {
+                    runtimeError("Only instances have properties");
+                    return INTERPRET_RUNTIME_ERROR;
+                }
+                ObjClassInstance *instance = AS_INSTANCE(peek(1));
                 ObjString *name = READ_STRING();
-                Value v = peek(1);
-                if (!IS_INSTANCE(v)) {
-                    runtimeError("Expect a class Instance.");
-                }
-                ObjClassInstance *classInstance = AS_INSTANCE(v);
-                // if (tableGet(vm))
-                if (!tableSet(&classInstance->fields, name, peek(0))) {
-                    runtimeError("Cannot set field");
-                    return INTERPRET_COMPILE_ERROR;
-                }
+
+                Value value = pop();
+                tableSet(&instance->fields, name, value);
+                pop();
+                push(value);
                 break;
             }
         }
