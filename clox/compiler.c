@@ -574,18 +574,15 @@ static void call(bool canAssign) {
     emitBytes(OP_CALL, argCount);
 }
 
-static void access(bool canAssign) {
-    uint8_t getOp = OP_GET_FIELD;
-    uint8_t setOp = OP_SET_FIELD;
-
-    consume(TOKEN_IDENTIFIER, "Expect a field name");
-    uint8_t arg = identifierConstant(&parser.previous);
+static void dot(bool canAssign) {
+    consume(TOKEN_IDENTIFIER, "Expect a property name after '.'");
+    uint8_t name = identifierConstant(&parser.previous);
 
     if (canAssign && match(TOKEN_EQUAL)) {
         expression();
-        emitBytes(setOp, arg);
+        emitBytes(OP_SET_PROPERTY, name);
     } else {
-        emitBytes(getOp, arg);
+        emitBytes(OP_GET_PROPERTY, name);
     }
 }
 
@@ -595,7 +592,7 @@ ParseRule rules[] = {
         [TOKEN_LEFT_BRACE] = {NULL, NULL, PREC_NONE},
         [TOKEN_RIGHT_BRACE] = {NULL, NULL, PREC_NONE},
         [TOKEN_COMMA] = {NULL, NULL, PREC_NONE},
-        [TOKEN_DOT] = {NULL, access, PREC_ASSIGNMENT},
+        [TOKEN_DOT] = {NULL, dot, PREC_CALL},
         [TOKEN_MINUS] = {unary, binary, PREC_TERM},
         [TOKEN_PLUS] = {NULL, binary, PREC_TERM},
         [TOKEN_SEMICOLON] = {NULL, NULL, PREC_NONE},
