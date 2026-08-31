@@ -168,8 +168,8 @@ static bool isTruthy(Value value) {
 }
 
 static void concatenate() {
-    ObjString *right = AS_STRING(pop());
-    ObjString *left = AS_STRING(pop());
+    ObjString *right = AS_STRING(peek(0));
+    ObjString *left = AS_STRING(peek(1));
     int length = right->length + left->length;
     char *result = ALLOCATE(char, length + 1);
     memcpy(result, left->characters, left->length);
