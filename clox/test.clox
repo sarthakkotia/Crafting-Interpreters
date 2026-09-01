@@ -4,3 +4,14 @@ var pair = Pair();
 pair.first = 1;
 pair.second = 2;
 print pair.first + pair.second; // 3.
+
+var th = "fi";
+var th2 = "rst";
+
+print pair.{th+th2};
+
+
+pair.{th+th2} = "second";
+print pair.first;
+print pair.{th};
+

@@ -574,15 +574,51 @@ static void call(bool canAssign) {
     emitBytes(OP_CALL, argCount);
 }
 
-static void dot(bool canAssign) {
-    consume(TOKEN_IDENTIFIER, "Expect a property name after '.'");
-    uint8_t name = identifierConstant(&parser.previous);
+static uint8_t lookupVariable(Token name, uint8_t *getOp) {
+    int arg = resolveLocal(current, &name);
+    if (arg != -1) {
+        *getOp = OP_GET_LOCAL;
+        return arg;
+    }
+    arg = resolveUpvalue(current, &name);
+    if (arg != -1) {
+        *getOp = OP_GET_UPVALUE;
+        return arg;
+    }
+    arg = identifierConstant(&name);
+    if (arg != -1) {
+        *getOp = OP_GET_GLOBAL;
+        return arg;
+    }
 
-    if (canAssign && match(TOKEN_EQUAL)) {
+    return -1;
+}
+
+static void dot(bool canAssign) {
+    if (match(TOKEN_LEFT_BRACE)) {
+        // consume(TOKEN_IDENTIFIER, "Expect a property name after '{'.");
+        uint8_t get_op;
         expression();
-        emitBytes(OP_SET_PROPERTY, name);
+        // uint8_t arg = lookupVariable(parser.previous, &get_op);
+        // if (arg == -1) errorAt(&parser.previous, "No lookup found for this identifier");
+        // emitBytes(get_op, arg);
+        consume(TOKEN_RIGHT_BRACE, "Expect '}' after property name.");
+
+        if (canAssign && match(TOKEN_EQUAL)) {
+            expression();
+            emitByte(OP_SET_VARIABLE_PROPERTY);
+        } else {
+            emitByte(OP_GET_VARIABLE_PROPERTY);
+        }
     } else {
-        emitBytes(OP_GET_PROPERTY, name);
+        consume(TOKEN_IDENTIFIER, "Expect a property name after '.'");
+        uint8_t name = identifierConstant(&parser.previous);
+        if (canAssign && match(TOKEN_EQUAL)) {
+            expression();
+            emitBytes(OP_SET_PROPERTY, name);
+        } else {
+            emitBytes(OP_GET_PROPERTY, name);
+        }
     }
 }
 

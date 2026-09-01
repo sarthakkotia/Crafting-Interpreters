@@ -40,6 +40,8 @@ typedef enum {
     OP_CLASS,
     OP_GET_PROPERTY,
     OP_SET_PROPERTY,
+    OP_GET_VARIABLE_PROPERTY,
+    OP_SET_VARIABLE_PROPERTY,
 } OpCode;
 
 typedef struct {

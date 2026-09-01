@@ -168,8 +168,8 @@ static bool isTruthy(Value value) {
 }
 
 static void concatenate() {
-    ObjString *right = AS_STRING(pop());
-    ObjString *left = AS_STRING(pop());
+    ObjString *right = AS_STRING(peek(0));
+    ObjString *left = AS_STRING(peek(1));
     int length = right->length + left->length;
     char *result = ALLOCATE(char, length + 1);
     memcpy(result, left->characters, left->length);
@@ -443,6 +443,46 @@ static InterpretResult run() {
 
                 Value value = pop();
                 tableSet(&instance->fields, name, value);
+                pop();
+                push(value);
+                break;
+            }
+            case OP_GET_VARIABLE_PROPERTY: {
+                if (!IS_STRING(peek(0))) {
+                    runtimeError("Only Strings as variable properties are allowed");
+                    return INTERPRET_RUNTIME_ERROR;
+                }
+                ObjString *name = AS_STRING(pop());
+                if (!IS_INSTANCE(peek(0))) {
+                    runtimeError("Only instances have properties");
+                    return INTERPRET_RUNTIME_ERROR;
+                }
+                ObjClassInstance *instance = AS_INSTANCE(peek(0));
+                Value value;
+                if (tableGet(&instance->fields, name, &value)){
+                    pop();
+                    push(value);
+                    break;
+                }
+                runtimeError("Undefined property %s", name->characters);
+                return INTERPRET_RUNTIME_ERROR;
+            }
+            case OP_SET_VARIABLE_PROPERTY: {
+                if (!IS_INSTANCE(peek(2))) {
+                    runtimeError("Only instances have properties");
+                    return INTERPRET_RUNTIME_ERROR;
+                }
+                ObjClassInstance *instance = AS_INSTANCE(peek(2));
+
+                if (!IS_STRING(peek(1))) {
+                    runtimeError("Only Strings as variable properties are allowed");
+                    return INTERPRET_RUNTIME_ERROR;
+                }
+                ObjString *name = AS_STRING(peek(1));
+
+                Value value = pop();
+                tableSet(&instance->fields, name, value);
+                pop();
                 pop();
                 push(value);
                 break;
