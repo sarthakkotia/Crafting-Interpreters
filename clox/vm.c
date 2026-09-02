@@ -11,9 +11,28 @@
 #include "compiler.h"
 
 VM vm;
+static void runtimeError(const char *msg, ...);
 
 static Value clockNative(int argCount, Value *args) {
     return NUMBER_VAL((double) clock() / CLOCKS_PER_SEC);
+}
+
+static Value deleteFieldNative(int argcount, Value *args) {
+    if (argcount != 2) {
+        runtimeError("Expect 2 arguments when calling 'deleteField' instead of %d", argcount);
+        return NIL_VAL;
+    }
+    if (IS_INSTANCE(args[0]) && IS_STRING(args[1])) {
+        ObjClassInstance *instance = AS_INSTANCE(args[0]);
+        ObjString *fieldName = AS_STRING(args[1]);
+        if (!tableDelete(&instance->fields, fieldName)) {
+            runtimeError("Unable to find '%s' in instance of '%s'", fieldName->characters, instance->class->name);
+            return NIL_VAL;
+        }
+    } else {
+        runtimeError("Expect 2 arguments when calling 'deleteField' (instance, 'field name')");
+    }
+    return NIL_VAL;
 }
 
 static void resetStack() {
@@ -66,6 +85,7 @@ void initVM() {
     initTable(&vm.globals);
 
     defineNative("clock", clockNative);
+    defineNative("deleteField", deleteFieldNative);
 }
 
 void freeVM() {
@@ -115,7 +135,9 @@ static bool callValue(Value callee, int argCount) {
                 NativeFn native = AS_NATIVE(callee);
                 Value result = native(argCount, vm.stackTop-argCount);
                 vm.stackTop = vm.stackTop - argCount - 1;
-                push(result);
+                if (!IS_NIL(result)) {
+                    push(result);
+                }
                 return true;
             }
             case OBJ_CLASS: {
