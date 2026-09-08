@@ -27,6 +27,7 @@ static void markInitialized();
 static void initCompiler(Compiler *compiler, FunctionType type);
 static uint8_t makeConstant(Value value);
 static void variable(bool canAssign);
+static void namedVariable(Token name, bool canAssign);
 
 
 static Chunk *currentChunk() {
@@ -245,7 +246,6 @@ static void function(FunctionType type) {
     consume(TOKEN_RIGHT_PAREN, "Expect ')' after parameters");
     consume(TOKEN_LEFT_BRACE, "Expect '{' before function body");
     block();
-    endScope();
     ObjFunction *function = endCompiler();
     emitBytes(OP_CLOSURE, makeConstant(OBJ_VAL(function)));
 
@@ -262,16 +262,30 @@ static void funDeclaration() {
     defineVariable(global);
 }
 
+
+static void method() {
+    consume(TOKEN_IDENTIFIER, "Expect method's name");
+    uint8_t methodName = identifierConstant(&parser.previous);
+    function(TYPE_FUNCTION);
+    emitBytes(OP_METHOD, methodName);
+
+}
+
 static void classDeclaration() {
     consume(TOKEN_IDENTIFIER, "Expect class name");
+    Token className = parser.previous;
     uint8_t nameConstant = identifierConstant(&parser.previous);
     declareVariable();
 
     emitBytes(OP_CLASS, nameConstant);
     defineVariable(nameConstant);
-
+    namedVariable(className, true);
     consume(TOKEN_LEFT_BRACE, "Expect '{' before class body.");
+    while (check(TOKEN_IDENTIFIER) && !check(TOKEN_EOF) && !check(TOKEN_RIGHT_BRACE)) {
+        method();
+    }
     consume(TOKEN_RIGHT_BRACE, "Expect '}' after class body.");
+    emitByte(OP_POP);
 }
 
 static void expressionStatement() {
