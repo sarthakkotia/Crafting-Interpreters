@@ -162,6 +162,15 @@ static void closeUpvalues(Value *last) {
     }
 }
 
+static void defineMethod(ObjString *name) {
+    Value method = peek(0);
+    ObjClass *class = AS_CLASS(peek(1));
+
+    tableSet(&class->methods, name, method);
+    pop();
+
+}
+
 static bool isTruthy(Value value) {
     if (IS_NIL(value) || (IS_BOOL(value) && !AS_BOOL(value))) return false;
     return true;
@@ -445,6 +454,10 @@ static InterpretResult run() {
                 tableSet(&instance->fields, name, value);
                 pop();
                 push(value);
+                break;
+            }
+            case OP_METHOD: {
+                defineMethod(READ_STRING());
                 break;
             }
         }
