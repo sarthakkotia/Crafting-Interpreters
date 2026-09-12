@@ -191,6 +191,19 @@ static void concatenate() {
     push(OBJ_VAL(answer));
 }
 
+static bool bindMethod(ObjClass *class, ObjString *method_name) {
+    Value value;
+    if (!tableGet(&class->methods, method_name, &value)) {
+        runtimeError("Undefined property '%s'.", method_name->characters);
+        return false;
+    }
+
+    ObjBoundMethod *method = newBoundMethod(peek(0), AS_CLOSURE(value));
+    pop();
+    push(OBJ_VAL(method));
+    return true;
+}
+
 static InterpretResult run() {
     CallFrame *frame = &vm.frames[vm.frameCount - 1];
 
@@ -439,8 +452,12 @@ static InterpretResult run() {
                     push(value);
                     break;
                 }
-                runtimeError("Undefined property %s", name->characters);
-                return INTERPRET_RUNTIME_ERROR;
+
+                if (!bindMethod(instance->class, name)) {
+                    runtimeError("Undefined property %s", name->characters);
+                    return INTERPRET_RUNTIME_ERROR;
+                }
+                break;
             }
             case OP_SET_PROPERTY: {
                 if (!IS_INSTANCE(peek(1))) {
