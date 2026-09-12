@@ -33,6 +33,9 @@
 #define IS_INSTANCE(value) \
     (isObjType(value, OBJ_INSTANCE))
 
+#define IS_BOUND_METHOD(value) \
+    (isObjType(value, OBJ_BOUND_METHOD))
+
 #define AS_FUNCTION(value) \
     ((ObjFunction *)AS_OBJ(value))
 
@@ -48,6 +51,8 @@
 #define AS_INSTANCE(value) \
     ((ObjClassInstance *)AS_OBJ(value))
 
+#define AS_BOUND_METHOD(value) \
+    ((ObjBoundMethod *)AS_OBJ(value))
 
 typedef enum {
     OBJ_STRING,
@@ -57,6 +62,7 @@ typedef enum {
     OBJ_UPVALUE,
     OBJ_CLASS,
     OBJ_INSTANCE,
+    OBJ_BOUND_METHOD,
 } ObjectType;
 
 struct Obj {
@@ -114,6 +120,12 @@ typedef struct {
     Table fields;
 } ObjClassInstance;
 
+typedef struct {
+    Obj obj;
+    Value receiver;
+    ObjClosure *method;
+} ObjBoundMethod;
+
 ObjFunction* newFunction();
 ObjNative* newNative(NativeFn function);
 ObjClosure* newClosure(ObjFunction* function);
@@ -122,6 +134,7 @@ ObjString* copyString(const char *characters, int length);
 ObjUpvalue* newUpvalue(Value *slot);
 ObjClass* newClass(ObjString *name);
 ObjClassInstance* newClassInstance(ObjClass *class);
+ObjBoundMethod* newBoundMethod(Value instance, ObjClosure *method);
 void printObject(Value value);
 
 static inline bool isObjType(Value value, ObjectType type) {
