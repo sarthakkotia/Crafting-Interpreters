@@ -123,6 +123,10 @@ static bool callValue(Value callee, int argCount) {
                 *(vm.stackTop - argCount - 1) = OBJ_VAL(newClassInstance(class));
                 return true;
             }
+            case OBJ_BOUND_METHOD: {
+                ObjBoundMethod *method = AS_BOUND_METHOD(callee);
+                return call(method->method, argCount);
+            }
             default:
                 break;
         }
