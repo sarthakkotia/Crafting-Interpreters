@@ -266,7 +266,7 @@ static void funDeclaration() {
 static void method() {
     consume(TOKEN_IDENTIFIER, "Expect method's name");
     uint8_t methodName = identifierConstant(&parser.previous);
-    function(TYPE_FUNCTION);
+    function(TYPE_METHOD);
     emitBytes(OP_METHOD, methodName);
 
 }
@@ -492,9 +492,14 @@ static void initCompiler(Compiler *compiler, FunctionType type) {
 
     Local *local = &current->locals[current->localCount++];
     local->depth = 0;
-    local->name.start = "";
-    local->name.length = 0;
     local->isCaptured = false;
+    if (type != TYPE_FUNCTION) {
+        local->name.start = "this";
+        local->name.length = 4;
+    } else {
+        local->name.start = "";
+        local->name.length = 0;
+    }
 }
 
 static void number(bool canAssign) {
@@ -600,6 +605,10 @@ static void dot(bool canAssign) {
     }
 }
 
+static void this(bool canAssign) {
+    variable(false);
+}
+
 ParseRule rules[] = {
         [TOKEN_LEFT_PAREN] = {grouping, call, PREC_CALL},
         [TOKEN_RIGHT_PAREN] = {NULL, NULL, PREC_NONE},
@@ -639,7 +648,7 @@ ParseRule rules[] = {
         [TOKEN_PRINT] = {NULL, NULL, PREC_NONE},
         [TOKEN_RETURN] = {NULL, NULL, PREC_NONE},
         [TOKEN_SUPER] = {NULL, NULL, PREC_NONE},
-        [TOKEN_THIS] = {NULL, NULL, PREC_NONE},
+        [TOKEN_THIS] = {this, NULL, PREC_NONE},
         [TOKEN_VAR] = {NULL, NULL, PREC_NONE},
         [TOKEN_WHILE] = {NULL, NULL, PREC_NONE},
         [TOKEN_EOF] = {NULL, NULL, PREC_NONE},

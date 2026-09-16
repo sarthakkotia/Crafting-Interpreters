@@ -126,9 +126,9 @@ int disassembleInstruction(Chunk* chunk, int offset){
         case OP_CLASS:
             return constantInstruction("OP_CLASS", offset, chunk);
         case OP_GET_PROPERTY:
-            return constantInstruction("OP_GET_FIELD", offset, chunk);
+            return constantInstruction("OP_GET_PROPERTY", offset, chunk);
         case OP_SET_PROPERTY:
-            return constantInstruction("OP_SET_FIELD", offset, chunk);
+            return constantInstruction("OP_SET_PROPERTY", offset, chunk);
         case OP_METHOD:
             return byteInstruction("OP_METHOD", offset, chunk);
         default:

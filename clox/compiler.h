@@ -43,6 +43,7 @@ typedef struct {
 typedef enum {
     TYPE_FUNCTION,
     TYPE_SCRIPT,
+    TYPE_METHOD,
 } FunctionType;
 
 typedef struct {
