@@ -114,6 +114,11 @@ static void emitLoop(int loopStart) {
 }
 
 static void emitReturn() {
+    if (current->type == TYPE_INITIALIZER) {
+        emitBytes(OP_GET_LOCAL, 0);
+    } else {
+        emitByte(OP_NIL);
+    }
     emitByte(OP_RETURN);
 }
 
@@ -267,7 +272,11 @@ static void funDeclaration() {
 static void method() {
     consume(TOKEN_IDENTIFIER, "Expect method's name");
     uint8_t methodName = identifierConstant(&parser.previous);
-    function(TYPE_METHOD);
+    FunctionType type = TYPE_METHOD;
+    if (parser.previous.length == 4 && memcmp(parser.previous.start, "init", 4) == 0) {
+        type = TYPE_INITIALIZER;
+    }
+    function(type);
     emitBytes(OP_METHOD, methodName);
 
 }
