@@ -1,3 +1,5 @@
+17/09 -> working now, turns out the compiler needed to change we just didn;t get to that point yet
+16/09 -> check why isn;t this program working
 class Brunch {
   init(food, drink) {
   this.food = food;
