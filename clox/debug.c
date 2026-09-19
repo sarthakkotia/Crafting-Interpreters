@@ -39,6 +39,15 @@ static int longConstantInstruction(const char* name, int offset, Chunk* chunk){
     return offset+4;
 }
 
+
+static int invokeInstruction(const char *name, int offset, Chunk *chunk) {
+    uint8_t constant_idx = chunk->code[offset+1];
+    uint8_t argCount = chunk->code[offset+2];
+    printf("%-16s (%d args) %4d '", name, argCount, constant_idx);
+    printValue(chunk->constants.values[constant_idx]);
+    printf("\n");
+    return offset+3;
+}
 int disassembleInstruction(Chunk* chunk, int offset){
     printf("%04d ", offset);
     if(offset > 0 && chunk->lines[offset] == chunk->lines[offset - 1]){
@@ -131,6 +140,8 @@ int disassembleInstruction(Chunk* chunk, int offset){
             return constantInstruction("OP_SET_PROPERTY", offset, chunk);
         case OP_METHOD:
             return byteInstruction("OP_METHOD", offset, chunk);
+        case OP_INVOKE:
+            return invokeInstruction("OP_INVOKE", offset, chunk);
         default:
             printf("Unknown opcode %d\n", instruction);
             return offset+1;

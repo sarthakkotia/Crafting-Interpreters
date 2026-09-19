@@ -220,6 +220,25 @@ static bool bindMethod(ObjClass *class, ObjString *method_name) {
     return true;
 }
 
+static bool invokeFromClass(ObjClass *class, ObjString *method_name, int argCount) {
+    Value method;
+    if (!tableGet(&class->methods, method_name, &method)) {
+        runtimeError("Class %s does not have method %s", class->name->characters, method_name->characters);
+        return false;
+    }
+    return call(AS_CLOSURE(method), argCount);
+}
+
+static bool invoke(ObjString *method_name, int argCount) {
+    Value receiver = peek(argCount);
+    if (!IS_INSTANCE(receiver)) {
+        runtimeError("Only instances have methods");
+        return INTERPRET_RUNTIME_ERROR;
+    }
+    ObjClassInstance *instance = AS_INSTANCE(receiver);
+    return invokeFromClass(instance->class, method_name, argCount);
+}
+
 static InterpretResult run() {
     CallFrame *frame = &vm.frames[vm.frameCount - 1];
 
@@ -491,6 +510,15 @@ static InterpretResult run() {
             }
             case OP_METHOD: {
                 defineMethod(READ_STRING());
+                break;
+            }
+            case OP_INVOKE: {
+                ObjString *method_name = READ_STRING();
+                int argCount = READ_BYTE();
+                if (!invoke(method_name, argCount)) {
+                    return INTERPRET_RUNTIME_ERROR;
+                }
+                frame = &vm.frames[vm.frameCount - 1];
                 break;
             }
         }
