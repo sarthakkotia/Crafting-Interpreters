@@ -236,6 +236,13 @@ static bool invoke(ObjString *method_name, int argCount) {
         return INTERPRET_RUNTIME_ERROR;
     }
     ObjClassInstance *instance = AS_INSTANCE(receiver);
+
+    Value value;
+    if (tableGet(&instance->fields, method_name, &value)) {
+        vm.stackTop[-argCount - 1] = value;
+        return callValue(value, argCount);
+    }
+
     return invokeFromClass(instance->class, method_name, argCount);
 }
 
