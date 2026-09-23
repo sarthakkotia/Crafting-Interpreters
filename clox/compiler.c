@@ -29,6 +29,7 @@ static void initCompiler(Compiler *compiler, FunctionType type);
 static uint8_t makeConstant(Value value);
 static void variable(bool canAssign);
 static void namedVariable(Token name, bool canAssign);
+static bool identifiersEqual(Token *name, Token *local);
 
 
 static Chunk *currentChunk() {
@@ -295,6 +296,16 @@ static void classDeclaration() {
     currentClass = &classCompiler;
 
     namedVariable(className, true);
+    if (match(TOKEN_LESS)) {
+        consume(TOKEN_IDENTIFIER, "Expect Superclass name");
+        variable(false);
+
+        if (identifiersEqual(&className, &parser.previous)) {
+            error("A class cannot inherit itself");
+        }
+        namedVariable(className, false);
+        emitByte(OP_INHERIT);
+    }
     consume(TOKEN_LEFT_BRACE, "Expect '{' before class body.");
     while (check(TOKEN_IDENTIFIER) && !check(TOKEN_EOF) && !check(TOKEN_RIGHT_BRACE)) {
         method();

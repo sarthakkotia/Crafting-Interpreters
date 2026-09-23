@@ -528,6 +528,13 @@ static InterpretResult run() {
                 frame = &vm.frames[vm.frameCount - 1];
                 break;
             }
+            case OP_INHERIT: {
+                ObjClass *superclass = AS_CLASS(peek(1));
+                ObjClass *subclass = AS_CLASS(peek(0));
+                tableAddAll(&superclass->methods, &subclass->methods);
+                pop();
+                break;
+            }
         }
 
     }

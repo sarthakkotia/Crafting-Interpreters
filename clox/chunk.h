@@ -21,6 +21,7 @@ typedef enum {
     OP_PRINT,
     OP_POP,
     OP_CLOSE_UPVALUE,
+    OP_INHERIT,
     // from this line all the opcodes have operands
     OP_CONSTANT,
     OP_DEFINE_GLOBAL,
