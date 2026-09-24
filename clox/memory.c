@@ -181,6 +181,7 @@ static void blackenObject(Obj *obj) {
             ObjClass *class = (ObjClass *)obj;
             markTable(class->methods);
             markObject((Obj *)class->name);
+            markValue(class->initializer);
             break;
         }
         case OBJ_INSTANCE: {

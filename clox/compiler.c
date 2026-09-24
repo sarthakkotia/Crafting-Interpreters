@@ -271,6 +271,16 @@ static void funDeclaration() {
 
 static void method() {
     consume(TOKEN_IDENTIFIER, "Expect method's name");
+    if (memcmp(parser.previous.start, "init", 4) == 0) {
+        uint8_t methodName = identifierConstant(&parser.previous);
+        FunctionType type = TYPE_METHOD;
+        if (parser.previous.length == 4 && memcmp(parser.previous.start, "init", 4) == 0) {
+            type = TYPE_INITIALIZER;
+        }
+        function(type);
+        emitByte(OP_INITIALIZER);
+        return;
+    }
     uint8_t methodName = identifierConstant(&parser.previous);
     FunctionType type = TYPE_METHOD;
     if (parser.previous.length == 4 && memcmp(parser.previous.start, "init", 4) == 0) {

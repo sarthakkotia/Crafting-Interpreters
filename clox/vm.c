@@ -125,8 +125,8 @@ static bool callValue(Value callee, int argCount) {
             case OBJ_CLASS: {
                 ObjClass *class = AS_CLASS(callee);
                 *(vm.stackTop - argCount - 1) = OBJ_VAL(newClassInstance(class));
-                Value initializer;
-                if (tableGet(&class->methods, vm.initString, &initializer)) {
+                Value initializer = class->initializer;
+                if (!IS_NIL(initializer) && IS_CLOSURE(initializer)) {
                     return callValue(initializer, argCount);
                 } else if (argCount != 0) {
                     runtimeError("Expected 0 arguments but got %d.", argCount);
@@ -184,7 +184,6 @@ static void defineMethod(ObjString *name) {
 
     tableSet(&class->methods, name, method);
     pop();
-
 }
 
 static bool isTruthy(Value value) {
@@ -527,6 +526,12 @@ static InterpretResult run() {
                 }
                 frame = &vm.frames[vm.frameCount - 1];
                 break;
+            }
+            case OP_INITIALIZER: {
+                Value method = peek(0);
+                ObjClass *class = AS_CLASS(peek(1));
+                class->initializer = method;
+                pop();
             }
         }
 
