@@ -529,7 +529,12 @@ static InterpretResult run() {
                 break;
             }
             case OP_INHERIT: {
-                ObjClass *superclass = AS_CLASS(peek(1));
+                Value value = (peek(1));
+                if (!IS_CLASS(value)) {
+                    runtimeError("Superclass is not a class");
+                    return INTERPRET_RUNTIME_ERROR;
+                }
+                ObjClass *superclass = AS_CLASS(value);
                 ObjClass *subclass = AS_CLASS(peek(0));
                 tableAddAll(&superclass->methods, &subclass->methods);
                 pop();
