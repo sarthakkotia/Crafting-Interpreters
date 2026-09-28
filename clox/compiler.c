@@ -30,6 +30,7 @@ static uint8_t makeConstant(Value value);
 static void variable(bool canAssign);
 static void namedVariable(Token name, bool canAssign);
 static bool identifiersEqual(Token *name, Token *local);
+static void addLocal(Token name);
 
 
 static Chunk *currentChunk() {
@@ -208,6 +209,13 @@ static void literal(bool canAssign) {
     }
 }
 
+static Token syntheticToken(const char *text) {
+    Token token;
+    token.start = text;
+    token.length = (int)strlen(text);
+    return token;
+}
+
 static void emitFunction(Value value) {
     emitBytes(OP_FUNCTION, makeConstant(value));
 }
@@ -293,6 +301,7 @@ static void classDeclaration() {
 
     ClassCompiler classCompiler;
     classCompiler.enclosing = currentClass;
+    classCompiler.hasSuperClass = false;
     currentClass = &classCompiler;
 
     namedVariable(className, true);
@@ -303,6 +312,12 @@ static void classDeclaration() {
         if (identifiersEqual(&className, &parser.previous)) {
             error("A class cannot inherit itself");
         }
+
+        beginScope();
+        addLocal(syntheticToken("super"));
+        defineVariable(0);
+        classCompiler.hasSuperClass = true;
+
         namedVariable(className, false);
         emitByte(OP_INHERIT);
     }
@@ -312,6 +327,11 @@ static void classDeclaration() {
     }
     consume(TOKEN_RIGHT_BRACE, "Expect '}' after class body.");
     emitByte(OP_POP);
+
+    if (classCompiler.hasSuperClass) {
+        endScope();
+    }
+
     currentClass = classCompiler.enclosing;
 }
 
