@@ -549,6 +549,16 @@ static InterpretResult run() {
                 }
                 break;
             }
+            case OP_SUPER_INVOKE: {
+                ObjString *method_name = READ_STRING();
+                int argCount = READ_BYTE();
+                ObjClass *superclass = AS_CLASS(pop());
+                if (!invokeFromClass(superclass, method_name, argCount)) {
+                    return INTERPRET_RUNTIME_ERROR;
+                }
+                frame = &vm.frames[vm.frameCount - 1];
+                break;
+            }
         }
 
     }

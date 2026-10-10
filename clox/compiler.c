@@ -321,6 +321,7 @@ static void classDeclaration() {
         namedVariable(className, false);
         emitByte(OP_INHERIT);
     }
+    namedVariable(className, false);
     consume(TOKEN_LEFT_BRACE, "Expect '{' before class body.");
     while (check(TOKEN_IDENTIFIER) && !check(TOKEN_EOF) && !check(TOKEN_RIGHT_BRACE)) {
         method();
@@ -677,8 +678,15 @@ static void super(bool canAssign) {
     consume(TOKEN_IDENTIFIER, "Expect superclass method name.");
     uint8_t name = identifierConstant(&parser.previous);
     namedVariable(syntheticToken("this"), false);
-    namedVariable(syntheticToken("super"), false);
-    emitBytes(OP_GET_SUPER, name);
+    if (match(TOKEN_LEFT_PAREN)) {
+        uint8_t argCount = argumentList();
+        namedVariable(syntheticToken("super"), false);
+        emitBytes(OP_SUPER_INVOKE, name);
+        emitByte(argCount);
+    } else {
+        namedVariable(syntheticToken("super"), false);
+        emitBytes(OP_GET_SUPER, name);
+    }
 }
 
 ParseRule rules[] = {
