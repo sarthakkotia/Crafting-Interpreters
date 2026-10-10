@@ -142,6 +142,8 @@ int disassembleInstruction(Chunk* chunk, int offset){
             return byteInstruction("OP_METHOD", offset, chunk);
         case OP_INVOKE:
             return invokeInstruction("OP_INVOKE", offset, chunk);
+        case OP_INHERIT:
+            return simpleInstruction("OP_INHERIT", offset);
         default:
             printf("Unknown opcode %d\n", instruction);
             return offset+1;

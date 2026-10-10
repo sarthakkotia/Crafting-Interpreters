@@ -668,6 +668,19 @@ static void this(bool canAssign) {
     variable(false);
 }
 
+static void super(bool canAssign) {
+    if (currentClass == NULL || currentClass->hasSuperClass == false) {
+        error("Can't use 'super' outside of a class. or a non inherited class.");
+        return;
+    }
+    consume(TOKEN_DOT, "Expect '.' after super keyword.");
+    consume(TOKEN_IDENTIFIER, "Expect superclass method name.");
+    uint8_t name = identifierConstant(&parser.previous);
+    namedVariable(syntheticToken("this"), false);
+    namedVariable(syntheticToken("super"), false);
+    emitBytes(OP_GET_SUPER, name);
+}
+
 ParseRule rules[] = {
         [TOKEN_LEFT_PAREN] = {grouping, call, PREC_CALL},
         [TOKEN_RIGHT_PAREN] = {NULL, NULL, PREC_NONE},
@@ -706,7 +719,7 @@ ParseRule rules[] = {
         [TOKEN_OR] = {NULL, or_, PREC_OR},
         [TOKEN_PRINT] = {NULL, NULL, PREC_NONE},
         [TOKEN_RETURN] = {NULL, NULL, PREC_NONE},
-        [TOKEN_SUPER] = {NULL, NULL, PREC_NONE},
+        [TOKEN_SUPER] = {super, NULL, PREC_NONE},
         [TOKEN_THIS] = {this, NULL, PREC_NONE},
         [TOKEN_VAR] = {NULL, NULL, PREC_NONE},
         [TOKEN_WHILE] = {NULL, NULL, PREC_NONE},
