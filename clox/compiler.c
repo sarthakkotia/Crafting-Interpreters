@@ -29,6 +29,8 @@ static void initCompiler(Compiler *compiler, FunctionType type);
 static uint8_t makeConstant(Value value);
 static void variable(bool canAssign);
 static void namedVariable(Token name, bool canAssign);
+static bool identifiersEqual(Token *name, Token *local);
+static void addLocal(Token name);
 
 
 static Chunk *currentChunk() {
@@ -207,6 +209,13 @@ static void literal(bool canAssign) {
     }
 }
 
+static Token syntheticToken(const char *text) {
+    Token token;
+    token.start = text;
+    token.length = (int)strlen(text);
+    return token;
+}
+
 static void emitFunction(Value value) {
     emitBytes(OP_FUNCTION, makeConstant(value));
 }
@@ -292,15 +301,38 @@ static void classDeclaration() {
 
     ClassCompiler classCompiler;
     classCompiler.enclosing = currentClass;
+    classCompiler.hasSuperClass = false;
     currentClass = &classCompiler;
 
     namedVariable(className, true);
+    if (match(TOKEN_LESS)) {
+        consume(TOKEN_IDENTIFIER, "Expect Superclass name");
+        variable(false);
+
+        if (identifiersEqual(&className, &parser.previous)) {
+            error("A class cannot inherit itself");
+        }
+
+        beginScope();
+        addLocal(syntheticToken("super"));
+        defineVariable(0);
+        classCompiler.hasSuperClass = true;
+
+        namedVariable(className, false);
+        emitByte(OP_INHERIT);
+    }
+    namedVariable(className, false);
     consume(TOKEN_LEFT_BRACE, "Expect '{' before class body.");
     while (check(TOKEN_IDENTIFIER) && !check(TOKEN_EOF) && !check(TOKEN_RIGHT_BRACE)) {
         method();
     }
     consume(TOKEN_RIGHT_BRACE, "Expect '}' after class body.");
     emitByte(OP_POP);
+
+    if (classCompiler.hasSuperClass) {
+        endScope();
+    }
+
     currentClass = classCompiler.enclosing;
 }
 
@@ -637,6 +669,26 @@ static void this(bool canAssign) {
     variable(false);
 }
 
+static void super(bool canAssign) {
+    if (currentClass == NULL || currentClass->hasSuperClass == false) {
+        error("Can't use 'super' outside of a class. or a non inherited class.");
+        return;
+    }
+    consume(TOKEN_DOT, "Expect '.' after super keyword.");
+    consume(TOKEN_IDENTIFIER, "Expect superclass method name.");
+    uint8_t name = identifierConstant(&parser.previous);
+    namedVariable(syntheticToken("this"), false);
+    if (match(TOKEN_LEFT_PAREN)) {
+        uint8_t argCount = argumentList();
+        namedVariable(syntheticToken("super"), false);
+        emitBytes(OP_SUPER_INVOKE, name);
+        emitByte(argCount);
+    } else {
+        namedVariable(syntheticToken("super"), false);
+        emitBytes(OP_GET_SUPER, name);
+    }
+}
+
 ParseRule rules[] = {
         [TOKEN_LEFT_PAREN] = {grouping, call, PREC_CALL},
         [TOKEN_RIGHT_PAREN] = {NULL, NULL, PREC_NONE},
@@ -675,7 +727,7 @@ ParseRule rules[] = {
         [TOKEN_OR] = {NULL, or_, PREC_OR},
         [TOKEN_PRINT] = {NULL, NULL, PREC_NONE},
         [TOKEN_RETURN] = {NULL, NULL, PREC_NONE},
-        [TOKEN_SUPER] = {NULL, NULL, PREC_NONE},
+        [TOKEN_SUPER] = {super, NULL, PREC_NONE},
         [TOKEN_THIS] = {this, NULL, PREC_NONE},
         [TOKEN_VAR] = {NULL, NULL, PREC_NONE},
         [TOKEN_WHILE] = {NULL, NULL, PREC_NONE},

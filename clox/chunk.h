@@ -21,6 +21,7 @@ typedef enum {
     OP_PRINT,
     OP_POP,
     OP_CLOSE_UPVALUE,
+    OP_INHERIT,
     // from this line all the opcodes have operands
     OP_CONSTANT,
     OP_DEFINE_GLOBAL,
@@ -42,6 +43,8 @@ typedef enum {
     OP_SET_PROPERTY,
     OP_METHOD,
     OP_INVOKE,
+    OP_GET_SUPER,
+    OP_SUPER_INVOKE,
 } OpCode;
 
 typedef struct {
